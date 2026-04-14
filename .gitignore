@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+data/
+memory_bundle_23_total/
+
+# OS files
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
