@@ -3,6 +3,7 @@
 const env = require('../../../../config/env')
 const { buildPrompt } = require('./prompt')
 const { normalizeMemoryCandidatesPacket } = require('./normalize')
+const { postprocessLlmCandidates } = require('./postprocess')
 const { appendLlmDebugLog } = require('./debug/llm.debug')
 const { generateRawCompletion } = require('../../../../services/llm.service')
 
@@ -221,6 +222,8 @@ async function runLlmExtractor({ event, eventWindow = [] }) {
         extractorVersion: EXTRACTOR_VERSION
       }
     })
+
+    normalizedPacket = postprocessLlmCandidates(normalizedPacket)
   } catch (err) {
     error = err?.message || 'unknown_error'
   }

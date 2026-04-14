@@ -12,15 +12,56 @@ const {
 } = require('../canonical/canonical.schemas')
 const { RAW_CLAIM_TYPE } = require('../../../shared/memory.types')
 
+function extractClaimReferences(claim) {
+  return claim?.payload?.references && typeof claim.payload.references === 'object'
+    ? claim.payload.references
+    : null
+}
+
+function sanitizeClaimRefValue(value) {
+  const normalized = String(value || '').trim()
+  return /^(core_user|core_character|entity|third_party):/i.test(normalized)
+    ? normalized
+    : null
+}
+
+function resolveClaimRef(refPayload, fallbackRef, options = {}) {
+  if (!refPayload || typeof refPayload !== 'object') {
+    return fallbackRef
+  }
+
+  const explicit = sanitizeClaimRefValue(refPayload.ref)
+  if (explicit) return explicit
+
+  if (options.allowNullUnknown && refPayload.role === 'unknown') {
+    return null
+  }
+
+  return fallbackRef
+}
+
+function resolveClaimRefs(claim, refs) {
+  const claimRefs = extractClaimReferences(claim)
+
+  return {
+    subjectRef: resolveClaimRef(claimRefs?.subject, refs.coreUserRef),
+    objectRef: resolveClaimRef(claimRefs?.object, refs.coreCharacterRef, {
+      allowNullUnknown: true
+    })
+  }
+}
+
 function mapRawFactClaim(claim, refs) {
+  const resolvedRefs = resolveClaimRefs(claim, refs)
+
   return createBeliefItem({
     keyParts: [
       'belief',
       claim.payload?.category || 'general',
       claim.payload?.semanticKey || claim.text
     ],
-    subjectRef: refs.coreUserRef,
-    objectRef: refs.coreCharacterRef,
+    subjectRef: resolvedRefs.subjectRef,
+    objectRef: resolvedRefs.objectRef,
     value: true,
     payload: {
       text: claim.text,
@@ -57,10 +98,12 @@ function mapRawEntityClaim(claim) {
 }
 
 function mapRawRelationshipClaim(claim, refs) {
+  const resolvedRefs = resolveClaimRefs(claim, refs)
+
   return createRelationshipSignalItem({
     keyParts: ['relationship', claim.payload?.sentiment || 'signal', claim.text],
-    subjectRef: refs.coreUserRef,
-    objectRef: refs.coreCharacterRef,
+    subjectRef: resolvedRefs.subjectRef,
+    objectRef: resolvedRefs.objectRef,
     payload: {
       text: claim.text,
       sentiment: claim.payload?.sentiment || 'signal'
@@ -75,14 +118,16 @@ function mapRawRelationshipClaim(claim, refs) {
 }
 
 function mapRawOpenLoopClaim(claim, refs) {
+  const resolvedRefs = resolveClaimRefs(claim, refs)
+
   return createOpenLoopItem({
     keyParts: [
       'open_loop',
       claim.payload?.loopType || 'topic',
       claim.payload?.semanticKey || claim.text
     ],
-    subjectRef: refs.coreUserRef,
-    objectRef: refs.coreCharacterRef,
+    subjectRef: resolvedRefs.subjectRef,
+    objectRef: resolvedRefs.objectRef,
     payload: {
       text: claim.text,
       type: claim.payload?.loopType || 'topic',
@@ -100,9 +145,11 @@ function mapRawOpenLoopClaim(claim, refs) {
 }
 
 function mapRawEpisodeClaim(claim, refs) {
+  const resolvedRefs = resolveClaimRefs(claim, refs)
+
   return createEpisodeStubItem({
         keyParts: ['episode', claim.payload?.semanticKey || claim.text],
-    subjectRef: refs.coreUserRef,
+    subjectRef: resolvedRefs.subjectRef,
     payload: {
       summary: claim.text,
       semanticKey: claim.payload?.semanticKey || null
@@ -171,5 +218,6 @@ async function runInterpretPipeline({ threadId, event, extracted }) {
 }
 
 module.exports = {
-  runInterpretPipeline
+  runInterpretPipeline,
+  resolveClaimRefs
 }

@@ -1,0 +1,131 @@
+diff --git a/src/core/memory/extractors/llm/postprocess.js b/src/core/memory/extractors/llm/postprocess.js
+index 1111111..2222222 100644
+--- a/src/core/memory/extractors/llm/postprocess.js
++++ b/src/core/memory/extractors/llm/postprocess.js
+@@ -12,7 +12,8 @@ const VALID_KINDS = new Set([
+   'instruction'
+ ])
+ 
+-const SCHEMA_ID_RE = /^[a-z][a-z0-9_]{0,63}$/
++const SCHEMA_ID_RE = /^[a-z][a-z0-9_]{0,63}$/
++const SEMANTIC_KEY_RE = /^[a-z][a-z0-9_-]{0,127}$/
+ const MODEL_NAME_RE = /^[a-z0-9][a-z0-9._:-]{1,80}$/i
+ 
+ const INTERNAL_STATE_IDS = new Set([
+@@ -41,6 +42,11 @@ const WORKFLOW_FRAGMENTS = [
+   'repo'
+ ]
+ 
++// Intentionally narrow.
++// These markers are allowed only for explicit technical/project chatter filtering.
++// Do not expand this list into general Russian language understanding,
++// emotional heuristics, or relationship parsing.
++
+ const WORKFLOW_TEXT_TERMS = [
+   'extractor',
+   'экстрактор',
+@@ -115,6 +121,11 @@ function sanitizeSchemaId(value) {
+   return SCHEMA_ID_RE.test(normalized) ? normalized : null
+ }
+ 
++function sanitizeSemanticKey(value) {
++  const normalized = String(value || '').trim().toLowerCase()
++  return SEMANTIC_KEY_RE.test(normalized) ? normalized : null
++}
++
+ function sanitizeModelName(value, fallback = null) {
+   const normalized = String(value || '').trim()
+   const lowered = normalized.toLowerCase()
+@@ -144,7 +155,7 @@ function sanitizeSemantic(candidate) {
+   const next = cloneCandidate(candidate)
+ 
+   next.semantic.class = sanitizeSchemaId(next.semantic.class)
+   next.semantic.subclass = sanitizeSchemaId(next.semantic.subclass)
+-  next.semantic.key = sanitizeSchemaId(next.semantic.key)
++  next.semantic.key = sanitizeSemanticKey(next.semantic.key)
+   next.semantic.category = sanitizeSchemaId(next.semantic.category)
+   next.semantic.tags = Array.from(new Set(
+     safeArray(next.semantic.tags)
+@@ -255,7 +266,6 @@ function repairReferences(candidate) {
+   if (
+     next.references.subject?.role === 'core_character' ||
+     next.references.subject?.ref === 'core_character:active' ||
+-    next.references.subject?.ref === 'core_character:hutao' ||
+     next.references.subject?.role === 'unknown'
+   ) {
+     next.references.subject = garfieldRef
+@@ -265,7 +275,6 @@ function repairReferences(candidate) {
+     next.kind !== 'relationship' &&
+     (
+       next.references.object?.role === 'core_character' ||
+       next.references.object?.ref === 'core_character:active' ||
+-      next.references.object?.ref === 'core_character:hutao' ||
+       sameRef(next.references.object, garfieldRef)
+     )
+   ) {
+@@ -296,6 +305,17 @@ function isWeakSelfReminder(candidate) {
+   )
+ }
+ 
++function isTemporarySelfDirectedInstruction(candidate) {
++  return (
++    candidate?.kind === 'instruction' &&
++    isSelfDirectedTaskCandidate(candidate) &&
++    ['transient', 'unknown'].includes(candidate?.memory?.durability) &&
++    Number(candidate?.memory?.stability || 0) < 0.75 &&
++    Number(candidate?.memory?.memoryRelevance || 0) < 0.8
++  )
++}
++
+ function applyNoiseGate(candidate) {
+   if (isTechnicalWorkflowCandidate(candidate)) {
+     return true
+@@ -303,6 +323,10 @@ function applyNoiseGate(candidate) {
+ 
++  if (isTemporarySelfDirectedInstruction(candidate)) {
++    return true
++  }
++
+   if (
+     (candidate.kind === 'fact' || candidate.kind === 'instruction') &&
+     isWeakSelfReminder(candidate)
+@@ -314,6 +338,26 @@ function applyNoiseGate(candidate) {
+   return false
+ }
+ 
++function refsSignature(ref) {
++  const item = cloneRef(ref)
++  return `${item.ref || ''}::${item.role || ''}::${item.label || ''}::${item.confidence || 0}`
++}
++
++function refsChanged(before, after) {
++  const beforeAbout = safeArray(before?.about).map(refsSignature).join('|')
++  const afterAbout = safeArray(after?.about).map(refsSignature).join('|')
++
++  return (
++    refsSignature(before?.subject) !== refsSignature(after?.subject) ||
++    refsSignature(before?.object) !== refsSignature(after?.object) ||
++    beforeAbout !== afterAbout
++  )
++}
++
+ function postprocessLlmCandidates(packet) {
+   const source = packet && typeof packet === 'object' ? packet : {}
+   const candidates = safeArray(source.candidates)
+@@ -345,7 +389,7 @@ function postprocessLlmCandidates(packet) {
+     }
+ 
+     const repaired = repairReferences(next)
+-    if (JSON.stringify(repaired.references) !== JSON.stringify(before.references)) {
++    if (refsChanged(before.references, repaired.references)) {
+       stats.repairedCandidates += 1
+     }
+ 
+@@ -373,6 +417,7 @@ module.exports = {
+   sanitizeSemantic,
+   repairReferences,
+   remapKind,
+-  applyNoiseGate
++  applyNoiseGate,
++  sanitizeSemanticKey
+ }
