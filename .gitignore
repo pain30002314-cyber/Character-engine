@@ -19,3 +19,6 @@ memory_bundle_23_total/
 # IDE
 .vscode/
 .idea/
+data/debug/*.log
+codex_*.txt
+codex_*.diff
