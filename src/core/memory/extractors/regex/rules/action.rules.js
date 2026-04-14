@@ -25,43 +25,6 @@ function wordCount(text) {
   return normalizeForMatch(text).split(/\s+/).filter(Boolean).length
 }
 
-function isReflectiveSpeechContext(text) {
-  const source = normalizeForMatch(text)
-
-  if (!source) return false
-
-  return (
-    source.startsWith('не то что я сказал') ||
-    source.startsWith('не то что я сказала') ||
-    source.startsWith('то что я сказал') ||
-    source.startsWith('то что я сказала') ||
-    source.startsWith('не то что я спросил') ||
-    source.startsWith('не то что я спросила') ||
-    source.startsWith('то что я спросил') ||
-    source.startsWith('то что я спросила') ||
-    source.startsWith('не то что я ответил') ||
-    source.startsWith('не то что я ответила') ||
-    source.startsWith('то что я ответил') ||
-    source.startsWith('то что я ответила') ||
-    (
-      source.includes('а как') && (
-        source.includes('я сказал') ||
-        source.includes('я сказала') ||
-        source.includes('я спросил') ||
-        source.includes('я спросила') ||
-        source.includes('я ответил') ||
-        source.includes('я ответила')
-      )
-    ) ||
-    source.includes('то как я сказал') ||
-    source.includes('то как я сказала') ||
-    source.includes('то как я спросил') ||
-    source.includes('то как я спросила') ||
-    source.includes('то как я ответил') ||
-    source.includes('то как я ответила')
-  )
-}
-
 function isRpActionGarbage(text) {
   const source = normalizeForMatch(text)
 
@@ -127,35 +90,6 @@ function classifyActionKind(text) {
   const source = normalizeForMatch(text)
 
   if (
-    includesAny(source, [
-      'сказал',
-      'сказала',
-      'сказал я',
-      'сказала я',
-      'резко сказал',
-      'резко сказала',
-      'тихо сказал',
-      'тихо сказала',
-      'спросил',
-      'спросила',
-      'ответил',
-      'ответила',
-      'прошептал',
-      'прошептала',
-      'произнес',
-      'произнесла',
-      'повторил',
-      'повторила',
-      'говорить',
-      'продолжал я говорить',
-      'продолжала я говорить'
-    ]) &&
-    !isReflectiveSpeechContext(source)
-  ) {
-    return 'speech'
-  }
-
-  if (
     /(^|[\s.,!?:;'"«»()\-])я[\s\S]*(тыкнул|ткнул|коснулся|коснулась|потрогал|потрогала|погладил|погладила|поцеловал|поцеловала|обнял|обняла|подал|подала)([\s.,!?:;'"«»()\-]|$)/i.test(source)
   ) {
     return 'physical'
@@ -187,14 +121,7 @@ function classifyActionKind(text) {
       'усмехаюсь',
       'вздыхаю',
       'молчу',
-      'киваю'
-    ])
-  ) {
-    return 'gesture'
-  }
-
-  if (
-    includesAny(source, [
+      'киваю',
       'посмотрел',
       'посмотрела',
       'глянул',
@@ -203,7 +130,7 @@ function classifyActionKind(text) {
       'смотрит'
     ])
   ) {
-    return 'interaction'
+    return 'gesture'
   }
 
   if (
@@ -310,51 +237,7 @@ function looksLikeActionUnit(text, context) {
   if (!source) return false
   if (isFalseAction(text, context)) return false
 
-  const hasSpeechAction = includesAny(source, [
-    'я сказал',
-    'я сказала',
-    'сказал я',
-    'сказала я',
-    'я спросил',
-    'я спросила',
-    'спросил я',
-    'спросила я',
-    'я ответил',
-    'я ответила',
-    'ответил я',
-    'ответила я',
-    'я повторил',
-    'я повторила',
-    'повторил я',
-    'повторила я',
-    'я прошептал',
-    'я прошептала',
-    'прошептал я',
-    'прошептала я',
-    'я произнес',
-    'я произнесла',
-    'произнес я',
-    'произнесла я',
-    'потом я сказал',
-    'потом я сказала',
-    'потом я спросил',
-    'потом я спросила',
-    'потом я ответил',
-    'потом я ответила',
-    'тихо сказал',
-    'тихо сказала',
-    'резко сказал',
-    'резко сказала',
-    'продолжал я говорить',
-    'продолжала я говорить'
-  ])
-
-  if (hasSpeechAction && isReflectiveSpeechContext(source)) {
-    return false
-  }
-
   return (
-    hasSpeechAction ||
     includesAny(source, [
       'я открыл',
       'я открыла',
@@ -375,6 +258,11 @@ function looksLikeActionUnit(text, context) {
       'я посмеялась',
       'я кивнул',
       'я кивнула',
+      'я посмотрел',
+      'я посмотрела',
+      'я глянул',
+      'я глянула',
+      'я смотрю',
       'я поцеловал',
       'я поцеловала',
       'я начал целовать тебя',
@@ -410,9 +298,7 @@ function looksLikeActionUnit(text, context) {
 
 function ruleNameForKind(kind) {
   return {
-    speech: 'speech_v2',
-    gesture: 'gesture_v2',
-    interaction: 'interaction_v1',
+    gesture: 'gesture_v3',
     physical: 'physical_v2',
     action: 'action_v1'
   }[kind] || 'action_v1'
@@ -443,9 +329,7 @@ function detectOne({ clause, context, hasPlainTextInMessage = false }) {
       context,
       rule: ruleNameForKind(kind),
       confidence:
-        kind === 'speech' ? 0.84 :
-        kind === 'gesture' ? 0.8 :
-        kind === 'interaction' ? 0.8 :
+        kind === 'gesture' ? 0.82 :
         kind === 'physical' ? 0.86 :
         0.76
     })

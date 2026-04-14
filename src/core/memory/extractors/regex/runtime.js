@@ -13,42 +13,20 @@ const { buildAtom } = require('./builders/atom.builder')
 const { buildIdentityHints } = require('./builders/identity-hints.builder')
 const { buildResponse } = require('./builders/response.builder')
 
-const identityDetector = require('./rules/identity.rules')
-const relationshipDetector = require('./rules/relationship.rules')
-const preferenceDetector = require('./rules/preference.rules')
 const intentDetector = require('./rules/intent.rules')
-const commitmentDetector = require('./rules/commitment.rules')
 const openLoopDetector = require('./rules/open-loop.rules')
-const conflictDetector = require('./rules/conflict.rules')
 const affectDetector = require('./rules/affect.rules')
-const factDetector = require('./rules/fact.rules')
 const entityDetector = require('./rules/entity.rules')
 const actionDetector = require('./rules/action.rules')
 const sceneDetector = require('./rules/scene.rules')
-const temporalDetector = require('./rules/temporal.rules')
-const episodeDetector = require('./rules/episode.rules')
-const goalDetector = require('./rules/goal.rules')
-const instructionDetector = require('./rules/instruction.rules')
-const boundaryDetector = require('./rules/boundary.rules')
 
 const DETECTORS = [
-  identityDetector,
-  relationshipDetector,
-  preferenceDetector,
   intentDetector,
-  commitmentDetector,
   openLoopDetector,
-  conflictDetector,
   affectDetector,
-  factDetector,
   entityDetector,
   actionDetector,
-  sceneDetector,
-  temporalDetector,
-  episodeDetector,
-  goalDetector,
-  instructionDetector,
-  boundaryDetector
+  sceneDetector
 ]
 
 async function extractRegexAtoms({ event }) {

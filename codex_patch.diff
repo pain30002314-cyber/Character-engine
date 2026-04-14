@@ -1,0 +1,1571 @@
+diff --git a/src/core/memory/extractors/regex/rules/action.rules.js b/src/core/memory/extractors/regex/rules/action.rules.js
+index 168292b..a84ee58 100644
+--- a/src/core/memory/extractors/regex/rules/action.rules.js
++++ b/src/core/memory/extractors/regex/rules/action.rules.js
+@@ -126,35 +126,6 @@ function isWeakGestureText(text) {
+ function classifyActionKind(text) {
+   const source = normalizeForMatch(text)
+ 
+-  if (
+-    includesAny(source, [
+-      'сказал',
+-      'сказала',
+-      'сказал я',
+-      'сказала я',
+-      'резко сказал',
+-      'резко сказала',
+-      'тихо сказал',
+-      'тихо сказала',
+-      'спросил',
+-      'спросила',
+-      'ответил',
+-      'ответила',
+-      'прошептал',
+-      'прошептала',
+-      'произнес',
+-      'произнесла',
+-      'повторил',
+-      'повторила',
+-      'говорить',
+-      'продолжал я говорить',
+-      'продолжала я говорить'
+-    ]) &&
+-    !isReflectiveSpeechContext(source)
+-  ) {
+-    return 'speech'
+-  }
+-
+   if (
+     /(^|[\s.,!?:;'"«»()\-])я[\s\S]*(тыкнул|ткнул|коснулся|коснулась|потрогал|потрогала|погладил|погладила|поцеловал|поцеловала|обнял|обняла|подал|подала)([\s.,!?:;'"«»()\-]|$)/i.test(source)
+   ) {
+@@ -193,19 +164,6 @@ function classifyActionKind(text) {
+     return 'gesture'
+   }
+ 
+-  if (
+-    includesAny(source, [
+-      'посмотрел',
+-      'посмотрела',
+-      'глянул',
+-      'глянула',
+-      'смотрю',
+-      'смотрит'
+-    ])
+-  ) {
+-    return 'interaction'
+-  }
+-
+   if (
+     includesAny(source, [
+       'открыл',
+@@ -298,6 +256,10 @@ function isFalseAction(text, context) {
+     return true
+   }
+ 
++  if (!context.isRp) {
++    return true
++  }
++
+   if (context.isRp) {
+     if (isRpActionGarbage(source)) return true
+   }
+@@ -310,51 +272,7 @@ function looksLikeActionUnit(text, context) {
+   if (!source) return false
+   if (isFalseAction(text, context)) return false
+ 
+-  const hasSpeechAction = includesAny(source, [
+-    'я сказал',
+-    'я сказала',
+-    'сказал я',
+-    'сказала я',
+-    'я спросил',
+-    'я спросила',
+-    'спросил я',
+-    'спросила я',
+-    'я ответил',
+-    'я ответила',
+-    'ответил я',
+-    'ответила я',
+-    'я повторил',
+-    'я повторила',
+-    'повторил я',
+-    'повторила я',
+-    'я прошептал',
+-    'я прошептала',
+-    'прошептал я',
+-    'прошептала я',
+-    'я произнес',
+-    'я произнесла',
+-    'произнес я',
+-    'произнесла я',
+-    'потом я сказал',
+-    'потом я сказала',
+-    'потом я спросил',
+-    'потом я спросила',
+-    'потом я ответил',
+-    'потом я ответила',
+-    'тихо сказал',
+-    'тихо сказала',
+-    'резко сказал',
+-    'резко сказала',
+-    'продолжал я говорить',
+-    'продолжала я говорить'
+-  ])
+-
+-  if (hasSpeechAction && isReflectiveSpeechContext(source)) {
+-    return false
+-  }
+-
+   return (
+-    hasSpeechAction ||
+     includesAny(source, [
+       'я открыл',
+       'я открыла',
+@@ -410,9 +328,7 @@ function looksLikeActionUnit(text, context) {
+ 
+ function ruleNameForKind(kind) {
+   return {
+-    speech: 'speech_v2',
+     gesture: 'gesture_v2',
+-    interaction: 'interaction_v1',
+     physical: 'physical_v2',
+     action: 'action_v1'
+   }[kind] || 'action_v1'
+@@ -443,9 +359,7 @@ function detectOne({ clause, context, hasPlainTextInMessage = false }) {
+       context,
+       rule: ruleNameForKind(kind),
+       confidence:
+-        kind === 'speech' ? 0.84 :
+         kind === 'gesture' ? 0.8 :
+-        kind === 'interaction' ? 0.8 :
+         kind === 'physical' ? 0.86 :
+         0.76
+     })
+@@ -468,4 +382,4 @@ async function detect({ clauses }) {
+ 
+ module.exports = {
+   detect
+-}
+\ No newline at end of file
++}
+diff --git a/src/core/memory/extractors/regex/rules/affect.rules.js b/src/core/memory/extractors/regex/rules/affect.rules.js
+index 22d1edb..8a43d49 100644
+--- a/src/core/memory/extractors/regex/rules/affect.rules.js
++++ b/src/core/memory/extractors/regex/rules/affect.rules.js
+@@ -42,27 +42,6 @@ function detectEmotion(text) {
+   const source = normalizeForMatch(text)
+   const softened = hasSoftenedEmotionContext(source)
+ 
+-  if (
+-    includesAny(source, [
+-      'люблю',
+-      'дорога',
+-      'дорогой',
+-      'безумно дорога',
+-      'трепетно',
+-      'нежно',
+-      'нежность',
+-      'согревает',
+-      'греет',
+-      'тепло',
+-      'в груди тепло',
+-      'хочется обнять',
+-      'обнять и посидеть',
+-      'мне нужна ты'
+-    ])
+-  ) {
+-    return 'affection'
+-  }
+-
+   if (
+     includesAny(source, [
+       'мне страшно',
+@@ -219,7 +198,7 @@ function detectEmotion(text) {
+ }
+ 
+ function polarityForEmotion(emotion) {
+-  if (['affection', 'joy', 'relief'].includes(emotion)) return 'positive'
++  if (['joy', 'relief'].includes(emotion)) return 'positive'
+   if (['fear', 'sadness', 'anger', 'embarrassment', 'fatigue', 'tension'].includes(emotion)) return 'negative'
+   return null
+ }
+@@ -290,15 +269,18 @@ function detectOne({ clause, context }) {
+   const text = clause.clauseText
+   const unitText = clause.text || clause.clauseText || ''
+   const results = []
++  const normalizedUnit = normalizeForMatch(unitText)
+ 
+   if (!text || isFalseAffect(unitText)) return results
++  if (!normalizedUnit) return results
++  if (normalizedUnit.split(/\s+/).filter(Boolean).length > 12) return results
+ 
+   const emotion = detectEmotion(unitText)
+   if (!emotion) return results
+ 
+   if (
+     emotion === 'tension' &&
+-    /не\s+(пережива(ешь|ет|ю|ем|ете)|волну(ешься|ется|юсь|емся|етесь))/.test(normalizeForMatch(unitText))
++    /не\s+(пережива(ешь|ет|ю|ем|ете)|волну(ешься|ется|юсь|емся|етесь))/.test(normalizedUnit)
+   ) {
+     return results
+   }
+@@ -311,7 +293,6 @@ function detectOne({ clause, context }) {
+       context,
+       rule: ruleNameForEmotion(emotion),
+       confidence:
+-        emotion === 'affection' ? 0.88 :
+         emotion === 'fear' ? 0.9 :
+         emotion === 'sadness' ? 0.86 :
+         emotion === 'fatigue' ? 0.84 :
+diff --git a/src/core/memory/extractors/regex/rules/entity.rules.js b/src/core/memory/extractors/regex/rules/entity.rules.js
+index 9889891..d5da53d 100644
+--- a/src/core/memory/extractors/regex/rules/entity.rules.js
++++ b/src/core/memory/extractors/regex/rules/entity.rules.js
+@@ -4,40 +4,8 @@ const { runRuleList } = require('./shared/base.detector')
+ const { makeCandidate } = require('./shared/detector.utils')
+ 
+ const ANDREY_RE = /(^|[^а-яёa-z0-9_])андрей([^а-яёa-z0-9_]|$)/i
+-const HUTAO_RE_1 = /ху\s+тао/i
+-const HUTAO_RE_2 = /хутао/i
+-
+-const CHATGPT_RE = /(^|[^а-яёa-z0-9_])chatgpt([^а-яёa-z0-9_]|$)/i
+-const VPS_RE = /(^|[^а-яёa-z0-9_])vps([^а-яёa-z0-9_]|$)/i
+-const TELEGRAM_RE = /(^|[^а-яёa-z0-9_])telegram([^а-яёa-z0-9_]|$)/i
+-const LLM_RE = /(^|[^а-яёa-z0-9_])llm([^а-яёa-z0-9_]|$)/i
+-const REGEX_RE = /(^|[^а-яёa-z0-9_])regex([^а-яёa-z0-9_]|$)/i
+-const JSON_RE = /(^|[^а-яёa-z0-9_])json([^а-яёa-z0-9_]|$)/i
+-const API_RE = /(^|[^а-яёa-z0-9_])api([^а-яёa-z0-9_]|$)/i
+-
+-const OPEN_LOOPS_RE = /open\s+loops/i
+-const REGEX_EXTRACTOR_RE = /regex\s+extractor/i
+-const LLM_EXTRACTOR_RE = /llm\s+extractor/i
+-const ENTITY_EXTRACTOR_RE = /entity\s+extractor/i
+-const FACT_EXTRACTOR_RE = /fact\s+extractor/i
+-const EPISODIC_EXTRACTOR_RE = /episodic\s+extractor/i
+-const PIPELINE_RE = /(^|[^а-яёa-z0-9_])pipeline([^а-яёa-z0-9_]|$)/i
+-const LIFE_ENGINE_RE = /движок\s+жизни/i
+-
+-const SYSTEM_RE = /(^|[^а-яёa-z0-9_])система([^а-яёa-z0-9_]|$)/i
+-const BIOCHIP_RE = /биочип/i
+-const CHAIR_RE = /(^|[^а-яёa-z0-9_])стул([^а-яёa-z0-9_]|$)/i
+-const BOXES_RE = /коробочк(и|а|ек|ам|ами|ах)?/i
+-const MECHANISM_RE = /механизм/i
+-const SERVER_RE = /(^|[^а-яёa-z0-9_])сервер([^а-яёa-z0-9_]|$)/i
+-const FILE_RE = /(^|[^а-яёa-z0-9_])файл([^а-яёa-z0-9_]|$)/i
+-const LOG_RE = /(^|[^а-яёa-z0-9_])лог(и)?([^а-яёa-z0-9_]|$)/i
+-const SNAPSHOT_RE = /(^|[^а-яёa-z0-9_])снапшот([^а-яёa-z0-9_]|$)/i
+-const MEM0_RE = /(^|[^а-яёa-z0-9_])mem0([^а-яёa-z0-9_]|$)/i
+-
+-const ABSTRACT_MEMORY_RE = /(^|[^а-яёa-z0-9_])(память|памяти|памятью)([^а-яёa-z0-9_]|$)/i
+-const ABSTRACT_INFRA_RE = /инфраструктур/i
+-const WHOLE_SENTENCE_GARBAGE_RE = /чтобы[\s\S]*осталась\s+живой/i
++const HUTAO_SPACED_RE = /ху\s+тао/i
++const HUTAO_COMPACT_RE = /хутао/i
+ 
+ function normalize(text) {
+   return String(text || '')
+@@ -47,56 +15,6 @@ function normalize(text) {
+     .trim()
+ }
+ 
+-function isTechnicalNoiseClause(text) {
+-  const source = normalize(text)
+-
+-  if (!source) return false
+-
+-  const technicalMarkers = [
+-    'regex',
+-    'llm',
+-    'json',
+-    'api',
+-    'extractor',
+-    'экстрактор',
+-    'pipeline',
+-    'пайплайн',
+-    'mem0',
+-    'снапшот',
+-    'лог',
+-    'логи',
+-    'мердж',
+-    'debug',
+-    'дебаг',
+-    'test',
+-    'тест'
+-  ]
+-
+-  const hitCount = technicalMarkers.filter((marker) => source.includes(marker)).length
+-
+-  return (
+-    source.length >= 120 &&
+-    hitCount >= 2
+-  )
+-}
+-
+-function allowTechnicalSystemEntity(text, value) {
+-  const source = normalize(text)
+-
+-  if (!source) return false
+-  if (!source.includes(String(value || '').toLowerCase())) return false
+-
+-  if (isTechnicalNoiseClause(source)) {
+-    return false
+-  }
+-
+-  if (source.length > 90) {
+-    return false
+-  }
+-
+-  return true
+-}
+-
+ function buildEntityCandidate({
+   subtype,
+   value,
+@@ -125,309 +43,48 @@ function buildEntityCandidate({
+   })
+ }
+ 
+-function normalize(text) {
+-  return String(text || '')
+-    .toLowerCase()
+-    .replace(/\s+/g, ' ')
+-    .trim()
+-}
+-
+-function isFalseEntity(text, lowered, event) {
+-  if (event.role !== 'user') return true
+-  if (!text) return true
+-  if (WHOLE_SENTENCE_GARBAGE_RE.test(lowered)) return true
+-  if (ABSTRACT_INFRA_RE.test(lowered)) return true
+-  return false
+-}
+-
+-function hasSpecificProjectContext(lowered) {
+-  return (
+-    /экстрактор/i.test(lowered) ||
+-    /regex\s+module/i.test(lowered) ||
+-    /regex\s+modul/i.test(lowered) ||
+-    /regex\s+extractor/i.test(lowered) ||
+-    /модул/i.test(lowered) ||
+-    /пайплайн/i.test(lowered) ||
+-    /pipeline/i.test(lowered) ||
+-    /логиру/i.test(lowered) ||
+-    /работа(ет|ют|л|ла)/i.test(lowered) ||
+-    /добавил/i.test(lowered) ||
+-    /собрал/i.test(lowered) ||
+-    /создал/i.test(lowered)
+-  )
+-}
+-
+-function allowGenericObject(lowered, value) {
+-  const normalizedValue = normalize(value)
+-
+-  if (normalizedValue === 'сервер') {
+-    return /(стоит|поднят|отдельно|на\s+vps|на\s+сервере)/i.test(lowered)
+-  }
+-
+-  if (normalizedValue === 'коробочки') {
+-    return /(работа(ют|ет)|собрал|из\s+\d+\s+коробоч)/i.test(lowered)
+-  }
+-
+-  if (normalizedValue === 'биочип') {
+-    return true
+-  }
+-
+-  if (normalizedValue === 'стул') {
+-    return /(стоит|рядом|возле|на\s+стуле)/i.test(lowered)
+-  }
++function isSafeEntityClause(text, context, event) {
++  const source = normalize(text)
+ 
+-  return false
+-}
++  if (!source) return false
++  if (event.role !== 'user') return false
++  if (context.isReported) return false
++  if (source.length > 80) return false
+ 
+-function pushIf(results, test, payload) {
+-  if (test) results.push(payload)
++  return true
+ }
+ 
+ function detectOne({ clause, context, event }) {
+-  const text = clause.text || clause.clauseText || ''
+-  const lowered = normalize(clause.normalizedText || text)
++  const text = clause.clauseText || ''
++  const lowered = normalize(text)
+   const results = []
+ 
+-  if (isFalseEntity(text, lowered, event)) return results
+-
+-  const blockAbstractMemory = ABSTRACT_MEMORY_RE.test(lowered)
++  if (!isSafeEntityClause(text, context, event)) return results
+ 
+-  if (!blockAbstractMemory) {
+-    pushIf(results, ANDREY_RE.test(lowered),
++  if (ANDREY_RE.test(lowered)) {
++    results.push(
+       buildEntityCandidate({
+         subtype: 'person',
+         value: 'Андрей',
+         clause,
+         context,
+-        rule: 'entity_andrey_v3',
++        rule: 'entity_andrey_v4',
+         confidence: 0.9
+-      }))
++      })
++    )
++  }
+ 
+-    pushIf(results, HUTAO_RE_1.test(lowered) || HUTAO_RE_2.test(lowered),
++  if (HUTAO_SPACED_RE.test(lowered) || HUTAO_COMPACT_RE.test(lowered)) {
++    results.push(
+       buildEntityCandidate({
+         subtype: 'person',
+         value: 'Ху Тао',
+         clause,
+         context,
+-        rule: 'entity_hutao_v3',
++        rule: 'entity_hutao_v4',
+         confidence: 0.9
+-      }))
+-  }
+-
+-  pushIf(results, REGEX_EXTRACTOR_RE.test(lowered),
+-    buildEntityCandidate({
+-      subtype: 'project',
+-      value: 'regex extractor',
+-      clause,
+-      context,
+-      rule: 'entity_regex_extractor_v3',
+-      confidence: 0.9
+-    }))
+-
+-  pushIf(results, LLM_EXTRACTOR_RE.test(lowered),
+-    buildEntityCandidate({
+-      subtype: 'project',
+-      value: 'llm extractor',
+-      clause,
+-      context,
+-      rule: 'entity_llm_extractor_v2',
+-      confidence: 0.88
+-    }))
+-
+-  pushIf(results, ENTITY_EXTRACTOR_RE.test(lowered),
+-    buildEntityCandidate({
+-      subtype: 'project',
+-      value: 'entity extractor',
+-      clause,
+-      context,
+-      rule: 'entity_entity_extractor_v2',
+-      confidence: 0.88
+-    }))
+-
+-  pushIf(results, FACT_EXTRACTOR_RE.test(lowered),
+-    buildEntityCandidate({
+-      subtype: 'project',
+-      value: 'fact extractor',
+-      clause,
+-      context,
+-      rule: 'entity_fact_extractor_v2',
+-      confidence: 0.88
+-    }))
+-
+-  pushIf(results, EPISODIC_EXTRACTOR_RE.test(lowered),
+-    buildEntityCandidate({
+-      subtype: 'project',
+-      value: 'episodic extractor',
+-      clause,
+-      context,
+-      rule: 'entity_episodic_extractor_v2',
+-      confidence: 0.88
+-    }))
+-
+-  pushIf(results, OPEN_LOOPS_RE.test(lowered),
+-    buildEntityCandidate({
+-      subtype: 'project',
+-      value: 'open loops',
+-      clause,
+-      context,
+-      rule: 'entity_open_loops_v2',
+-      confidence: 0.82
+-    }))
+-
+-  pushIf(results, PIPELINE_RE.test(lowered),
+-    buildEntityCandidate({
+-      subtype: 'project',
+-      value: 'pipeline',
+-      clause,
+-      context,
+-      rule: 'entity_pipeline_v2',
+-      confidence: 0.8
+-    }))
+-
+-  pushIf(results, LIFE_ENGINE_RE.test(lowered),
+-    buildEntityCandidate({
+-      subtype: 'project',
+-      value: 'движок жизни',
+-      clause,
+-      context,
+-      rule: 'entity_life_engine_v2',
+-      confidence: 0.84
+-    }))
+-
+-  if (hasSpecificProjectContext(lowered)) {
+-    pushIf(results, CHATGPT_RE.test(lowered) && allowTechnicalSystemEntity(text, 'chatgpt'),
+-      buildEntityCandidate({
+-        subtype: 'system',
+-        value: 'chatgpt',
+-        clause,
+-        context,
+-        rule: 'entity_chatgpt_v3',
+-        confidence: 0.78
+-      }))
+-
+-    pushIf(results, VPS_RE.test(lowered) && allowTechnicalSystemEntity(text, 'vps'),
+-      buildEntityCandidate({
+-        subtype: 'system',
+-        value: 'vps',
+-        clause,
+-        context,
+-        rule: 'entity_vps_v3',
+-        confidence: 0.78
+-      }))
+-
+-    pushIf(results, TELEGRAM_RE.test(lowered) && allowTechnicalSystemEntity(text, 'telegram'),
+-      buildEntityCandidate({
+-        subtype: 'system',
+-        value: 'telegram',
+-        clause,
+-        context,
+-        rule: 'entity_telegram_v3',
+-        confidence: 0.78
+-      }))
+-
+-    pushIf(results, LLM_RE.test(lowered) && allowTechnicalSystemEntity(text, 'llm'),
+-      buildEntityCandidate({
+-        subtype: 'system',
+-        value: 'llm',
+-        clause,
+-        context,
+-        rule: 'entity_llm_v3',
+-        confidence: 0.76
+-      }))
+-
+-    pushIf(results, REGEX_RE.test(lowered) && allowTechnicalSystemEntity(text, 'regex'),
+-      buildEntityCandidate({
+-        subtype: 'system',
+-        value: 'regex',
+-        clause,
+-        context,
+-        rule: 'entity_regex_v3',
+-        confidence: 0.76
+-      }))
+-
+-    pushIf(results, JSON_RE.test(lowered) && allowTechnicalSystemEntity(text, 'json'),
+-      buildEntityCandidate({
+-        subtype: 'system',
+-        value: 'json',
+-        clause,
+-        context,
+-        rule: 'entity_json_v3',
+-        confidence: 0.76
+-      }))
+-
+-    pushIf(results, API_RE.test(lowered) && allowTechnicalSystemEntity(text, 'api'),
+-      buildEntityCandidate({
+-        subtype: 'system',
+-        value: 'api',
+-        clause,
+-        context,
+-        rule: 'entity_api_v3',
+-        confidence: 0.76
+-      }))
+-
+-    pushIf(results, SNAPSHOT_RE.test(lowered) && allowTechnicalSystemEntity(text, 'снапшот'),
+-      buildEntityCandidate({
+-        subtype: 'system',
+-        value: 'снапшот',
+-        clause,
+-        context,
+-        rule: 'entity_snapshot_v1',
+-        confidence: 0.72
+-      }))
+-
+-    pushIf(results, MEM0_RE.test(lowered) && allowTechnicalSystemEntity(text, 'mem0'),
+-      buildEntityCandidate({
+-        subtype: 'system',
+-        value: 'mem0',
+-        clause,
+-        context,
+-        rule: 'entity_mem0_v1',
+-        confidence: 0.74
+-      }))
+-  }
+-
+-  if (allowGenericObject(lowered, 'биочип') && BIOCHIP_RE.test(lowered)) {
+-    results.push(buildEntityCandidate({
+-      subtype: 'object',
+-      value: 'биочип',
+-      clause,
+-      context,
+-      rule: 'entity_biochip_v2',
+-      confidence: 0.84
+-    }))
+-  }
+-
+-  if (allowGenericObject(lowered, 'стул') && CHAIR_RE.test(lowered)) {
+-    results.push(buildEntityCandidate({
+-      subtype: 'object',
+-      value: 'стул',
+-      clause,
+-      context,
+-      rule: 'entity_chair_v2',
+-      confidence: 0.74
+-    }))
+-  }
+-
+-  if (allowGenericObject(lowered, 'коробочки') && BOXES_RE.test(lowered)) {
+-    results.push(buildEntityCandidate({
+-      subtype: 'object',
+-      value: 'коробочки',
+-      clause,
+-      context,
+-      rule: 'entity_boxes_v2',
+-      confidence: 0.78
+-    }))
+-  }
+-
+-  if (allowGenericObject(lowered, 'сервер') && SERVER_RE.test(lowered)) {
+-    results.push(buildEntityCandidate({
+-      subtype: 'object',
+-      value: 'сервер',
+-      clause,
+-      context,
+-      rule: 'entity_server_v2',
+-      confidence: 0.8
+-    }))
++      })
++    )
+   }
+ 
+   return results
+@@ -442,4 +99,4 @@ async function detect({ clauses, event }) {
+ 
+ module.exports = {
+   detect
+-}
+\ No newline at end of file
++}
+diff --git a/src/core/memory/extractors/regex/rules/intent.rules.js b/src/core/memory/extractors/regex/rules/intent.rules.js
+index 9e1f03a..a492e35 100644
+--- a/src/core/memory/extractors/regex/rules/intent.rules.js
++++ b/src/core/memory/extractors/regex/rules/intent.rules.js
+@@ -4,13 +4,23 @@ const { runRuleList } = require('./shared/base.detector')
+ const { makeCandidate } = require('./shared/detector.utils')
+ const { toRoleRef } = require('../builders/atom.builder')
+ 
++const WANT_RE = /^(?:я\s+)?хочу\s+(.+)/i
++const WILL_RE = /^(?:я\s+)?буду\s+(.+)/i
++const NEED_RE = /^мне\s+нуж(?:ен|на|но|ны)\s+(.+)/i
++const PLAN_RE = /^(?:я\s+)?планирую\s+(.+)/i
++
+ function actorRef(role) {
+   return toRoleRef(role, 'я', 1)
+ }
+ 
+-function includesAny(text, needles) {
+-  const source = String(text || '').toLowerCase()
+-  return needles.some((needle) => source.includes(String(needle).toLowerCase()))
++function normalize(text) {
++  return String(text || '')
++    .replace(/\s+/g, ' ')
++    .trim()
++}
++
++function wordCount(text) {
++  return normalize(text).split(/\s+/).filter(Boolean).length
+ }
+ 
+ function detectTimeHint(text) {
+@@ -20,32 +30,10 @@ function detectTimeHint(text) {
+   if (source.includes('завтра')) return 'tomorrow'
+   if (source.includes('потом')) return 'later'
+   if (source.includes('позже')) return 'later'
+-  if (source.includes('пока')) return 'for_now'
+-  if (source.includes('сразу')) return 'immediate'
+-  if (source.includes('вечером')) return 'evening'
+ 
+   return null
+ }
+ 
+-function cleanActionText(text) {
+-  const source = String(text || '').trim()
+-
+-  return source
+-    .replace(/^(я\s+)?хочу\s+/i, '')
+-    .replace(/^(я\s+)?собираюсь\s+/i, '')
+-    .replace(/^(я\s+)?планирую\s+/i, '')
+-    .replace(/^думаю\s+заняться\s+/i, '')
+-    .replace(/^(я\s+)?попробую\s+/i, '')
+-    .replace(/^(я\s+)?буду\s+/i, '')
+-    .replace(/^(я\s+)?не\s+хочу\s+/i, '')
+-    .replace(/^(я\s+)?не\s+буду\s+/i, '')
+-    .replace(/^отложим\s+/i, '')
+-    .replace(/^можно\s+не\s+/i, '')
+-    .replace(/^пока\s+/i, '')
+-    .replace(/^давай\s+/i, '')
+-    .trim()
+-}
+-
+ function buildIntentCandidate({
+   subtype,
+   text,
+@@ -54,11 +42,10 @@ function buildIntentCandidate({
+   rule,
+   confidence,
+   certainty,
+-  timeAnchor = null,
+-  timeHint = null
++  action
+ }) {
+   const actor = actorRef(context.actorRole)
+-  const cleanedAction = cleanActionText(text)
++  const timeHint = detectTimeHint(text)
+ 
+   return makeCandidate({
+     type: 'intent',
+@@ -75,129 +62,88 @@ function buildIntentCandidate({
+     confidence,
+     certainty,
+     tenseHint: subtype === 'planned' ? 'future' : null,
+-    timeAnchor,
++    timeAnchor: timeHint,
+     dedupeKeyHint: `intent::${subtype}::speaker::${text.toLowerCase()}`,
+     payload: {
+       status: subtype,
+-      action: cleanedAction || text,
++      action: normalize(action || text),
+       timeHint
+     }
+   })
+ }
+ 
+-function isFalsePositiveIntent(text, context) {
+-  const source = String(text || '').toLowerCase()
++function isSafeExplicitIntent(text, context) {
++  const source = normalize(text)
+ 
+-  if (context.isQuestion) return true
+-  if (/может,\s*я\s+просто\s+разн/i.test(source)) return true
+-  if (/скрывать\s+не\s+буду,\s*ты\s+меня\s+и\s+научила/i.test(source)) return true
+-
+-  if (
+-    includesAny(source, [
+-      'я не буду помнить',
+-      'ты запомнишь',
+-      'я уже представлю',
+-      'по идее',
+-      'могу привести',
+-      'я знаю, что',
+-      'я прекрасно знаю',
+-      'если ты',
+-      'если я',
+-      'когда ты',
+-      'когда я'
+-    ])
+-  ) {
+-    return true
+-  }
++  if (!source) return false
++  if (context.isQuestion) return false
++  if (context.isConditional) return false
++  if (context.isHypothetical) return false
++  if (context.isReported) return false
++  if (wordCount(source) > 12) return false
+ 
+-  return false
++  return true
+ }
+ 
+ function detectOne({ clause, context }) {
+   const text = clause.clauseText
+-  const lowered = clause.clauseNormalizedText
+   const results = []
+ 
+-  if (!text || isFalsePositiveIntent(text, context)) return results
++  if (!text || !isSafeExplicitIntent(text, context)) return results
+ 
+-  const timeHint = detectTimeHint(text)
+-
+-  if (/(завтра|потом|позже|вечером)/i.test(lowered) && /(сделаю|вернусь|добью|проверю|посмотрю)/i.test(lowered)) {
+-    results.push(
+-      buildIntentCandidate({
+-        subtype: 'planned',
+-        text,
+-        clause,
+-        context,
+-        rule: 'planned_v1',
+-        confidence: 0.9,
+-        certainty: 'high',
+-        timeAnchor: timeHint,
+-        timeHint
+-      })
+-    )
+-  }
++  const source = normalize(text)
++  const matchers = [
++    {
++      regex: WANT_RE,
++      subtype: 'wanted',
++      rule: 'explicit_want_v1',
++      confidence: 0.86,
++      certainty: 'high'
++    },
++    {
++      regex: WILL_RE,
++      subtype: 'planned',
++      rule: 'explicit_will_v1',
++      confidence: 0.86,
++      certainty: 'high'
++    },
++    {
++      regex: NEED_RE,
++      subtype: 'needed',
++      rule: 'explicit_need_v1',
++      confidence: 0.88,
++      certainty: 'high'
++    },
++    {
++      regex: PLAN_RE,
++      subtype: 'planned',
++      rule: 'explicit_plan_v1',
++      confidence: 0.88,
++      certainty: 'high'
++    }
++  ]
+ 
+-  if (/^хочу[.!?]?$/i.test(text) || /(^|\s)я\s+хочу\s+/i.test(lowered)) {
+-    results.push(
+-      buildIntentCandidate({
+-        subtype: 'wanted',
+-        text,
+-        clause,
+-        context,
+-        rule: 'wanted_v1',
+-        confidence: 0.84,
+-        certainty: /^хочу[.!?]?$/i.test(text) ? 'medium' : 'high',
+-        timeHint
+-      })
+-    )
+-  }
++  for (const matcher of matchers) {
++    const match = source.match(matcher.regex)
+ 
+-  if (/попробую/i.test(lowered) || /я\s+бы,\s*наверное/i.test(lowered)) {
+-    results.push(
+-      buildIntentCandidate({
+-        subtype: 'considering',
+-        text,
+-        clause,
+-        context,
+-        rule: 'considering_v1',
+-        confidence: 0.78,
+-        certainty: 'low',
+-        timeHint
+-      })
+-    )
+-  }
++    if (!match || !normalize(match[1])) {
++      continue
++    }
+ 
+-  if (/пока\s+не\s+хочу/i.test(lowered)) {
+     results.push(
+       buildIntentCandidate({
+-        subtype: 'avoiding',
+-        text,
++        subtype: matcher.subtype,
++        text: source,
+         clause,
+         context,
+-        rule: 'avoiding_v1',
+-        confidence: 0.88,
+-        certainty: 'high',
+-        timeAnchor: 'for_now',
+-        timeHint: 'for_now'
++        rule: matcher.rule,
++        confidence: matcher.confidence,
++        certainty: matcher.certainty,
++        action: match[1]
+       })
+     )
+-  }
+ 
+-  if (/я\s+не\s+буду/i.test(lowered) || /^не\s+буду/i.test(lowered)) {
+-    results.push(
+-      buildIntentCandidate({
+-        subtype: 'refused',
+-        text,
+-        clause,
+-        context,
+-        rule: 'refused_v1',
+-        confidence: 0.84,
+-        certainty: 'high',
+-        timeAnchor: lowered.includes('пока') ? 'for_now' : null,
+-        timeHint: lowered.includes('пока') ? 'for_now' : timeHint
+-      })
+-    )
++    break
+   }
+ 
+   return results
+diff --git a/src/core/memory/extractors/regex/rules/open-loop.rules.js b/src/core/memory/extractors/regex/rules/open-loop.rules.js
+index 894e358..9387a93 100644
+--- a/src/core/memory/extractors/regex/rules/open-loop.rules.js
++++ b/src/core/memory/extractors/regex/rules/open-loop.rules.js
+@@ -3,18 +3,7 @@
+ const { runRuleList } = require('./shared/base.detector')
+ const { makeCandidate } = require('./shared/detector.utils')
+ 
+-const STRICT_QUESTION_RE = /^(зачем|почему|что|кто|где|когда)\b/i
+-const SOFT_QUESTION_RE = /^(как)\b/i
+-
+-const RETURN_LATER_RE =
+-  /(вернемся|вернёмся|вернусь|обсудим|поговорим|разберем|разберём|посмотрим)\s+[\s\S]{0,40}(позже|потом)/i
+-
+-const SUSPENDED_RE =
+-  /пока\s+не\s+хочу[\s\S]{0,80}(эту\s+тему|об\s+этом|к\s+этому|это\s+обсуждать)/i
+-
+-const FUTURE_TASK_RE =
+-  /(завтра|позже|потом)\s+[\s\S]{0,60}(сделаю|проверю|посмотрю|вернусь|добью|разберу|разберусь)/i
+-
++const STRICT_QUESTION_RE = /^(зачем|почему|что|кто|где|когда)(?:\s|[?!…]|$)/i
+ const PENDING_DECISION_RE =
+   /(надо\s+решить|нужно\s+понять|надо\s+выбрать|нужно\s+выбрать|надо\s+определить|нужно\s+определить)/i
+ 
+@@ -151,20 +140,20 @@ function shouldCreateDirectQuestion(text, context) {
+   if (context?.isConditional) return false
+   if (context?.isHypothetical) return false
+ 
+-  const hasQuestionMark = source.endsWith('?')
+-  const startsLikeQuestion = STRICT_QUESTION_RE.test(source) || SOFT_QUESTION_RE.test(source)
+-
+-  if (!hasQuestionMark && !startsLikeQuestion && !context?.isQuestion) {
++  if (!source.endsWith('?')) {
+     return false
+   }
+ 
++  const startsLikeQuestion = STRICT_QUESTION_RE.test(source)
++
+   if (isEmotionalExclamation(source)) return false
+   if (isDecorativeQuestion(source)) return false
+   if (isConditionalQuestion(source)) return false
+   if (/^или\s+просто\s+[«"].+[»"]\?$/i.test(source)) return false
+   if (/^чтобы\b/i.test(source.toLowerCase())) return false
++  if (source.length > 120) return false
+ 
+-  return startsLikeQuestion || hasQuestionMark
++  return startsLikeQuestion
+ }
+ 
+ function detectOne({ clause, context }) {
+@@ -213,54 +202,6 @@ function detectOne({ clause, context }) {
+     )
+   }
+ 
+-  if (RETURN_LATER_RE.test(lowered)) {
+-    results.push(
+-      buildOpenLoopCandidate({
+-        subtype: 'postponed_topic',
+-        text: normalize(text),
+-        clause,
+-        context,
+-        rule: 'return_later_v2',
+-        confidence: 0.82,
+-        payload: {
+-          form: 'postponed'
+-        }
+-      })
+-    )
+-  }
+-
+-  if (SUSPENDED_RE.test(lowered)) {
+-    results.push(
+-      buildOpenLoopCandidate({
+-        subtype: 'suspended_topic',
+-        text: normalize(text),
+-        clause,
+-        context,
+-        rule: 'suspended_topic_v2',
+-        confidence: 0.84,
+-        payload: {
+-          form: 'suspended'
+-        }
+-      })
+-    )
+-  }
+-
+-  if (FUTURE_TASK_RE.test(lowered)) {
+-    results.push(
+-      buildOpenLoopCandidate({
+-        subtype: 'pending_task',
+-        text: normalize(text),
+-        clause,
+-        context,
+-        rule: 'future_task_v2',
+-        confidence: 0.76,
+-        payload: {
+-          form: 'pending'
+-        }
+-      })
+-    )
+-  }
+-
+   if (PENDING_DECISION_RE.test(lowered)) {
+     results.push(
+       buildOpenLoopCandidate({
+@@ -285,4 +226,4 @@ async function detect({ clauses }) {
+ 
+ module.exports = {
+   detect
+-}
+\ No newline at end of file
++}
+diff --git a/src/core/memory/extractors/regex/runtime.js b/src/core/memory/extractors/regex/runtime.js
+index b243dbe..a126af4 100644
+--- a/src/core/memory/extractors/regex/runtime.js
++++ b/src/core/memory/extractors/regex/runtime.js
+@@ -13,42 +13,20 @@ const { buildAtom } = require('./builders/atom.builder')
+ const { buildIdentityHints } = require('./builders/identity-hints.builder')
+ const { buildResponse } = require('./builders/response.builder')
+ 
+-const identityDetector = require('./rules/identity.rules')
+-const relationshipDetector = require('./rules/relationship.rules')
+-const preferenceDetector = require('./rules/preference.rules')
+ const intentDetector = require('./rules/intent.rules')
+-const commitmentDetector = require('./rules/commitment.rules')
+ const openLoopDetector = require('./rules/open-loop.rules')
+-const conflictDetector = require('./rules/conflict.rules')
+ const affectDetector = require('./rules/affect.rules')
+-const factDetector = require('./rules/fact.rules')
+ const entityDetector = require('./rules/entity.rules')
+ const actionDetector = require('./rules/action.rules')
+ const sceneDetector = require('./rules/scene.rules')
+-const temporalDetector = require('./rules/temporal.rules')
+-const episodeDetector = require('./rules/episode.rules')
+-const goalDetector = require('./rules/goal.rules')
+-const instructionDetector = require('./rules/instruction.rules')
+-const boundaryDetector = require('./rules/boundary.rules')
+ 
+ const DETECTORS = [
+-  identityDetector,
+-  relationshipDetector,
+-  preferenceDetector,
+   intentDetector,
+-  commitmentDetector,
+   openLoopDetector,
+-  conflictDetector,
+   affectDetector,
+-  factDetector,
+   entityDetector,
+   actionDetector,
+-  sceneDetector,
+-  temporalDetector,
+-  episodeDetector,
+-  goalDetector,
+-  instructionDetector,
+-  boundaryDetector
++  sceneDetector
+ ]
+ 
+ async function extractRegexAtoms({ event }) {
+@@ -166,4 +144,4 @@ async function extractRegexAtoms({ event }) {
+ 
+ module.exports = {
+   extractRegexAtoms
+-}
+\ No newline at end of file
++}
+diff --git a/tests/regex-atoms.basic.test.js b/tests/regex-atoms.basic.test.js
+index a0dcb8d..92c910e 100644
+--- a/tests/regex-atoms.basic.test.js
++++ b/tests/regex-atoms.basic.test.js
+@@ -39,7 +39,7 @@ async function run() {
+       role: 'user',
+       world: 'Earth',
+       timestamp: '2026-04-07T12:00:00.000Z',
+-      text: 'Меня зовут Андрей. Я люблю тебя. Почему я выбрал именно эту метафору?',
++      text: '*Я вздохнул*. Почему я выбрал именно эту метафору?',
+       language: 'ru',
+       replyToEventId: null,
+       edited: false,
+@@ -58,9 +58,8 @@ async function run() {
+   assert.ok(Array.isArray(result.signals.contextAtoms))
+   assert.ok(Array.isArray(result.signals.questions))
+ 
+-  assert.ok(atoms.some((a) => a.type === 'identity' && a.subtype === 'display_name'))
+-  assert.ok(atoms.some((a) => a.type === 'relationship' && a.subtype === 'affection'))
+   assert.ok(atoms.some((a) => a.type === 'open_loop' && a.subtype === 'direct_question'))
++  assert.strictEqual(result.signals.identityHints.length, 0)
+ 
+   console.log('OK')
+ }
+@@ -68,4 +67,4 @@ async function run() {
+ run().catch((err) => {
+   console.error(err)
+   process.exit(1)
+-})
+\ No newline at end of file
++})
+diff --git a/tests/regex/extractRegexAtomsV1.test.js b/tests/regex/extractRegexAtomsV1.test.js
+index 10744c6..5c4d1cf 100644
+--- a/tests/regex/extractRegexAtomsV1.test.js
++++ b/tests/regex/extractRegexAtomsV1.test.js
+@@ -5,135 +5,29 @@ const assert = require('node:assert/strict')
+ 
+ const { extractRegexAtomsV1 } = require('../../src/core/memory/extractors/regex')
+ 
+-function findAtom(result, type, subtype = null) {
+-  return result.atoms.find((item) => {
+-    if (item.type !== type) return false
+-    if (subtype && item.subtype !== subtype) return false
+-    return true
+-  }) || null
+-}
+-
+ function buildCompatAtoms(result) {
+-  if (Array.isArray(result?.atoms)) {
+-    return result.atoms
+-  }
+-
+   const signals = result?.signals || {}
+ 
+   const questionAtoms = (signals.questions || []).map((item) => ({
+     id: item.id,
+     type: 'open_loop',
+     subtype: item.kind || 'direct_question',
+-    text: item.text,
+-    normalizedText: item.normalizedText || String(item.text || '').toLowerCase(),
+-    confidence: item.confidence || 0.8,
+-    source: {
+-      extractor: 'regex.fast_signals',
+-      rule: item.sourceRule || 'unknown_rule'
+-    },
+-    payload: {
+-      clauseId: item.clauseId || null
+-    }
+-  }))
+-
+-  const instructionAtoms = (signals.instructions || []).map((item) => ({
+-    id: item.id,
+-    type: 'instruction',
+-    subtype: item.kind || 'direct_instruction',
+-    text: item.text,
+-    normalizedText: item.normalizedText || String(item.text || '').toLowerCase(),
+-    confidence: item.confidence || 0.8,
+-    source: {
+-      extractor: 'regex.fast_signals',
+-      rule: item.sourceRule || 'unknown_rule'
+-    },
+-    payload: {
+-      clauseId: item.clauseId || null
+-    }
+-  }))
+-
+-  const temporalAtoms = (signals.temporalAnchors || []).map((item) => ({
+-    id: item.id,
+-    type: 'temporal',
+-    subtype: item.kind || 'temporal_anchor',
+-    text: item.text,
+-    normalizedText: item.normalizedText || String(item.text || '').toLowerCase(),
+-    confidence: item.confidence || 0.75,
+-    source: {
+-      extractor: 'regex.fast_signals',
+-      rule: item.sourceRule || 'unknown_rule'
+-    },
+-    payload: {
+-      clauseId: item.clauseId || null
+-    }
+-  }))
+-
+-  const identityAtoms = (signals.identityHints || []).map((item) => ({
+-    id: item.id,
+-    type: 'identity',
+-    subtype: item.kind === 'display_name_candidate' ? 'display_name' : 'role',
+-    text: item.value,
+-    normalizedText:
+-      item.normalizedValue || String(item.value || '').toLowerCase(),
+-    confidence: item.confidence || 0.8,
+-    source: {
+-      extractor: 'regex.fast_signals',
+-      rule: item.sourceRule || 'unknown_rule'
+-    },
+-    payload: {
+-      value: item.value,
+-      clauseId: item.clauseId || null
+-    }
++    text: item.text
+   }))
+ 
+   const contextAtoms = (signals.contextAtoms || []).map((item) => ({
+     id: item.id,
+     type: item.type,
+     subtype: item.subtype || 'generic',
+-    text: item.text,
+-    normalizedText: item.normalizedText || String(item.text || '').toLowerCase(),
+-    confidence: item.confidence || 0.7,
+-    source: {
+-      extractor: 'regex.fast_signals',
+-      rule: item.sourceRule || 'unknown_rule'
+-    },
+-    payload: {
+-      clauseId: item.clauseId || null,
+-      tags: Array.isArray(item.tags) ? item.tags : []
+-    }
++    text: item.text
+   }))
+ 
+   return [
+-    ...identityAtoms,
+     ...questionAtoms,
+-    ...instructionAtoms,
+-    ...temporalAtoms,
+     ...contextAtoms
+   ]
+ }
+ 
+-function buildCompatIdentityHints(result) {
+-  if (Array.isArray(result?.identityHints)) {
+-    return result.identityHints
+-  }
+-
+-  return (result?.signals?.identityHints || []).map((item) => ({
+-    id: item.id,
+-    kind: item.kind,
+-    value: item.value,
+-    normalizedValue:
+-      item.normalizedValue || String(item.value || '').toLowerCase(),
+-    confidence: item.confidence || 0.8,
+-    source: {
+-      extractor: 'regex.fast_signals',
+-      rule: item.sourceRule || 'unknown_rule'
+-    },
+-    payload: {
+-      clauseId: item.clauseId || null
+-    }
+-  }))
+-}
+-
+ async function run(text) {
+   const result = await extractRegexAtomsV1({
+     event: {
+@@ -155,8 +49,7 @@ async function run(text) {
+ 
+   return {
+     ...result,
+-    atoms: buildCompatAtoms(result),
+-    identityHints: buildCompatIdentityHints(result)
++    atoms: buildCompatAtoms(result)
+   }
+ }
+ 
+@@ -168,7 +61,7 @@ function countAtoms(result, type, subtype = null) {
+   }).length
+ }
+ 
+-test('returns stable contract', async () => {
++test('returns stable narrowed contract', async () => {
+   const result = await run('Меня зовут Андрей.')
+ 
+   assert.equal(result.version, 2)
+@@ -183,14 +76,9 @@ test('returns stable contract', async () => {
+   assert.ok(Array.isArray(result.signals.contextAtoms))
+   assert.ok(result.service)
+   assert.ok(result.service.stats)
+-})
+-
+-test('extracts display name and identity hint', async () => {
+-  const result = await run('Меня зовут Андрей.')
+-
+-  assert.equal(countAtoms(result, 'identity', 'display_name'), 1)
+-  assert.equal(result.identityHints.length, 1)
+-  assert.equal(result.identityHints[0].value, 'Андрей')
++  assert.equal(result.signals.identityHints.length, 0)
++  assert.equal(result.signals.temporalAnchors.length, 0)
++  assert.equal(result.signals.instructions.length, 0)
+ })
+ 
+ test('keeps explicit atmosphere with anchored location', async () => {
+@@ -199,46 +87,31 @@ test('keeps explicit atmosphere with anchored location', async () => {
+   assert.equal(countAtoms(result, 'scene', 'atmosphere'), 1)
+ })
+ 
+-test('keeps explicit atmosphere for here cool', async () => {
+-  const result = await run('Здесь прохладно.')
+-
+-  assert.equal(countAtoms(result, 'scene', 'atmosphere'), 1)
+-})
+-
+ test('keeps explicit location scene', async () => {
+   const result = await run('*Я сел рядом с тобой*')
+ 
+   assert.equal(countAtoms(result, 'scene', 'location'), 1)
+-  assert.equal(countAtoms(result, 'episode', 'scene'), 0)
+-})
+-
+-test('does not promote weak laugh rp into episode', async () => {
+-  const result = await run('*Я тихонько посмеялся*')
+-
+-  assert.equal(countAtoms(result, 'episode', 'emotional_moment'), 0)
+-  assert.equal(countAtoms(result, 'scene', 'atmosphere'), 0)
+ })
+ 
+-test('does not promote pause rp into episode', async () => {
+-  const result = await run('*Я сделал паузу*')
++test('keeps short rp bodily action', async () => {
++  const result = await run('*Я вздохнул*')
+ 
+-  assert.equal(countAtoms(result, 'episode'), 0)
++  assert.equal(countAtoms(result, 'action', 'gesture'), 1)
+ })
+ 
+-test('does not keep shrug as meaningful atom', async () => {
++test('does not keep weak shrug as meaningful action', async () => {
+   const result = await run('*Я пожал плечами*')
+ 
+   assert.equal(countAtoms(result, 'action', 'gesture'), 0)
+-  assert.equal(countAtoms(result, 'episode'), 0)
+ })
+ 
+-test('extracts direct question as open loop', async () => {
++test('keeps direct question as open loop', async () => {
+   const result = await run('Почему я выбрал именно эту метафору?')
+ 
+   assert.equal(countAtoms(result, 'open_loop', 'direct_question'), 1)
+ })
+ 
+-test('does not create open loop from quoted decorative alternative', async () => {
++test('does not create open loop from decorative alternative', async () => {
+   const result = await run('Или просто «приходи, потому что надо приходить»?')
+ 
+   assert.equal(countAtoms(result, 'open_loop', 'direct_question'), 0)
+@@ -250,209 +123,15 @@ test('does not create open loop from conditional rhetorical question', async ()
+   assert.equal(countAtoms(result, 'open_loop'), 0)
+ })
+ 
+-test('does not create tail garbage open loop', async () => {
+-  const result = await run('Чтобы я решала, что важно, а что — мусор?')
+-
+-  assert.equal(result.atoms.some((item) => item.type === 'open_loop' && item.text === 'что — мусор?'), false)
+-})
+-
+-test('does not turn semantic plain text into scene atmosphere', async () => {
+-  const result = await run('Я хочу, чтобы ты жила как часть моего мира.')
+-
+-  assert.equal(countAtoms(result, 'scene'), 0)
+-})
+-
+-test('does not emit punctuation garbage after splitting', async () => {
+-  const result = await run('Я проспал на час... .. потом пошел работать')
+-
+-  assert.equal(result.atoms.some((item) => item.text === '. .' || item.unitText === '. .'), false)
+-})
+-
+-test('does not turn weak preference wording into fact', async () => {
+-  const result = await run('Мне хотелось бы просто посидеть в тишине.')
+-
+-  assert.equal(countAtoms(result, 'fact', 'desire'), 0)
+-})
+-
+-test('does not turn rhetorical question into fact', async () => {
+-  const result = await run('Ну и какой идиот это придумал?')
+-
+-  assert.equal(countAtoms(result, 'fact'), 0)
+-})
+-
+-test('does not create fact from decorative rp gesture', async () => {
+-  const result = await run('*Я улыбнулся и пожал плечами*')
+-
+-  assert.equal(countAtoms(result, 'fact'), 0)
+-})
+-
+-test('splits strong transition marker and does not leave lone "но" unit garbage', async () => {
+-  const result = await run('Там уже стоит базовая архитектура, но ее нужно усиливать и расширять.')
+-
+-  assert.equal(result.atoms.some((item) => item.text === 'но'), false)
+-})
+-
+-test('does not promote long reflective paragraph into action gesture', async () => {
+-  const result = await run('И я задумался о том что они оба вообще делать должны только когда вообще написал этот llm и заглянул в логи, начав сравнивать результат работы regex и llm.')
+-
+-  assert.equal(countAtoms(result, 'action', 'gesture'), 0)
+-})
+-
+-test('keeps rp sigh as short gesture', async () => {
+-  const result = await run('*Я вздохнул*')
++test('keeps direct affect marker', async () => {
++  const result = await run('Мне тревожно.')
+ 
+-  assert.equal(countAtoms(result, 'action', 'gesture'), 1)
++  assert.equal(countAtoms(result, 'affect', 'fear'), 1)
+ })
+ 
+-test('does not create dirty temporal duration from insulted mixed clause', async () => {
+-  const result = await run('Бляяя, Ху Тао, я еблан тот ещё. Я 4 дня.')
+-
+-  assert.equal(
+-    result.atoms.some((item) => item.type === 'temporal' && item.subtype === 'duration' && item.text.includes('Бляяя')),
+-    false
+-  )
+-})
+-
+-test('keeps clean temporal duration from short clause', async () => {
++test('does not emit temporal anchors under narrowed contract', async () => {
+   const result = await run('Я 4 дня.')
+ 
+-  assert.equal(countAtoms(result, 'temporal', 'duration'), 1)
++  assert.equal(result.signals.temporalAnchors.length, 0)
++  assert.equal(countAtoms(result, 'temporal'), 0)
+ })
+-
+-test('drops weak sigh rp when message also has plain semantic content', async () => {
+-  const result = await run('*Я вздохнул*\n\nПочинили наконец-то. Теперь сообщения снова работают.')
+-
+-  assert.equal(countAtoms(result, 'action', 'gesture'), 0)
+-})
+-
+-test('drops weak laugh rp when message also has plain semantic content', async () => {
+-  const result = await run('*Я рассмеялся*\n\nЕсли телеграм сломается, будем через консоль общаться.')
+-
+-  assert.equal(countAtoms(result, 'action', 'gesture'), 0)
+-})
+-
+-test('keeps standalone sigh rp as weak scene action for now', async () => {
+-  const result = await run('*Я вздохнул*')
+-
+-  assert.equal(countAtoms(result, 'action', 'gesture'), 1)
+-})
+-
+-test('does not create open loop from bridge question but knows continuation follows', async () => {
+-  const result = await run('Но знаешь что?')
+-
+-  assert.equal(countAtoms(result, 'open_loop', 'direct_question'), 0)
+-})
+-
+-test('does not create open loop from very short rhetorical console question', async () => {
+-  const result = await run('Через консоль?')
+-
+-  assert.equal(countAtoms(result, 'open_loop', 'direct_question'), 0)
+-})
+-
+-test('does not create open loop from short rhetorical honesty check', async () => {
+-  const result = await run('Честно?')
+-
+-  assert.equal(countAtoms(result, 'open_loop', 'direct_question'), 0)
+-})
+-
+-test('keeps real short social question as open loop', async () => {
+-  const result = await run('Как ночка?')
+-
+-  assert.equal(countAtoms(result, 'open_loop', 'direct_question'), 1)
+-})
+-
+-test('does not promote conversational start summary into episode event', async () => {
+-  const result = await run('У меня, как видишь, началось оно с очередного обхода блокировки.')
+-
+-  assert.equal(countAtoms(result, 'episode', 'event'), 0)
+-})
+-
+-test('does not create preference need from operational logging chatter', async () => {
+-  const result = await run('Нужно немного поговорить для логов для начала.')
+-
+-  assert.equal(countAtoms(result, 'preference', 'need'), 0)
+-})
+-
+-test('does not create preference need from procedural evaluation wording', async () => {
+-  const result = await run('Пожалуйста, пройдите тест, нужно оценить ваши способности.')
+-
+-  assert.equal(countAtoms(result, 'preference', 'need'), 0)
+-})
+-
+-test('does not create temporal anchor now from operational current-step chatter', async () => {
+-  const result = await run('Видимо, сейчас пойдем в слои выше.')
+-
+-  assert.equal(countAtoms(result, 'temporal', 'anchor_now'), 0)
+-})
+-
+-test('does not create temporal anchor now from hedged now filler', async () => {
+-  const result = await run('Ты, мне кажется, переоценила сейчас эту мысль.')
+-
+-  assert.equal(countAtoms(result, 'temporal', 'anchor_now'), 0)
+-})
+-
+-test('does not create dislike preference from hypothetical boring fantasy', async () => {
+-  const result = await run('Представляю, как через месяц на экране будет написано "Мне скучно!"')
+-
+-  assert.equal(countAtoms(result, 'preference', 'dislike'), 0)
+-})
+-
+-test('keeps physical interaction from nose poke rp even in mixed message', async () => {
+-  const result = await run('Нужно немного поговорить.\n\n*Я легонько тыкнул тебя в кончик носа*')
+-
+-  assert.equal(countAtoms(result, 'action', 'physical'), 1)
+-})
+-
+-test('extracts physical touch from fingers on cheek rp', async () => {
+-  const result = await run('*Я легонько положил кончики пальцев тебе на щеку*')
+-
+-  assert.equal(countAtoms(result, 'action', 'physical'), 1)
+-})
+-
+-test('extracts physical action from started kissing rp', async () => {
+-  const result = await run('*Я навис над тобой и начал целовать тебя в щеки в разные места*')
+-
+-  assert.equal(countAtoms(result, 'action', 'physical'), 1)
+-})
+-
+-test('trims long mixed clause to real question core', async () => {
+-  const result = await run('Сейчас мы на этапе "Вообще понять, что идёт дождь из воды H2O", а потом уже будем прикручивать экстракторы, которые поймают нам и его запах, и реакцию, которое он вызвал, и ощущение капельки, которая попала тебе за шиворот. Слушай, а ты точно не сверхсилы какие-то?')
+-
+-  const atom = findAtom(result, 'open_loop', 'direct_question')
+-  assert.ok(atom)
+-  assert.match(atom.text.toLowerCase(), /ты точно не сверхсилы какие-то\?$/)
+-})
+-
+-test('does not keep long technical llm chatter as system entity', async () => {
+-  const result = await run('Мердж строить было бессмысленно, доделывать regex это бесконечное дело в русском языке, а llm превратилось в плохой промпт, поверх которого сел ещё один regex по сути.')
+-
+-  assert.equal(countAtoms(result, 'entity', 'system'), 0)
+-})
+-
+-test('splits long technical chatter into multiple plain clauses', async () => {
+-  const result = await extractRegexAtomsV1({
+-    event: {
+-      id: 'evt-tech-split',
+-      threadId: 'thread-test',
+-      platform: 'telegram',
+-      channel: 'text',
+-      role: 'user',
+-      world: 'Earth',
+-      timestamp: '2026-04-07T12:00:00.000Z',
+-      text: 'Мердж строить было бессмысленно, доделывать regex это бесконечное дело в русском языке, а llm превратилось в плохой промпт, поверх которого сел ещё один regex по сути. Зато regex экстрактор мы превратили в точечный отлов вопросов.',
+-      language: 'ru',
+-      replyToEventId: null,
+-      edited: false,
+-      attachments: [],
+-      meta: {}
+-    }
+-  })
+-
+-  assert.ok(result.service.stats.clauseCount >= 3)
+-})
+-
+-test('does not create anchor_now from technical current-state chatter', async () => {
+-  const result = await run('Ты все с тем же снапшотом, к сожалению сейчас.')
+-
+-  assert.equal(countAtoms(result, 'temporal', 'anchor_now'), 0)
+-})
+\ No newline at end of file

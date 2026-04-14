@@ -3,17 +3,17 @@
 const { runRuleList } = require('./shared/base.detector')
 const { makeCandidate } = require('./shared/detector.utils')
 
-const STRICT_QUESTION_RE = /^(зачем|почему|что|кто|где|когда)\b/i
-const SOFT_QUESTION_RE = /^(как)\b/i
+const STRICT_QUESTION_RE = /^(зачем|почему|что|кто|где|когда)(?:\s|[?!…]|$)/i
+const SOFT_QUESTION_RE = /^(как)(?:\s|[?!…]|$)/i
 
 const RETURN_LATER_RE =
-  /(вернемся|вернёмся|вернусь|обсудим|поговорим|разберем|разберём|посмотрим)\s+[\s\S]{0,40}(позже|потом)/i
+  /(?:(вернемся|вернёмся|вернусь|обсудим|поговорим|разберем|разберём|посмотрим)\s+[\s\S]{0,40}(позже|потом)|(позже|потом)\s+[\s\S]{0,40}(вернемся|вернёмся|вернусь|обсудим|поговорим|разберем|разберём|посмотрим))/i
 
 const SUSPENDED_RE =
-  /пока\s+не\s+хочу[\s\S]{0,80}(эту\s+тему|об\s+этом|к\s+этому|это\s+обсуждать)/i
+  /пока\s+не\s+хочу[\s\S]{0,80}(эту\s+тему|об\s+этом|к\s+этому|это\s+обсуждать|обсуждать\s+это)/i
 
 const FUTURE_TASK_RE =
-  /(завтра|позже|потом)\s+[\s\S]{0,60}(сделаю|проверю|посмотрю|вернусь|добью|разберу|разберусь)/i
+  /(завтра|позже|потом|сегодня)\s+[\s\S]{0,60}(сделаю|проверю|посмотрю|вернусь|добью|разберу|разберусь|доделаю|починю)/i
 
 const PENDING_DECISION_RE =
   /(надо\s+решить|нужно\s+понять|надо\s+выбрать|нужно\s+выбрать|надо\s+определить|нужно\s+определить)/i
@@ -150,21 +150,21 @@ function shouldCreateDirectQuestion(text, context) {
 
   if (context?.isConditional) return false
   if (context?.isHypothetical) return false
+  if (context?.isReported) return false
+  if (!source.endsWith('?')) return false
 
-  const hasQuestionMark = source.endsWith('?')
-  const startsLikeQuestion = STRICT_QUESTION_RE.test(source) || SOFT_QUESTION_RE.test(source)
-
-  if (!hasQuestionMark && !startsLikeQuestion && !context?.isQuestion) {
-    return false
-  }
+  const startsLikeQuestion =
+    STRICT_QUESTION_RE.test(source) ||
+    SOFT_QUESTION_RE.test(source)
 
   if (isEmotionalExclamation(source)) return false
   if (isDecorativeQuestion(source)) return false
   if (isConditionalQuestion(source)) return false
   if (/^или\s+просто\s+[«"].+[»"]\?$/i.test(source)) return false
   if (/^чтобы\b/i.test(source.toLowerCase())) return false
+  if (source.length > 140) return false
 
-  return startsLikeQuestion || hasQuestionMark
+  return startsLikeQuestion || source.endsWith('?')
 }
 
 function detectOne({ clause, context }) {
@@ -204,7 +204,7 @@ function detectOne({ clause, context }) {
         text: questionCore,
         clause,
         context,
-        rule: 'direct_question_v7',
+        rule: 'direct_question_v8',
         confidence: 0.9,
         payload: {
           form: 'question'
@@ -220,7 +220,7 @@ function detectOne({ clause, context }) {
         text: normalize(text),
         clause,
         context,
-        rule: 'return_later_v2',
+        rule: 'return_later_v3',
         confidence: 0.82,
         payload: {
           form: 'postponed'
@@ -236,7 +236,7 @@ function detectOne({ clause, context }) {
         text: normalize(text),
         clause,
         context,
-        rule: 'suspended_topic_v2',
+        rule: 'suspended_topic_v3',
         confidence: 0.84,
         payload: {
           form: 'suspended'
@@ -252,8 +252,8 @@ function detectOne({ clause, context }) {
         text: normalize(text),
         clause,
         context,
-        rule: 'future_task_v2',
-        confidence: 0.76,
+        rule: 'future_task_v3',
+        confidence: 0.78,
         payload: {
           form: 'pending'
         }
@@ -279,6 +279,7 @@ function detectOne({ clause, context }) {
 
   return results
 }
+
 async function detect({ clauses }) {
   return runRuleList({ clauses, detectOne })
 }

@@ -249,6 +249,7 @@ function buildResponse({
     version: 2,
     strategy: 'regex_fast_signals_v1',
     event: buildEvent(event),
+    atoms: safeAtoms,
     signals,
     service: buildService(service, signals)
   }

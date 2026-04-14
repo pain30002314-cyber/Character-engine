@@ -3,98 +3,232 @@
 const { runRuleList } = require('./shared/base.detector')
 const { makeCandidate } = require('./shared/detector.utils')
 
-const ANDREY_RE = /(^|[^а-яёa-z0-9_])андрей([^а-яёa-z0-9_]|$)/i
-const HUTAO_RE_1 = /ху\s+тао/i
-const HUTAO_RE_2 = /хутао/i
-
-const CHATGPT_RE = /(^|[^а-яёa-z0-9_])chatgpt([^а-яёa-z0-9_]|$)/i
-const VPS_RE = /(^|[^а-яёa-z0-9_])vps([^а-яёa-z0-9_]|$)/i
-const TELEGRAM_RE = /(^|[^а-яёa-z0-9_])telegram([^а-яёa-z0-9_]|$)/i
-const LLM_RE = /(^|[^а-яёa-z0-9_])llm([^а-яёa-z0-9_]|$)/i
-const REGEX_RE = /(^|[^а-яёa-z0-9_])regex([^а-яёa-z0-9_]|$)/i
-const JSON_RE = /(^|[^а-яёa-z0-9_])json([^а-яёa-z0-9_]|$)/i
-const API_RE = /(^|[^а-яёa-z0-9_])api([^а-яёa-z0-9_]|$)/i
-
-const OPEN_LOOPS_RE = /open\s+loops/i
-const REGEX_EXTRACTOR_RE = /regex\s+extractor/i
-const LLM_EXTRACTOR_RE = /llm\s+extractor/i
-const ENTITY_EXTRACTOR_RE = /entity\s+extractor/i
-const FACT_EXTRACTOR_RE = /fact\s+extractor/i
-const EPISODIC_EXTRACTOR_RE = /episodic\s+extractor/i
-const PIPELINE_RE = /(^|[^а-яёa-z0-9_])pipeline([^а-яёa-z0-9_]|$)/i
-const LIFE_ENGINE_RE = /движок\s+жизни/i
-
-const SYSTEM_RE = /(^|[^а-яёa-z0-9_])система([^а-яёa-z0-9_]|$)/i
-const BIOCHIP_RE = /биочип/i
-const CHAIR_RE = /(^|[^а-яёa-z0-9_])стул([^а-яёa-z0-9_]|$)/i
-const BOXES_RE = /коробочк(и|а|ек|ам|ами|ах)?/i
-const MECHANISM_RE = /механизм/i
-const SERVER_RE = /(^|[^а-яёa-z0-9_])сервер([^а-яёa-z0-9_]|$)/i
-const FILE_RE = /(^|[^а-яёa-z0-9_])файл([^а-яёa-z0-9_]|$)/i
-const LOG_RE = /(^|[^а-яёa-z0-9_])лог(и)?([^а-яёa-z0-9_]|$)/i
-const SNAPSHOT_RE = /(^|[^а-яёa-z0-9_])снапшот([^а-яёa-z0-9_]|$)/i
-const MEM0_RE = /(^|[^а-яёa-z0-9_])mem0([^а-яёa-z0-9_]|$)/i
-
-const ABSTRACT_MEMORY_RE = /(^|[^а-яёa-z0-9_])(память|памяти|памятью)([^а-яёa-z0-9_]|$)/i
-const ABSTRACT_INFRA_RE = /инфраструктур/i
-const WHOLE_SENTENCE_GARBAGE_RE = /чтобы[\s\S]*осталась\s+живой/i
+const ENTITY_DEFS = [
+  {
+    subtype: 'person',
+    value: 'Андрей',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])андрей([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_andrey_v5',
+    confidence: 0.9
+  },
+  {
+    subtype: 'character',
+    value: 'Ху Тао',
+    patterns: [
+      /ху\s+тао/i,
+      /хутао/i
+    ],
+    rule: 'entity_hutao_v5',
+    confidence: 0.9
+  },
+  {
+    subtype: 'pet',
+    value: 'Гарфилд',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])гарфилд([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_garfield_v1',
+    confidence: 0.92
+  },
+  {
+    subtype: 'pet',
+    value: 'Семка',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])семк[аиуео]?([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_semka_v1',
+    confidence: 0.9
+  },
+  {
+    subtype: 'pet',
+    value: 'Дымок',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])дымок([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_dymok_v1',
+    confidence: 0.9
+  },
+  {
+    subtype: 'pet',
+    value: 'Чумуска',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])чумуск[аиуео]?([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_chumuska_v1',
+    confidence: 0.9
+  },
+  {
+    subtype: 'person',
+    value: 'Иваныч',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])иваныч([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_ivanych_v1',
+    confidence: 0.88
+  },
+  {
+    subtype: 'person',
+    value: 'Инна',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])инна([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_inna_v1',
+    confidence: 0.88
+  },
+  {
+    subtype: 'person',
+    value: 'Айгунь',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])айгунь([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_aigun_v1',
+    confidence: 0.88
+  },
+  {
+    subtype: 'person',
+    value: 'Кристина',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])кристина([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_kristina_v1',
+    confidence: 0.88
+  },
+  {
+    subtype: 'person',
+    value: 'Милена',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])милена([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_milena_v1',
+    confidence: 0.88
+  },
+  {
+    subtype: 'person',
+    value: 'Юля',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])юля([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_yulya_v1',
+    confidence: 0.88
+  },
+  {
+    subtype: 'person',
+    value: 'Настя',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])настя([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_nastya_v1',
+    confidence: 0.88
+  },
+  {
+    subtype: 'person',
+    value: 'Брат',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])брат([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_brat_v1',
+    confidence: 0.72,
+    extraGuard: isLikelyRealBrotherContext
+  },
+  {
+    subtype: 'place',
+    value: 'ресторан',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])ресторанчик([^а-яёa-z0-9_]|$)/i,
+      /(^|[^а-яёa-z0-9_])ресторан([^а-яёa-z0-9_]|$)/i,
+      /(^|[^а-яёa-z0-9_])кафе([^а-яёa-z0-9_]|$)/i,
+      /(^|[^а-яёa-z0-9_])заведение([^а-яёa-z0-9_]|$)/i,
+      /(^|[^а-яёa-z0-9_])заведении([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_restaurant_v1',
+    confidence: 0.8,
+    extraGuard: isLikelyOwnedVenueContext
+  },
+  {
+    subtype: 'place',
+    value: 'кофейня',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])кофейня([^а-яёa-z0-9_]|$)/i,
+      /(^|[^а-яёa-z0-9_])кофейне([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_coffee_shop_v1',
+    confidence: 0.82
+  },
+  {
+    subtype: 'project',
+    value: 'Мостик',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])мостик([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_mostik_v1',
+    confidence: 0.86
+  },
+  {
+    subtype: 'system',
+    value: 'chatgpt',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])chatgpt([^а-яёa-z0-9_]|$)/i,
+      /chat\s+gpt/i,
+      /чат\s*гпт/i,
+      /чатгпт/i
+    ],
+    rule: 'entity_chatgpt_v4',
+    confidence: 0.84
+  },
+  {
+    subtype: 'system',
+    value: 'телеграм',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])telegram([^а-яёa-z0-9_]|$)/i,
+      /(^|[^а-яёa-z0-9_])телеграм([^а-яёa-z0-9_]|$)/i,
+      /(^|[^а-яёa-z0-9_])телега([^а-яёa-z0-9_]|$)/i,
+      /(^|[^а-яёa-z0-9_])телегу([^а-яёa-z0-9_]|$)/i,
+      /(^|[^а-яёa-z0-9_])тг([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_telegram_v1',
+    confidence: 0.82
+  },
+  {
+    subtype: 'system',
+    value: 'сервер',
+    patterns: [
+      /(^|[^а-яёa-z0-9_])сервер([^а-яёa-z0-9_]|$)/i,
+      /(^|[^а-яёa-z0-9_])сервере([^а-яёa-z0-9_]|$)/i,
+      /(^|[^а-яёa-z0-9_])впс([^а-яёa-z0-9_]|$)/i,
+      /(^|[^а-яёa-z0-9_])vps([^а-яёa-z0-9_]|$)/i
+    ],
+    rule: 'entity_server_v3',
+    confidence: 0.8,
+    extraGuard: isLikelyProjectServerContext
+  }
+]
 
 function normalize(text) {
   return String(text || '')
     .toLowerCase()
-    .replace(/ё/g, 'е')
     .replace(/\s+/g, ' ')
     .trim()
 }
 
-function isTechnicalNoiseClause(text) {
-  const source = normalize(text)
-
-  if (!source) return false
-
-  const technicalMarkers = [
-    'regex',
-    'llm',
-    'json',
-    'api',
-    'extractor',
-    'экстрактор',
-    'pipeline',
-    'пайплайн',
-    'mem0',
-    'снапшот',
-    'лог',
-    'логи',
-    'мердж',
-    'debug',
-    'дебаг',
-    'test',
-    'тест'
-  ]
-
-  const hitCount = technicalMarkers.filter((marker) => source.includes(marker)).length
-
-  return (
-    source.length >= 120 &&
-    hitCount >= 2
-  )
+function escapeRegex(text) {
+  return String(text || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
-function allowTechnicalSystemEntity(text, value) {
-  const source = normalize(text)
+function hasBoundedPhrase(text, phrase) {
+  const normalizedPhrase = normalize(phrase)
+  if (!normalizedPhrase) return false
 
-  if (!source) return false
-  if (!source.includes(String(value || '').toLowerCase())) return false
+  const pattern = normalizedPhrase
+    .split(/\s+/)
+    .map(escapeRegex)
+    .join('\\s+')
 
-  if (isTechnicalNoiseClause(source)) {
-    return false
-  }
-
-  if (source.length > 90) {
-    return false
-  }
-
-  return true
+  return new RegExp(
+    `(^|[^а-яёa-z0-9_])${pattern}([^а-яёa-z0-9_]|$)`,
+    'i'
+  ).test(text)
 }
 
 function buildEntityCandidate({
@@ -108,7 +242,7 @@ function buildEntityCandidate({
   return makeCandidate({
     type: 'entity',
     subtype,
-    text: value,
+    text: clause.clauseText || clause.text || '',
     clause,
     context,
     source: {
@@ -116,318 +250,112 @@ function buildEntityCandidate({
       rule
     },
     confidence,
-    dedupeKeyHint: `entity::${subtype}::${value.toLowerCase()}`,
+    certainty: 'medium',
+    dedupeKeyHint: `entity::${subtype}::${normalize(value)}`,
     payload: {
-      name: value,
-      normalizedName: value.toLowerCase(),
-      entityType: subtype
+      entityValue: value
     }
   })
 }
 
-function normalize(text) {
-  return String(text || '')
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim()
+function isSafeEntityClause(text, context, event) {
+  const source = normalize(text)
+
+  if (!source) return false
+  if (event.role !== 'user') return false
+  if (context.isReported) return false
+  if (source.length > 140) return false
+
+  return true
 }
 
-function isFalseEntity(text, lowered, event) {
-  if (event.role !== 'user') return true
-  if (!text) return true
-  if (WHOLE_SENTENCE_GARBAGE_RE.test(lowered)) return true
-  if (ABSTRACT_INFRA_RE.test(lowered)) return true
-  return false
-}
+function isLikelyOwnedVenueContext(text) {
+  const source = normalize(text)
 
-function hasSpecificProjectContext(lowered) {
   return (
-    /экстрактор/i.test(lowered) ||
-    /regex\s+module/i.test(lowered) ||
-    /regex\s+modul/i.test(lowered) ||
-    /regex\s+extractor/i.test(lowered) ||
-    /модул/i.test(lowered) ||
-    /пайплайн/i.test(lowered) ||
-    /pipeline/i.test(lowered) ||
-    /логиру/i.test(lowered) ||
-    /работа(ет|ют|л|ла)/i.test(lowered) ||
-    /добавил/i.test(lowered) ||
-    /собрал/i.test(lowered) ||
-    /создал/i.test(lowered)
+    hasBoundedPhrase(source, 'мой') ||
+    hasBoundedPhrase(source, 'мое') ||
+    hasBoundedPhrase(source, 'моё') ||
+    hasBoundedPhrase(source, 'моя') ||
+    hasBoundedPhrase(source, 'мои') ||
+    hasBoundedPhrase(source, 'у меня') ||
+    hasBoundedPhrase(source, 'в моем') ||
+    hasBoundedPhrase(source, 'в моём') ||
+    hasBoundedPhrase(source, 'в кофейне') ||
+    hasBoundedPhrase(source, 'в ресторане') ||
+    hasBoundedPhrase(source, 'сотрудник') ||
+    hasBoundedPhrase(source, 'смена') ||
+    hasBoundedPhrase(source, 'заказы')
   )
 }
 
-function allowGenericObject(lowered, value) {
-  const normalizedValue = normalize(value)
+function isLikelyProjectServerContext(text) {
+  const source = normalize(text)
 
-  if (normalizedValue === 'сервер') {
-    return /(стоит|поднят|отдельно|на\s+vps|на\s+сервере)/i.test(lowered)
-  }
-
-  if (normalizedValue === 'коробочки') {
-    return /(работа(ют|ет)|собрал|из\s+\d+\s+коробоч)/i.test(lowered)
-  }
-
-  if (normalizedValue === 'биочип') {
-    return true
-  }
-
-  if (normalizedValue === 'стул') {
-    return /(стоит|рядом|возле|на\s+стуле)/i.test(lowered)
-  }
-
-  return false
+  return (
+    hasBoundedPhrase(source, 'проект') ||
+    hasBoundedPhrase(source, 'бот') ||
+    hasBoundedPhrase(source, 'код') ||
+    hasBoundedPhrase(source, 'репо') ||
+    hasBoundedPhrase(source, 'git') ||
+    hasBoundedPhrase(source, 'терминал') ||
+    hasBoundedPhrase(source, 'сервер') ||
+    hasBoundedPhrase(source, 'vps') ||
+    hasBoundedPhrase(source, 'впс') ||
+    hasBoundedPhrase(source, 'лежит') ||
+    hasBoundedPhrase(source, 'развернул') ||
+    hasBoundedPhrase(source, 'поднял')
+  )
 }
 
-function pushIf(results, test, payload) {
-  if (test) results.push(payload)
+function isLikelyRealBrotherContext(text) {
+  const source = normalize(text)
+
+  if (source === 'брат') return false
+  if (/^ну\s+брат[.!?…]?$/i.test(source)) return false
+  if (/^брат[.!?…]?$/i.test(source)) return false
+
+  return (
+    hasBoundedPhrase(source, 'мой брат') ||
+    hasBoundedPhrase(source, 'у брата') ||
+    hasBoundedPhrase(source, 'с братом') ||
+    hasBoundedPhrase(source, 'брату') ||
+    (hasBoundedPhrase(source, 'брат') && (
+      hasBoundedPhrase(source, 'сказал') ||
+      hasBoundedPhrase(source, 'написал') ||
+      hasBoundedPhrase(source, 'позвонил') ||
+      hasBoundedPhrase(source, 'работает') ||
+      hasBoundedPhrase(source, 'живет') ||
+      hasBoundedPhrase(source, 'живёт')
+    ))
+  )
+}
+
+function matchesAny(patterns, text) {
+  return patterns.some((pattern) => pattern.test(text))
 }
 
 function detectOne({ clause, context, event }) {
-  const text = clause.text || clause.clauseText || ''
-  const lowered = normalize(clause.normalizedText || text)
+  const text = clause.clauseText || clause.text || ''
+  const lowered = normalize(text)
   const results = []
 
-  if (isFalseEntity(text, lowered, event)) return results
+  if (!isSafeEntityClause(text, context, event)) return results
 
-  const blockAbstractMemory = ABSTRACT_MEMORY_RE.test(lowered)
+  for (const def of ENTITY_DEFS) {
+    if (!matchesAny(def.patterns, lowered)) continue
+    if (typeof def.extraGuard === 'function' && !def.extraGuard(text)) continue
 
-  if (!blockAbstractMemory) {
-    pushIf(results, ANDREY_RE.test(lowered),
+    results.push(
       buildEntityCandidate({
-        subtype: 'person',
-        value: 'Андрей',
+        subtype: def.subtype,
+        value: def.value,
         clause,
         context,
-        rule: 'entity_andrey_v3',
-        confidence: 0.9
-      }))
-
-    pushIf(results, HUTAO_RE_1.test(lowered) || HUTAO_RE_2.test(lowered),
-      buildEntityCandidate({
-        subtype: 'person',
-        value: 'Ху Тао',
-        clause,
-        context,
-        rule: 'entity_hutao_v3',
-        confidence: 0.9
-      }))
-  }
-
-  pushIf(results, REGEX_EXTRACTOR_RE.test(lowered),
-    buildEntityCandidate({
-      subtype: 'project',
-      value: 'regex extractor',
-      clause,
-      context,
-      rule: 'entity_regex_extractor_v3',
-      confidence: 0.9
-    }))
-
-  pushIf(results, LLM_EXTRACTOR_RE.test(lowered),
-    buildEntityCandidate({
-      subtype: 'project',
-      value: 'llm extractor',
-      clause,
-      context,
-      rule: 'entity_llm_extractor_v2',
-      confidence: 0.88
-    }))
-
-  pushIf(results, ENTITY_EXTRACTOR_RE.test(lowered),
-    buildEntityCandidate({
-      subtype: 'project',
-      value: 'entity extractor',
-      clause,
-      context,
-      rule: 'entity_entity_extractor_v2',
-      confidence: 0.88
-    }))
-
-  pushIf(results, FACT_EXTRACTOR_RE.test(lowered),
-    buildEntityCandidate({
-      subtype: 'project',
-      value: 'fact extractor',
-      clause,
-      context,
-      rule: 'entity_fact_extractor_v2',
-      confidence: 0.88
-    }))
-
-  pushIf(results, EPISODIC_EXTRACTOR_RE.test(lowered),
-    buildEntityCandidate({
-      subtype: 'project',
-      value: 'episodic extractor',
-      clause,
-      context,
-      rule: 'entity_episodic_extractor_v2',
-      confidence: 0.88
-    }))
-
-  pushIf(results, OPEN_LOOPS_RE.test(lowered),
-    buildEntityCandidate({
-      subtype: 'project',
-      value: 'open loops',
-      clause,
-      context,
-      rule: 'entity_open_loops_v2',
-      confidence: 0.82
-    }))
-
-  pushIf(results, PIPELINE_RE.test(lowered),
-    buildEntityCandidate({
-      subtype: 'project',
-      value: 'pipeline',
-      clause,
-      context,
-      rule: 'entity_pipeline_v2',
-      confidence: 0.8
-    }))
-
-  pushIf(results, LIFE_ENGINE_RE.test(lowered),
-    buildEntityCandidate({
-      subtype: 'project',
-      value: 'движок жизни',
-      clause,
-      context,
-      rule: 'entity_life_engine_v2',
-      confidence: 0.84
-    }))
-
-  if (hasSpecificProjectContext(lowered)) {
-    pushIf(results, CHATGPT_RE.test(lowered) && allowTechnicalSystemEntity(text, 'chatgpt'),
-      buildEntityCandidate({
-        subtype: 'system',
-        value: 'chatgpt',
-        clause,
-        context,
-        rule: 'entity_chatgpt_v3',
-        confidence: 0.78
-      }))
-
-    pushIf(results, VPS_RE.test(lowered) && allowTechnicalSystemEntity(text, 'vps'),
-      buildEntityCandidate({
-        subtype: 'system',
-        value: 'vps',
-        clause,
-        context,
-        rule: 'entity_vps_v3',
-        confidence: 0.78
-      }))
-
-    pushIf(results, TELEGRAM_RE.test(lowered) && allowTechnicalSystemEntity(text, 'telegram'),
-      buildEntityCandidate({
-        subtype: 'system',
-        value: 'telegram',
-        clause,
-        context,
-        rule: 'entity_telegram_v3',
-        confidence: 0.78
-      }))
-
-    pushIf(results, LLM_RE.test(lowered) && allowTechnicalSystemEntity(text, 'llm'),
-      buildEntityCandidate({
-        subtype: 'system',
-        value: 'llm',
-        clause,
-        context,
-        rule: 'entity_llm_v3',
-        confidence: 0.76
-      }))
-
-    pushIf(results, REGEX_RE.test(lowered) && allowTechnicalSystemEntity(text, 'regex'),
-      buildEntityCandidate({
-        subtype: 'system',
-        value: 'regex',
-        clause,
-        context,
-        rule: 'entity_regex_v3',
-        confidence: 0.76
-      }))
-
-    pushIf(results, JSON_RE.test(lowered) && allowTechnicalSystemEntity(text, 'json'),
-      buildEntityCandidate({
-        subtype: 'system',
-        value: 'json',
-        clause,
-        context,
-        rule: 'entity_json_v3',
-        confidence: 0.76
-      }))
-
-    pushIf(results, API_RE.test(lowered) && allowTechnicalSystemEntity(text, 'api'),
-      buildEntityCandidate({
-        subtype: 'system',
-        value: 'api',
-        clause,
-        context,
-        rule: 'entity_api_v3',
-        confidence: 0.76
-      }))
-
-    pushIf(results, SNAPSHOT_RE.test(lowered) && allowTechnicalSystemEntity(text, 'снапшот'),
-      buildEntityCandidate({
-        subtype: 'system',
-        value: 'снапшот',
-        clause,
-        context,
-        rule: 'entity_snapshot_v1',
-        confidence: 0.72
-      }))
-
-    pushIf(results, MEM0_RE.test(lowered) && allowTechnicalSystemEntity(text, 'mem0'),
-      buildEntityCandidate({
-        subtype: 'system',
-        value: 'mem0',
-        clause,
-        context,
-        rule: 'entity_mem0_v1',
-        confidence: 0.74
-      }))
-  }
-
-  if (allowGenericObject(lowered, 'биочип') && BIOCHIP_RE.test(lowered)) {
-    results.push(buildEntityCandidate({
-      subtype: 'object',
-      value: 'биочип',
-      clause,
-      context,
-      rule: 'entity_biochip_v2',
-      confidence: 0.84
-    }))
-  }
-
-  if (allowGenericObject(lowered, 'стул') && CHAIR_RE.test(lowered)) {
-    results.push(buildEntityCandidate({
-      subtype: 'object',
-      value: 'стул',
-      clause,
-      context,
-      rule: 'entity_chair_v2',
-      confidence: 0.74
-    }))
-  }
-
-  if (allowGenericObject(lowered, 'коробочки') && BOXES_RE.test(lowered)) {
-    results.push(buildEntityCandidate({
-      subtype: 'object',
-      value: 'коробочки',
-      clause,
-      context,
-      rule: 'entity_boxes_v2',
-      confidence: 0.78
-    }))
-  }
-
-  if (allowGenericObject(lowered, 'сервер') && SERVER_RE.test(lowered)) {
-    results.push(buildEntityCandidate({
-      subtype: 'object',
-      value: 'сервер',
-      clause,
-      context,
-      rule: 'entity_server_v2',
-      confidence: 0.8
-    }))
+        rule: def.rule,
+        confidence: def.confidence
+      })
+    )
   }
 
   return results
@@ -436,7 +364,8 @@ function detectOne({ clause, context, event }) {
 async function detect({ clauses, event }) {
   return runRuleList({
     clauses,
-    detectOne: (entry) => detectOne({ ...entry, event })
+    detectorName: 'entity',
+    detectOne: (payload) => detectOne({ ...payload, event })
   })
 }
 

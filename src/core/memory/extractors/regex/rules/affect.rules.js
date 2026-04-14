@@ -44,27 +44,6 @@ function detectEmotion(text) {
 
   if (
     includesAny(source, [
-      'люблю',
-      'дорога',
-      'дорогой',
-      'безумно дорога',
-      'трепетно',
-      'нежно',
-      'нежность',
-      'согревает',
-      'греет',
-      'тепло',
-      'в груди тепло',
-      'хочется обнять',
-      'обнять и посидеть',
-      'мне нужна ты'
-    ])
-  ) {
-    return 'affection'
-  }
-
-  if (
-    includesAny(source, [
       'мне страшно',
       'мне тревожно',
       'боюсь',
@@ -219,7 +198,7 @@ function detectEmotion(text) {
 }
 
 function polarityForEmotion(emotion) {
-  if (['affection', 'joy', 'relief'].includes(emotion)) return 'positive'
+  if (['joy', 'relief'].includes(emotion)) return 'positive'
   if (['fear', 'sadness', 'anger', 'embarrassment', 'fatigue', 'tension'].includes(emotion)) return 'negative'
   return null
 }
@@ -290,15 +269,17 @@ function detectOne({ clause, context }) {
   const text = clause.clauseText
   const unitText = clause.text || clause.clauseText || ''
   const results = []
+  const normalizedUnit = normalizeForMatch(unitText)
 
   if (!text || isFalseAffect(unitText)) return results
+  if (!normalizedUnit) return results
 
   const emotion = detectEmotion(unitText)
   if (!emotion) return results
 
   if (
     emotion === 'tension' &&
-    /не\s+(пережива(ешь|ет|ю|ем|ете)|волну(ешься|ется|юсь|емся|етесь))/.test(normalizeForMatch(unitText))
+    /не\s+(пережива(ешь|ет|ю|ем|ете)|волну(ешься|ется|юсь|емся|етесь))/.test(normalizedUnit)
   ) {
     return results
   }
@@ -311,7 +292,6 @@ function detectOne({ clause, context }) {
       context,
       rule: ruleNameForEmotion(emotion),
       confidence:
-        emotion === 'affection' ? 0.88 :
         emotion === 'fear' ? 0.9 :
         emotion === 'sadness' ? 0.86 :
         emotion === 'fatigue' ? 0.84 :
