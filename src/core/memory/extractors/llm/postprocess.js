@@ -44,51 +44,6 @@ const SELF_DIRECTED_IDS = new Set([
   'self_regulation_task'
 ])
 
-const MEDICAL_FRAGMENTS = [
-  'medical',
-  'health',
-  'symptom',
-  'treatment',
-  'diagnos',
-  'veterinar',
-  'recovery',
-  'illness'
-]
-
-const WORKFLOW_FRAGMENTS = [
-  'workflow',
-  'pipeline',
-  'extractor',
-  'debug',
-  'prompt',
-  'patch',
-  'model',
-  'snapshot',
-  'mem0',
-  'repo'
-]
-
-const WORKFLOW_TEXT_TERMS = [
-  'extractor',
-  'экстрактор',
-  'mem0',
-  'snapshot',
-  'prompt',
-  'промпт',
-  'pipeline',
-  'пайплайн',
-  'patch',
-  'патч',
-  'logs',
-  'log',
-  'логи',
-  'лог',
-  'model',
-  'модель',
-  'debug',
-  'дебаг'
-]
-
 function safeArray(value) {
   return Array.isArray(value) ? value : []
 }
@@ -100,12 +55,6 @@ function normalizeInlineText(value) {
     .replace(/[ \t]+/g, ' ')
     .replace(/\n+/g, ' ')
     .trim()
-}
-
-function normalizeLowerText(value) {
-  return normalizeInlineText(value)
-    .toLowerCase()
-    .replace(/ё/g, 'е')
 }
 
 function cloneRef(ref) {
@@ -166,6 +115,24 @@ function cloneCandidate(candidate) {
   }
 }
 
+function safeFlags(candidate) {
+  const flags = Array.isArray(candidate?.flags) ? candidate.flags : []
+  return Array.from(new Set(
+    flags
+      .map((item) => String(item || '').trim())
+      .filter(Boolean)
+  ))
+}
+
+function withFlag(candidate, flag) {
+  const next = cloneCandidate(candidate)
+  next.flags = Array.from(new Set([
+    ...safeFlags(next),
+    String(flag || '').trim()
+  ].filter(Boolean)))
+  return next
+}
+
 function sanitizeSchemaId(value) {
   const normalized = String(value || '').trim().toLowerCase()
   return SCHEMA_ID_RE.test(normalized) ? normalized : null
@@ -197,6 +164,17 @@ function sanitizeModelName(value, fallback = null) {
   return MODEL_NAME_RE.test(normalized) ? normalized : fallback
 }
 
+function isSuspiciousSemanticTag(tag) {
+  const value = sanitizeSchemaId(tag)
+  if (!value) return true
+
+  if (!value.includes('_') && value.length > 6) {
+    return true
+  }
+
+  return false
+}
+
 function sanitizeSemantic(candidate) {
   const next = cloneCandidate(candidate)
 
@@ -204,11 +182,23 @@ function sanitizeSemantic(candidate) {
   next.semantic.subclass = sanitizeSchemaId(next.semantic.subclass)
   next.semantic.key = sanitizeSemanticKey(next.semantic.key)
   next.semantic.category = sanitizeSchemaId(next.semantic.category)
+
+  const rawTags = safeArray(next.semantic.tags)
+  const hadInvalidTags = rawTags.some((item) => sanitizeSchemaId(item) == null)
+
   next.semantic.tags = Array.from(new Set(
-    safeArray(next.semantic.tags)
+    rawTags
       .map((item) => sanitizeSchemaId(item))
       .filter(Boolean)
+      .filter((item) => !isSuspiciousSemanticTag(item))
   )).slice(0, 5)
+
+  if (hadInvalidTags || next.semantic.tags.length !== rawTags.length) {
+    next.flags = Array.from(new Set([
+      ...safeFlags(next),
+      'invalid_semantic_tags'
+    ]))
+  }
 
   return next.semantic.class ? next : null
 }
@@ -225,6 +215,16 @@ function sanitizeSchema(candidate, packet) {
       : String(packet?.meta?.promptVersion || 'llm_memory_candidates_v1')
   next.source.extractor = 'llm'
 
+  if (
+    String(candidate?.source?.model || '').trim() &&
+    next.source.model == null
+  ) {
+    next.flags = Array.from(new Set([
+      ...safeFlags(next),
+      'broken_source_model'
+    ]))
+  }
+
   return next.kind ? next : null
 }
 
@@ -239,33 +239,58 @@ function collectSemanticIds(candidate) {
     .filter(Boolean)
 }
 
-function hasSemanticId(candidate, allowed) {
-  return collectSemanticIds(candidate).some((item) => allowed.has(item))
+function hasInvalidSemanticTags(candidate) {
+  const rawTags = safeArray(candidate?.semantic?.tags)
+  if (!rawTags.length) return false
+
+  return rawTags.some((item) => {
+    const value = String(item || '').trim()
+    return !value || sanitizeSchemaId(value) == null || isSuspiciousSemanticTag(value)
+  })
 }
 
-function hasSemanticFragment(candidate, fragments) {
-  return collectSemanticIds(candidate).some((item) =>
-    fragments.some((fragment) => item.includes(fragment))
-  )
+function hasWeakReferenceGrounding(candidate) {
+  const subject = candidate?.references?.subject
+  const object = candidate?.references?.object
+  const about = safeArray(candidate?.references?.about)
+
+  const weakSubject =
+    !subject?.ref ||
+    subject?.role === 'unknown' ||
+    subject?.confidence === 0
+
+  const weakObject =
+    !object?.ref ||
+    object?.role === 'unknown' ||
+    object?.confidence === 0
+
+  const noAbout = about.length === 0
+
+  return weakSubject && weakObject && noAbout
 }
 
-function countWorkflowTextHits(text) {
-  const source = normalizeLowerText(text)
-  if (!source) return 0
+function hasTypeSemanticMismatch(candidate) {
+  const semanticClass = sanitizeSchemaId(candidate?.semantic?.class)
+  if (!semanticClass) return false
 
-  return WORKFLOW_TEXT_TERMS.reduce(
-    (count, term) => count + (source.includes(term) ? 1 : 0),
-    0
-  )
-}
-
-function isTechnicalWorkflowCandidate(candidate) {
-  if (hasSemanticFragment(candidate, WORKFLOW_FRAGMENTS)) {
+  if (candidate?.kind === 'relationship' && INTERNAL_STATE_IDS.has(semanticClass)) {
     return true
   }
 
-  const textHits = countWorkflowTextHits(candidate?.text)
-  return textHits >= 2 || /(^|\s)(mem0|snapshot|pipeline)(\s|$)/i.test(String(candidate?.text || ''))
+  if (
+    (candidate?.kind === 'goal' ||
+      candidate?.kind === 'commitment' ||
+      candidate?.kind === 'instruction') &&
+    INTERNAL_STATE_IDS.has(semanticClass)
+  ) {
+    return true
+  }
+
+  return false
+}
+
+function hasSemanticId(candidate, allowed) {
+  return collectSemanticIds(candidate).some((item) => allowed.has(item))
 }
 
 function isInternalStateCandidate(candidate) {
@@ -281,16 +306,20 @@ function isSelfDirectedTaskCandidate(candidate) {
 
 function remapKind(candidate) {
   const next = cloneCandidate(candidate)
+  const semanticClass = sanitizeSchemaId(next?.semantic?.class)
 
-  if (next.kind === 'relationship' && isInternalStateCandidate(next)) {
+  if (next.kind === 'relationship' && semanticClass && INTERNAL_STATE_IDS.has(semanticClass)) {
     next.kind = 'fact'
-  } else if (next.kind === 'instruction' && isSelfDirectedTaskCandidate(next)) {
-    next.kind = 'fact'
-  } else if (
-    (next.kind === 'goal' || next.kind === 'commitment') &&
-    isInternalStateCandidate(next)
+    return next
+  }
+
+  if (
+    (next.kind === 'goal' || next.kind === 'commitment' || next.kind === 'instruction') &&
+    semanticClass &&
+    INTERNAL_STATE_IDS.has(semanticClass)
   ) {
     next.kind = 'fact'
+    return next
   }
 
   return next
@@ -316,50 +345,6 @@ function dedupeRefs(refs) {
   return result
 }
 
-function isGarfieldRef(ref) {
-  const refValue = normalizeLowerText(ref?.ref)
-  const labelValue = normalizeLowerText(ref?.label)
-
-  return (
-    refValue.includes('garfield') ||
-    refValue.includes('гарфилд') ||
-    labelValue.includes('garfield') ||
-    labelValue.includes('гарфилд')
-  )
-}
-
-function hasGarfieldMedicalFallback(text) {
-  const source = normalizeLowerText(text)
-
-  return (
-    (source.includes('гарфилд') || source.includes('garfield')) &&
-    (
-      source.includes('ветеринар') ||
-      source.includes('ветклиник') ||
-      source.includes('лечение') ||
-      source.includes('диагноз')
-    )
-  )
-}
-
-function findGarfieldRef(references) {
-  const pool = [
-    references?.subject,
-    references?.object,
-    ...safeArray(references?.about)
-  ]
-
-  const hit = pool.find((ref) => isGarfieldRef(ref))
-  return hit ? cloneRef(hit) : null
-}
-
-function isGarfieldMedicalCandidate(candidate) {
-  return (
-    hasSemanticFragment(candidate, MEDICAL_FRAGMENTS) &&
-    Boolean(findGarfieldRef(candidate?.references))
-  ) || hasGarfieldMedicalFallback(candidate?.text)
-}
-
 function repairReferences(candidate) {
   const next = cloneCandidate(candidate)
 
@@ -371,32 +356,18 @@ function repairReferences(candidate) {
     safeArray(next.references.about).filter((item) => !sameRef(item, next.references.subject))
   )
 
-  if (!isGarfieldMedicalCandidate(next)) {
-    return next
-  }
-
-  const garfieldRef = findGarfieldRef(next.references)
-  if (!garfieldRef) {
-    return next
-  }
-
   if (
-    next.references.subject?.role === 'core_character' ||
-    next.references.subject?.ref === 'core_character:active' ||
-    next.references.subject?.role === 'unknown'
-  ) {
-    next.references.subject = garfieldRef
-  }
-
-  if (
-    next.kind !== 'relationship' &&
-    (
-      next.references.object?.role === 'core_character' ||
-      next.references.object?.ref === 'core_character:active' ||
-      sameRef(next.references.object, garfieldRef)
-    )
+    next.references.object?.ref === 'core_character:active' &&
+    next.references.object?.role === 'unknown'
   ) {
     next.references.object = blankRef()
+  }
+
+  if (
+    next.references.subject?.ref === 'core_character:active' &&
+    next.references.subject?.role === 'unknown'
+  ) {
+    next.references.subject = blankRef()
   }
 
   next.references.about = dedupeRefs(
@@ -426,10 +397,6 @@ function isTemporarySelfDirectedInstruction(candidate) {
 }
 
 function applyNoiseGate(candidate) {
-  if (isTechnicalWorkflowCandidate(candidate)) {
-    return true
-  }
-
   if (isTemporarySelfDirectedInstruction(candidate)) {
     return true
   }
@@ -460,6 +427,24 @@ function refsChanged(before, after) {
   )
 }
 
+function flagCandidate(candidate) {
+  let next = cloneCandidate(candidate)
+
+  if (hasInvalidSemanticTags(candidate)) {
+    next = withFlag(next, 'invalid_semantic_tags')
+  }
+
+  if (hasWeakReferenceGrounding(candidate)) {
+    next = withFlag(next, 'weak_reference_grounding')
+  }
+
+  if (hasTypeSemanticMismatch(candidate)) {
+    next = withFlag(next, 'type_semantic_mismatch')
+  }
+
+  return next
+}
+
 function postprocessLlmCandidates(packet) {
   const source = packet && typeof packet === 'object' ? packet : {}
   const candidates = safeArray(source.candidates)
@@ -469,7 +454,8 @@ function postprocessLlmCandidates(packet) {
     outputCandidates: 0,
     droppedCandidates: 0,
     remappedCandidates: 0,
-    repairedCandidates: 0
+    repairedCandidates: 0,
+    flaggedCandidates: 0
   }
 
   const nextCandidates = []
@@ -487,6 +473,11 @@ function postprocessLlmCandidates(packet) {
     if (!next) {
       stats.droppedCandidates += 1
       continue
+    }
+
+    next = flagCandidate(next)
+    if (safeFlags(next).length > 0) {
+      stats.flaggedCandidates += 1
     }
 
     const repaired = repairReferences(next)
@@ -527,5 +518,7 @@ module.exports = {
   repairReferences,
   remapKind,
   applyNoiseGate,
-  sanitizeSemanticKey
+  sanitizeSemanticKey,
+  flagCandidate,
+  withFlag
 }

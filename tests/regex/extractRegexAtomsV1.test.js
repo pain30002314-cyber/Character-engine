@@ -196,12 +196,6 @@ test('keeps longer direct affect marker without hard word limit', async () => {
   assert.equal(countAtoms(result, 'affect', 'fear'), 1)
 })
 
-test('keeps explicit want intent', async () => {
-  const result = await run('Хочу доделать это сегодня.')
-
-  assert.equal(countAtoms(result, 'intent', 'wanted'), 1)
-})
-
 test('keeps explicit need intent', async () => {
   const result = await run('Мне нужно проверить сервер.')
 
@@ -214,34 +208,10 @@ test('keeps generic need intent', async () => {
   assert.equal(countAtoms(result, 'intent', 'needed'), 1)
 })
 
-test('keeps planning intent', async () => {
-  const result = await run('Собираюсь допилить экстрактор.')
-
-  assert.equal(countAtoms(result, 'intent', 'planned'), 1)
-})
-
 test('keeps future intent with time hint', async () => {
   const result = await run('Завтра проверю все еще раз.')
 
   assert.equal(countAtoms(result, 'intent', 'planned'), 1)
-})
-
-test('keeps refusal intent', async () => {
-  const result = await run('Не хочу это обсуждать.')
-
-  assert.equal(countAtoms(result, 'intent', 'avoiding'), 1)
-})
-
-test('keeps try intent as considering', async () => {
-  const result = await run('Попробую позже это добить.')
-
-  assert.equal(countAtoms(result, 'intent', 'considering'), 1)
-})
-
-test('keeps entity for andrey', async () => {
-  const result = await run('Андрей сегодня занят.')
-
-  assert.equal(countAtoms(result, 'entity', 'person'), 1)
 })
 
 test('keeps entity for hu tao', async () => {

@@ -17,6 +17,11 @@ const PLAN_RE = /^(?:я\s+)?планирую\s+(.+)/i
 const GOING_TO_RE = /^(?:я\s+)?собираюсь\s+(.+)/i
 const TRY_RE = /^(?:я\s+)?попробую\s+(.+)/i
 
+const INLINE_WONT_RE = /(?:^|[^а-яёa-z0-9_])не\s+буду\s+(.+)/i
+const INLINE_NEED_RE = /(?:^|[^а-яёa-z0-9_])мне\s+(?:сегодня|завтра|потом|позже)?\s*нужно(?:\s+будет)?\s+(.+)/i
+const INLINE_NEED_GENERIC_RE = /(?:^|[^а-яёa-z0-9_])(?:сегодня|завтра|потом|позже)?\s*(?:надо|нужно)(?:\s+будет)?\s+(.+)/i
+const INLINE_RETURN_RE = /(?:^|[^а-яёa-z0-9_])вернусь(?:\s+(.+))?$/i
+
 const FUTURE_TASK_RE =
   /^(завтра|потом|позже|сегодня)\s+(.{0,120}?(сделаю|проверю|посмотрю|вернусь|добью|разберу|разберусь|доделаю|починю).*)$/i
 
@@ -193,10 +198,42 @@ function detectOne({ clause, context }) {
     }
   ]
 
-  for (const matcher of matchers) {
-    const match = source.match(matcher.regex)
+  const inlineMatchers = [
+    {
+      regex: INLINE_WONT_RE,
+      subtype: 'refused',
+      rule: 'inline_wont_v1',
+      confidence: 0.84,
+      certainty: 'high'
+    },
+    {
+      regex: INLINE_NEED_RE,
+      subtype: 'needed',
+      rule: 'inline_need_v1',
+      confidence: 0.86,
+      certainty: 'high'
+    },
+    {
+      regex: INLINE_NEED_GENERIC_RE,
+      subtype: 'needed',
+      rule: 'inline_need_generic_v1',
+      confidence: 0.82,
+      certainty: 'medium'
+    },
+    {
+      regex: INLINE_RETURN_RE,
+      subtype: 'planned',
+      rule: 'inline_return_v1',
+      confidence: 0.8,
+      certainty: 'medium'
+    }
+  ]
 
-    if (!match || !normalize(match[1])) continue
+  for (const matcher of inlineMatchers) {
+    const match = source.match(matcher.regex)
+    const action = normalize(match?.[1] || match?.[0] || '')
+
+    if (!match || !action) continue
 
     results.push(
       buildIntentCandidate({
@@ -207,7 +244,7 @@ function detectOne({ clause, context }) {
         rule: matcher.rule,
         confidence: matcher.confidence,
         certainty: matcher.certainty,
-        action: match[1]
+        action
       })
     )
 

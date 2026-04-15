@@ -143,6 +143,25 @@ function isConditionalQuestion(text) {
   )
 }
 
+function isQuotedOrReportedQuestion(text, context) {
+  const source = normalize(text)
+
+  if (!source) return false
+  if (context?.isReported) return true
+  if (context?.isQuoted) return true
+
+  if (/^[«"].+\?[»"]?$/i.test(source)) return true
+
+  if (
+    /[«"].+\?[»"]?/i.test(source) &&
+    /(спросил|спросила|спросили|спрашивал|спрашивала|спрашивали|сказал|сказала|сказали|врач|доктор)/i.test(source)
+  ) {
+    return true
+  }
+
+  return false
+}
+
 function shouldCreateDirectQuestion(text, context) {
   const source = normalize(text)
 
@@ -151,6 +170,7 @@ function shouldCreateDirectQuestion(text, context) {
   if (context?.isConditional) return false
   if (context?.isHypothetical) return false
   if (context?.isReported) return false
+  if (isQuotedOrReportedQuestion(source, context)) return false
   if (!source.endsWith('?')) return false
 
   const startsLikeQuestion =
@@ -196,7 +216,8 @@ function detectOne({ clause, context }) {
     questionCore &&
     !isConditionalRhetorical &&
     !isFalsePositiveQuestionCore(questionCore, context) &&
-    !isTailGarbageQuestion
+    !isTailGarbageQuestion &&
+    !isQuotedOrReportedQuestion(questionCore, context)
   ) {
     results.push(
       buildOpenLoopCandidate({
