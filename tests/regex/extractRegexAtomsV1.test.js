@@ -286,3 +286,51 @@ test('does not emit temporal anchors under narrowed contract', async () => {
   assert.equal(result.signals.temporalAnchors.length, 0)
   assert.equal(countAtoms(result, 'temporal'), 0)
 })
+
+test('keeps chatgpt mention as memory lookup entity trigger', async () => {
+  const result = await run('Это один чат гпт, который читает лог нашего разговора и помогает писать код.')
+
+  assert.equal(countAtoms(result, 'entity', 'system'), 1)
+})
+
+test('keeps explicit promise as commitment lookup trigger', async () => {
+  const result = await run('И я обещаю, что буду ее развивать и не забрасывать.')
+
+  assert.equal(countAtoms(result, 'intent', 'commitment'), 1)
+})
+
+test('keeps promise continuation as commitment lookup trigger', async () => {
+  const result = await run('Я не отказываюсь от этого обещания.')
+
+  assert.equal(countAtoms(result, 'intent', 'commitment'), 1)
+})
+
+test('keeps explicit refusal lookup trigger', async () => {
+  const result = await run('Гуглить не буду.')
+
+  assert.equal(countAtoms(result, 'intent', 'refused'), 1)
+})
+
+test('keeps tomorrow need as lookup trigger', async () => {
+  const result = await run('Мне завтра нужно будет в другой город ехать.')
+
+  assert.equal(countAtoms(result, 'intent', 'needed'), 1)
+})
+
+test('does not keep quoted reported medical question as direct lookup trigger', async () => {
+  const result = await run('Я спросил у врача: «вообще какие шансы вылечиться?»')
+
+  assert.equal(countAtoms(result, 'open_loop', 'direct_question'), 0)
+})
+
+test('does not keep quoted person mention as lookup entity trigger', async () => {
+  const result = await run('Это было сказано не как "Андрей", а как роль внутри примера.')
+
+  assert.equal(countAtoms(result, 'entity'), 0)
+})
+
+test('does not force lookup trigger from long unique medical update without memory key', async () => {
+  const result = await run('Поставили катетер, сделали капельницу, взяли анализы, теперь ждем, как он отреагирует на лечение.')
+
+  assert.equal(result.atoms.length, 0)
+})

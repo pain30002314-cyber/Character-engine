@@ -179,7 +179,9 @@ const ENTITY_DEFS = [
     subtype: 'project',
     value: 'Мостик',
     patterns: [
-      /(^|[^а-яёa-z0-9_])мостик([^а-яёa-z0-9_]|$)/i
+      /(^|[^а-яёa-z0-9_])мостик([^а-яёa-z0-9_]|$)/i,
+      /(^|[^а-яёa-z0-9_])мостика([^а-яёa-z0-9_]|$)/i,
+      /(^|[^а-яёa-z0-9_])мостику([^а-яёa-z0-9_]|$)/i
     ],
     rule: 'entity_mostik_v1',
     confidence: 0.86
@@ -189,9 +191,9 @@ const ENTITY_DEFS = [
     value: 'chatgpt',
     patterns: [
       /(^|[^а-яёa-z0-9_])chatgpt([^а-яёa-z0-9_]|$)/i,
-      /chat\s+gpt/i,
-      /чат\s*гпт/i,
-      /чатгпт/i
+      /(^|[^а-яёa-z0-9_])chat\s*gpt([^а-яёa-z0-9_]|$)/i,
+      /(^|[^а-яёa-z0-9_])чат\s*гпт([^а-яёa-z0-9_]|$)/i,
+      /(^|[^а-яёa-z0-9_])чатгпт([^а-яёa-z0-9_]|$)/i
     ],
     rule: 'entity_chatgpt_v4',
     confidence: 0.84

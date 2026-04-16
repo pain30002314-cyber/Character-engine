@@ -22,6 +22,15 @@ const INLINE_NEED_RE = /(?:^|[^а-яёa-z0-9_])мне\s+(?:сегодня|зав
 const INLINE_NEED_GENERIC_RE = /(?:^|[^а-яёa-z0-9_])(?:сегодня|завтра|потом|позже)?\s*(?:надо|нужно)(?:\s+будет)?\s+(.+)/i
 const INLINE_RETURN_RE = /(?:^|[^а-яёa-z0-9_])вернусь(?:\s+(.+))?$/i
 
+const PROMISE_RE = /(?:^|[^а-яёa-z0-9_])я\s+обещаю,\s*что\s+(.+)/i
+const KEEP_PROMISE_RE = /(?:^|[^а-яёa-z0-9_])не\s+отказываюсь\s+от\s+(?:этого\s+)?обещани(?:я|й)\b/i
+const WE_WILL_RE = /(?:^|[^а-яёa-z0-9_])(?:мы\s+)?(.+?)\s+будем\s+(.+)/i
+const SHOULD_SEND_RE = /(?:^|[^а-яёa-z0-9_])(сегодня|завтра|сегодня-завтра|потом|позже)?\s*должны\s+(?:мне\s+)?(скинуть|прислать|отправить|дать)\s+(.+)/i
+
+const PROMISE_RE = /(?:^|[^а-яёa-z0-9_])я\s+обещаю(?:,\s*что)?\s+(.+)/i
+const KEEP_PROMISE_RE = /(?:^|[^а-яёa-z0-9_])не\s+отказываюсь\s+от\s+(?:этого\s+)?обещани(?:я|й)(?:\s|$)/i
+const INLINE_WONT_RE = /(?:^|[^а-яёa-z0-9_])(.+?)?\bне\s+буду\s+(.+)/i
+
 const FUTURE_TASK_RE =
   /^(завтра|потом|позже|сегодня)\s+(.{0,120}?(сделаю|проверю|посмотрю|вернусь|добью|разберу|разберусь|доделаю|починю).*)$/i
 
@@ -247,6 +256,78 @@ function detectOne({ clause, context }) {
         action
       })
     )
+
+      const lookupMatchers = [
+    {
+      regex: PROMISE_RE,
+      subtype: 'commitment',
+      rule: 'promise_v1',
+      confidence: 0.9,
+      certainty: 'high',
+      getAction: (match) => match[1]
+    },
+    {
+      regex: KEEP_PROMISE_RE,
+      subtype: 'commitment',
+      rule: 'promise_keep_v1',
+      confidence: 0.88,
+      certainty: 'high',
+      getAction: () => 'не отказываюсь от обещания'
+    },
+    {
+      regex: SHOULD_SEND_RE,
+      subtype: 'planned',
+      rule: 'should_send_v1',
+      confidence: 0.86,
+      certainty: 'high',
+      getAction: (match) => `${match[2]} ${match[3]}`.trim()
+    }
+  ]
+
+  for (const matcher of lookupMatchers) {
+    const match = source.match(matcher.regex)
+    if (!match) continue
+
+    const action = normalize(matcher.getAction(match))
+    if (!action) continue
+
+    results.push(
+      buildIntentCandidate({
+        subtype: matcher.subtype,
+        text: source,
+        clause,
+        context,
+        rule: matcher.rule,
+        confidence: matcher.confidence,
+        certainty: matcher.certainty,
+        action
+      })
+    )
+
+    return results
+  }
+
+    const willMatch = source.match(WE_WILL_RE)
+
+  if (
+    willMatch &&
+    /(?:делать|строить|ремонтировать|запускать|собирать|доделывать|чинить|проверять|смотреть)/i.test(source)
+  ) {
+    results.push(
+      buildIntentCandidate({
+        subtype: 'planned',
+        text: source,
+        clause,
+        context,
+        rule: 'we_will_v1',
+        confidence: 0.82,
+        certainty: 'medium',
+        action: normalize(source)
+      })
+    )
+
+    return results
+  }
 
     return results
   }
