@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-04-17T10:51:11.530Z",
+  "timestamp": "2026-04-17T16:28:37.203Z",
   "channel": "reply",
   "model": "deepseek/deepseek-v3.2-20251201",
   "usage": {
-    "prompt_tokens": 3182,
-    "completion_tokens": 69,
-    "total_tokens": 3251,
-    "cost": 0.000883558,
+    "prompt_tokens": 3599,
+    "completion_tokens": 196,
+    "total_tokens": 3795,
+    "cost": 0.001046531,
     "is_byok": false,
     "prompt_tokens_details": {
       "cached_tokens": 0,
@@ -15,9 +15,9 @@
       "video_tokens": 0
     },
     "cost_details": {
-      "upstream_inference_cost": 0.000883558,
-      "upstream_inference_prompt_cost": 0.000855958,
-      "upstream_inference_completions_cost": 0.0000276
+      "upstream_inference_cost": 0.001046531,
+      "upstream_inference_prompt_cost": 0.000968131,
+      "upstream_inference_completions_cost": 0.0000784
     },
     "completion_tokens_details": {
       "reasoning_tokens": 0,
@@ -26,921 +26,24 @@
     }
   },
   "cost": {
-    "promptTokens": 3182,
-    "completionTokens": 69,
-    "totalTokens": 3251,
-    "inputCost": 0.001591,
-    "outputCost": 0.0001035,
-    "totalCost": 0.0016945
-  }
-}
----
-{
-  "timestamp": "2026-04-17T10:54:34.259Z",
-  "channel": "reply",
-  "model": "deepseek/deepseek-v3.2-20251201",
-  "usage": {
-    "prompt_tokens": 3191,
-    "completion_tokens": 128,
-    "total_tokens": 3319,
-    "cost": 0.00086998,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 64,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00086998,
-      "upstream_inference_prompt_cost": 0.00082134,
-      "upstream_inference_completions_cost": 0.00004864
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": {
-    "promptTokens": 3191,
-    "completionTokens": 128,
-    "totalTokens": 3319,
-    "inputCost": 0.0015955,
-    "outputCost": 0.000192,
-    "totalCost": 0.0017875
-  }
-}
----
-{
-  "timestamp": "2026-04-17T10:54:59.058Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
-  "usage": {
-    "prompt_tokens": 4686,
-    "completion_tokens": 2269,
-    "total_tokens": 6955,
-    "cost": 0.00377345,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00377345,
-      "upstream_inference_prompt_cost": 0.0009372,
-      "upstream_inference_completions_cost": 0.00283625
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": null
-}
----
-{
-  "timestamp": "2026-04-17T10:54:59.151Z",
-  "channel": "memory_raw_error",
-  "model": "openai/gpt-5.4-nano",
-  "status": 400,
-  "errorMessage": "Request failed with status code 400",
-  "errorData": {
-    "error": {
-      "message": "Input must have at least 1 token.",
-      "code": 400,
-      "metadata": {
-        "provider_name": null
-      }
-    },
-    "user_id": "user_3BhuIRC5XfhMNdlMrWvQT98bPoF"
-  },
-  "attempt": 1
-}
----
-{
-  "timestamp": "2026-04-17T10:56:31.355Z",
-  "channel": "reply",
-  "model": "deepseek/deepseek-v3.2-20251201",
-  "usage": {
-    "prompt_tokens": 3082,
-    "completion_tokens": 219,
-    "total_tokens": 3301,
-    "cost": 0.00088454,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00088454,
-      "upstream_inference_prompt_cost": 0.00080132,
-      "upstream_inference_completions_cost": 0.00008322
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": {
-    "promptTokens": 3082,
-    "completionTokens": 219,
-    "totalTokens": 3301,
-    "inputCost": 0.001541,
-    "outputCost": 0.0003285,
-    "totalCost": 0.0018695
-  }
-}
----
-{
-  "timestamp": "2026-04-17T10:56:38.036Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
-  "usage": {
-    "prompt_tokens": 4599,
-    "completion_tokens": 1008,
-    "total_tokens": 5607,
-    "cost": 0.00167292,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 2816,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00167292,
-      "upstream_inference_prompt_cost": 0.00041292,
-      "upstream_inference_completions_cost": 0.00126
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": null
-}
----
-{
-  "timestamp": "2026-04-17T10:56:38.093Z",
-  "channel": "memory_raw_error",
-  "model": "openai/gpt-5.4-nano",
-  "status": 400,
-  "errorMessage": "Request failed with status code 400",
-  "errorData": {
-    "error": {
-      "message": "Input must have at least 1 token.",
-      "code": 400,
-      "metadata": {
-        "provider_name": null
-      }
-    },
-    "user_id": "user_3BhuIRC5XfhMNdlMrWvQT98bPoF"
-  },
-  "attempt": 1
-}
----
-{
-  "timestamp": "2026-04-17T10:59:13.572Z",
-  "channel": "reply",
-  "model": "deepseek/deepseek-v3.2-20251201",
-  "usage": {
-    "prompt_tokens": 3231,
-    "completion_tokens": 197,
-    "total_tokens": 3428,
-    "cost": 0.00095511,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00095511,
-      "upstream_inference_prompt_cost": 0.00087237,
-      "upstream_inference_completions_cost": 0.00008274
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": {
-    "promptTokens": 3231,
-    "completionTokens": 197,
-    "totalTokens": 3428,
-    "inputCost": 0.0016155,
-    "outputCost": 0.00029549999999999997,
-    "totalCost": 0.001911
-  }
-}
----
-{
-  "timestamp": "2026-04-17T11:00:02.615Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
-  "usage": {
-    "prompt_tokens": 4719,
-    "completion_tokens": 4237,
-    "total_tokens": 8956,
-    "cost": 0.00573317,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 2816,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00573317,
-      "upstream_inference_prompt_cost": 0.00043692,
-      "upstream_inference_completions_cost": 0.00529625
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": null
-}
----
-{
-  "timestamp": "2026-04-17T11:00:02.711Z",
-  "channel": "memory_raw_error",
-  "model": "openai/gpt-5.4-nano",
-  "status": 400,
-  "errorMessage": "Request failed with status code 400",
-  "errorData": {
-    "error": {
-      "message": "Input must have at least 1 token.",
-      "code": 400,
-      "metadata": {
-        "provider_name": null
-      }
-    },
-    "user_id": "user_3BhuIRC5XfhMNdlMrWvQT98bPoF"
-  },
-  "attempt": 1
-}
----
-{
-  "timestamp": "2026-04-17T11:01:16.212Z",
-  "channel": "reply",
-  "model": "deepseek/deepseek-v3.2-20251201",
-  "usage": {
-    "prompt_tokens": 3159,
-    "completion_tokens": 165,
-    "total_tokens": 3324,
-    "cost": 0.00088404,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00088404,
-      "upstream_inference_prompt_cost": 0.00082134,
-      "upstream_inference_completions_cost": 0.0000627
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": {
-    "promptTokens": 3159,
-    "completionTokens": 165,
-    "totalTokens": 3324,
-    "inputCost": 0.0015795,
-    "outputCost": 0.0002475,
-    "totalCost": 0.001827
-  }
-}
----
-{
-  "timestamp": "2026-04-17T11:01:51.888Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
-  "usage": {
-    "prompt_tokens": 4666,
-    "completion_tokens": 2181,
-    "total_tokens": 6847,
-    "cost": 0.00315257,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 2816,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00315257,
-      "upstream_inference_prompt_cost": 0.00042632,
-      "upstream_inference_completions_cost": 0.00272625
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": null
-}
----
-{
-  "timestamp": "2026-04-17T11:01:51.955Z",
-  "channel": "memory_raw_error",
-  "model": "openai/gpt-5.4-nano",
-  "status": 400,
-  "errorMessage": "Request failed with status code 400",
-  "errorData": {
-    "error": {
-      "message": "Input must have at least 1 token.",
-      "code": 400,
-      "metadata": {
-        "provider_name": null
-      }
-    },
-    "user_id": "user_3BhuIRC5XfhMNdlMrWvQT98bPoF"
-  },
-  "attempt": 1
-}
----
-{
-  "timestamp": "2026-04-17T11:04:39.552Z",
-  "channel": "reply",
-  "model": "deepseek/deepseek-v3.2-20251201",
-  "usage": {
-    "prompt_tokens": 3326,
-    "completion_tokens": 419,
-    "total_tokens": 3745,
-    "cost": 0.00110726,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00110726,
-      "upstream_inference_prompt_cost": 0.00093128,
-      "upstream_inference_completions_cost": 0.00017598
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": {
-    "promptTokens": 3326,
-    "completionTokens": 419,
-    "totalTokens": 3745,
-    "inputCost": 0.001663,
-    "outputCost": 0.0006284999999999999,
-    "totalCost": 0.0022915
-  }
-}
----
-{
-  "timestamp": "2026-04-17T11:04:55.918Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
-  "usage": {
-    "prompt_tokens": 4806,
-    "completion_tokens": 3827,
-    "total_tokens": 8633,
-    "cost": 0.00523807,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 2816,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00523807,
-      "upstream_inference_prompt_cost": 0.00045432,
-      "upstream_inference_completions_cost": 0.00478375
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": null
-}
----
-{
-  "timestamp": "2026-04-17T11:04:56.186Z",
-  "channel": "memory_raw_error",
-  "model": "openai/gpt-5.4-nano",
-  "status": 400,
-  "errorMessage": "Request failed with status code 400",
-  "errorData": {
-    "error": {
-      "message": "Input must have at least 1 token.",
-      "code": 400,
-      "metadata": {
-        "provider_name": null
-      }
-    },
-    "user_id": "user_3BhuIRC5XfhMNdlMrWvQT98bPoF"
-  },
-  "attempt": 1
-}
----
-{
-  "timestamp": "2026-04-17T11:06:51.850Z",
-  "channel": "reply",
-  "model": "deepseek/deepseek-v3.2-20251201",
-  "usage": {
-    "prompt_tokens": 3275,
-    "completion_tokens": 232,
-    "total_tokens": 3507,
-    "cost": 0.000973775,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.000973775,
-      "upstream_inference_prompt_cost": 0.000880975,
-      "upstream_inference_completions_cost": 0.0000928
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": {
-    "promptTokens": 3275,
-    "completionTokens": 232,
-    "totalTokens": 3507,
-    "inputCost": 0.0016375,
-    "outputCost": 0.000348,
-    "totalCost": 0.0019855000000000003
-  }
-}
----
-{
-  "timestamp": "2026-04-17T11:07:13.812Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
-  "usage": {
-    "prompt_tokens": 4765,
-    "completion_tokens": 1884,
-    "total_tokens": 6649,
-    "cost": 0.00280112,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 2816,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00280112,
-      "upstream_inference_prompt_cost": 0.00044612,
-      "upstream_inference_completions_cost": 0.002355
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": null
-}
----
-{
-  "timestamp": "2026-04-17T11:07:13.862Z",
-  "channel": "memory_raw_error",
-  "model": "openai/gpt-5.4-nano",
-  "status": 400,
-  "errorMessage": "Request failed with status code 400",
-  "errorData": {
-    "error": {
-      "message": "Input must have at least 1 token.",
-      "code": 400,
-      "metadata": {
-        "provider_name": null
-      }
-    },
-    "user_id": "user_3BhuIRC5XfhMNdlMrWvQT98bPoF"
-  },
-  "attempt": 1
-}
----
-{
-  "timestamp": "2026-04-17T11:08:30.324Z",
-  "channel": "reply",
-  "model": "deepseek/deepseek-v3.2-20251201",
-  "usage": {
-    "prompt_tokens": 3222,
-    "completion_tokens": 158,
-    "total_tokens": 3380,
-    "cost": 0.00206976,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00206976,
-      "upstream_inference_prompt_cost": 0.00180432,
-      "upstream_inference_completions_cost": 0.00026544
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": {
-    "promptTokens": 3222,
-    "completionTokens": 158,
-    "totalTokens": 3380,
-    "inputCost": 0.001611,
-    "outputCost": 0.000237,
-    "totalCost": 0.001848
-  }
-}
----
-{
-  "timestamp": "2026-04-17T11:08:51.637Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
-  "usage": {
-    "prompt_tokens": 4724,
-    "completion_tokens": 1554,
-    "total_tokens": 6278,
-    "cost": 0.00238042,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 2816,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00238042,
-      "upstream_inference_prompt_cost": 0.00043792,
-      "upstream_inference_completions_cost": 0.0019425
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": null
-}
----
-{
-  "timestamp": "2026-04-17T11:08:51.687Z",
-  "channel": "memory_raw_error",
-  "model": "openai/gpt-5.4-nano",
-  "status": 400,
-  "errorMessage": "Request failed with status code 400",
-  "errorData": {
-    "error": {
-      "message": "Input must have at least 1 token.",
-      "code": 400,
-      "metadata": {
-        "provider_name": null
-      }
-    },
-    "user_id": "user_3BhuIRC5XfhMNdlMrWvQT98bPoF"
-  },
-  "attempt": 1
-}
----
-{
-  "timestamp": "2026-04-17T11:10:23.666Z",
-  "channel": "reply",
-  "model": "deepseek/deepseek-v3.2-20251201",
-  "usage": {
-    "prompt_tokens": 3274,
-    "completion_tokens": 222,
-    "total_tokens": 3496,
-    "cost": 0.00097722,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00097722,
-      "upstream_inference_prompt_cost": 0.00088398,
-      "upstream_inference_completions_cost": 0.00009324
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": {
-    "promptTokens": 3274,
-    "completionTokens": 222,
-    "totalTokens": 3496,
-    "inputCost": 0.001637,
-    "outputCost": 0.000333,
-    "totalCost": 0.00197
-  }
-}
----
-{
-  "timestamp": "2026-04-17T11:11:15.976Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
-  "usage": {
-    "prompt_tokens": 4766,
-    "completion_tokens": 3611,
-    "total_tokens": 8377,
-    "cost": 0.00496007,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 2816,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00496007,
-      "upstream_inference_prompt_cost": 0.00044632,
-      "upstream_inference_completions_cost": 0.00451375
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": null
-}
----
-{
-  "timestamp": "2026-04-17T11:11:16.257Z",
-  "channel": "memory_raw_error",
-  "model": "openai/gpt-5.4-nano",
-  "status": 400,
-  "errorMessage": "Request failed with status code 400",
-  "errorData": {
-    "error": {
-      "message": "Input must have at least 1 token.",
-      "code": 400,
-      "metadata": {
-        "provider_name": null
-      }
-    },
-    "user_id": "user_3BhuIRC5XfhMNdlMrWvQT98bPoF"
-  },
-  "attempt": 1
-}
----
-{
-  "timestamp": "2026-04-17T11:12:33.897Z",
-  "channel": "reply",
-  "model": "deepseek/deepseek-v3.2-20251201",
-  "usage": {
-    "prompt_tokens": 3171,
-    "completion_tokens": 252,
-    "total_tokens": 3423,
-    "cost": 0.00092022,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00092022,
-      "upstream_inference_prompt_cost": 0.00082446,
-      "upstream_inference_completions_cost": 0.00009576
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": {
-    "promptTokens": 3171,
-    "completionTokens": 252,
-    "totalTokens": 3423,
-    "inputCost": 0.0015855,
-    "outputCost": 0.00037799999999999997,
-    "totalCost": 0.0019635
-  }
-}
----
-{
-  "timestamp": "2026-04-17T11:13:07.233Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
-  "usage": {
-    "prompt_tokens": 4685,
-    "completion_tokens": 2267,
-    "total_tokens": 6952,
-    "cost": 0.00377075,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00377075,
-      "upstream_inference_prompt_cost": 0.000937,
-      "upstream_inference_completions_cost": 0.00283375
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": null
-}
----
-{
-  "timestamp": "2026-04-17T11:13:07.305Z",
-  "channel": "memory_raw_error",
-  "model": "openai/gpt-5.4-nano",
-  "status": 400,
-  "errorMessage": "Request failed with status code 400",
-  "errorData": {
-    "error": {
-      "message": "Input must have at least 1 token.",
-      "code": 400,
-      "metadata": {
-        "provider_name": null
-      }
-    },
-    "user_id": "user_3BhuIRC5XfhMNdlMrWvQT98bPoF"
-  },
-  "attempt": 1
-}
----
-{
-  "timestamp": "2026-04-17T11:14:54.337Z",
-  "channel": "reply",
-  "model": "deepseek/deepseek-v3.2-20251201",
-  "usage": {
-    "prompt_tokens": 3208,
-    "completion_tokens": 376,
-    "total_tokens": 3584,
-    "cost": 0.002168,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.002168,
-      "upstream_inference_prompt_cost": 0.001604,
-      "upstream_inference_completions_cost": 0.000564
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": {
-    "promptTokens": 3208,
-    "completionTokens": 376,
-    "totalTokens": 3584,
-    "inputCost": 0.001604,
-    "outputCost": 0.0005639999999999999,
-    "totalCost": 0.002168
-  }
-}
----
-{
-  "timestamp": "2026-04-17T11:15:24.041Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
-  "usage": {
-    "prompt_tokens": 4711,
-    "completion_tokens": 2357,
-    "total_tokens": 7068,
-    "cost": 0.00388845,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00388845,
-      "upstream_inference_prompt_cost": 0.0009422,
-      "upstream_inference_completions_cost": 0.00294625
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": null
-}
----
-{
-  "timestamp": "2026-04-17T11:15:24.132Z",
-  "channel": "memory_raw_error",
-  "model": "openai/gpt-5.4-nano",
-  "status": 400,
-  "errorMessage": "Request failed with status code 400",
-  "errorData": {
-    "error": {
-      "message": "Input must have at least 1 token.",
-      "code": 400,
-      "metadata": {
-        "provider_name": null
-      }
-    },
-    "user_id": "user_3BhuIRC5XfhMNdlMrWvQT98bPoF"
-  },
-  "attempt": 1
-}
----
-{
-  "timestamp": "2026-04-17T11:36:50.269Z",
-  "channel": "reply",
-  "model": "deepseek/deepseek-v3.2-20251201",
-  "usage": {
-    "prompt_tokens": 3200,
-    "completion_tokens": 329,
-    "total_tokens": 3529,
-    "cost": 0.0009924,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.0009924,
-      "upstream_inference_prompt_cost": 0.0008608,
-      "upstream_inference_completions_cost": 0.0001316
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": {
-    "promptTokens": 3200,
-    "completionTokens": 329,
-    "totalTokens": 3529,
-    "inputCost": 0.0016,
-    "outputCost": 0.0004935,
+    "promptTokens": 3599,
+    "completionTokens": 196,
+    "totalTokens": 3795,
+    "inputCost": 0.0017995,
+    "outputCost": 0.000294,
     "totalCost": 0.0020935
   }
 }
 ---
 {
-  "timestamp": "2026-04-17T11:37:28.102Z",
+  "timestamp": "2026-04-17T16:29:01.609Z",
   "channel": "memory_raw",
   "model": "openai/gpt-5.4-nano-20260317",
   "usage": {
-    "prompt_tokens": 4729,
-    "completion_tokens": 2942,
-    "total_tokens": 7671,
-    "cost": 0.0046233,
+    "prompt_tokens": 5062,
+    "completion_tokens": 2207,
+    "total_tokens": 7269,
+    "cost": 0.00377115,
     "is_byok": false,
     "prompt_tokens_details": {
       "cached_tokens": 0,
@@ -949,9 +52,9 @@
       "video_tokens": 0
     },
     "cost_details": {
-      "upstream_inference_cost": 0.0046233,
-      "upstream_inference_prompt_cost": 0.0009458,
-      "upstream_inference_completions_cost": 0.0036775
+      "upstream_inference_cost": 0.00377115,
+      "upstream_inference_prompt_cost": 0.0010124,
+      "upstream_inference_completions_cost": 0.00275875
     },
     "completion_tokens_details": {
       "reasoning_tokens": 0,
@@ -963,33 +66,14 @@
 }
 ---
 {
-  "timestamp": "2026-04-17T11:37:28.203Z",
-  "channel": "memory_raw_error",
-  "model": "openai/gpt-5.4-nano",
-  "status": 400,
-  "errorMessage": "Request failed with status code 400",
-  "errorData": {
-    "error": {
-      "message": "Input must have at least 1 token.",
-      "code": 400,
-      "metadata": {
-        "provider_name": null
-      }
-    },
-    "user_id": "user_3BhuIRC5XfhMNdlMrWvQT98bPoF"
-  },
-  "attempt": 1
-}
----
-{
-  "timestamp": "2026-04-17T11:43:56.488Z",
+  "timestamp": "2026-04-17T16:32:18.318Z",
   "channel": "reply",
   "model": "deepseek/deepseek-v3.2-20251201",
   "usage": {
-    "prompt_tokens": 3221,
-    "completion_tokens": 295,
-    "total_tokens": 3516,
-    "cost": 0.002053,
+    "prompt_tokens": 3739,
+    "completion_tokens": 495,
+    "total_tokens": 4234,
+    "cost": 0.001176301,
     "is_byok": false,
     "prompt_tokens_details": {
       "cached_tokens": 0,
@@ -998,9 +82,9 @@
       "video_tokens": 0
     },
     "cost_details": {
-      "upstream_inference_cost": 0.002053,
-      "upstream_inference_prompt_cost": 0.0016105,
-      "upstream_inference_completions_cost": 0.0004425
+      "upstream_inference_cost": 0.001176301,
+      "upstream_inference_prompt_cost": 0.000968401,
+      "upstream_inference_completions_cost": 0.0002079
     },
     "completion_tokens_details": {
       "reasoning_tokens": 0,
@@ -1009,24 +93,24 @@
     }
   },
   "cost": {
-    "promptTokens": 3221,
-    "completionTokens": 295,
-    "totalTokens": 3516,
-    "inputCost": 0.0016105,
-    "outputCost": 0.0004425,
-    "totalCost": 0.002053
+    "promptTokens": 3739,
+    "completionTokens": 495,
+    "totalTokens": 4234,
+    "inputCost": 0.0018695,
+    "outputCost": 0.0007425,
+    "totalCost": 0.002612
   }
 }
 ---
 {
-  "timestamp": "2026-04-17T11:44:11.402Z",
+  "timestamp": "2026-04-17T16:32:48.374Z",
   "channel": "memory_raw",
   "model": "openai/gpt-5.4-nano-20260317",
   "usage": {
-    "prompt_tokens": 4737,
-    "completion_tokens": 1174,
-    "total_tokens": 5911,
-    "cost": 0.0024149,
+    "prompt_tokens": 5175,
+    "completion_tokens": 3234,
+    "total_tokens": 8409,
+    "cost": 0.0050775,
     "is_byok": false,
     "prompt_tokens_details": {
       "cached_tokens": 0,
@@ -1035,9 +119,9 @@
       "video_tokens": 0
     },
     "cost_details": {
-      "upstream_inference_cost": 0.0024149,
-      "upstream_inference_prompt_cost": 0.0009474,
-      "upstream_inference_completions_cost": 0.0014675
+      "upstream_inference_cost": 0.0050775,
+      "upstream_inference_prompt_cost": 0.001035,
+      "upstream_inference_completions_cost": 0.0040425
     },
     "completion_tokens_details": {
       "reasoning_tokens": 0,
@@ -1049,14 +133,14 @@
 }
 ---
 {
-  "timestamp": "2026-04-17T12:00:24.748Z",
+  "timestamp": "2026-04-17T16:36:23.152Z",
   "channel": "reply",
   "model": "deepseek/deepseek-v3.2-20251201",
   "usage": {
-    "prompt_tokens": 3780,
-    "completion_tokens": 461,
-    "total_tokens": 4241,
-    "cost": 0.00120122,
+    "prompt_tokens": 3757,
+    "completion_tokens": 257,
+    "total_tokens": 4014,
+    "cost": 0.00253568,
     "is_byok": false,
     "prompt_tokens_details": {
       "cached_tokens": 0,
@@ -1065,9 +149,9 @@
       "video_tokens": 0
     },
     "cost_details": {
-      "upstream_inference_cost": 0.00120122,
-      "upstream_inference_prompt_cost": 0.00101682,
-      "upstream_inference_completions_cost": 0.0001844
+      "upstream_inference_cost": 0.00253568,
+      "upstream_inference_prompt_cost": 0.00210392,
+      "upstream_inference_completions_cost": 0.00043176
     },
     "completion_tokens_details": {
       "reasoning_tokens": 0,
@@ -1076,24 +160,24 @@
     }
   },
   "cost": {
-    "promptTokens": 3780,
-    "completionTokens": 461,
-    "totalTokens": 4241,
-    "inputCost": 0.00189,
-    "outputCost": 0.0006915,
-    "totalCost": 0.0025815
+    "promptTokens": 3757,
+    "completionTokens": 257,
+    "totalTokens": 4014,
+    "inputCost": 0.0018785,
+    "outputCost": 0.0003855,
+    "totalCost": 0.002264
   }
 }
 ---
 {
-  "timestamp": "2026-04-17T12:01:20.889Z",
+  "timestamp": "2026-04-17T16:36:56.684Z",
   "channel": "memory_raw",
   "model": "openai/gpt-5.4-nano-20260317",
   "usage": {
-    "prompt_tokens": 5227,
-    "completion_tokens": 4602,
-    "total_tokens": 9829,
-    "cost": 0.0067979,
+    "prompt_tokens": 5192,
+    "completion_tokens": 3578,
+    "total_tokens": 8770,
+    "cost": 0.0055109,
     "is_byok": false,
     "prompt_tokens_details": {
       "cached_tokens": 0,
@@ -1102,9 +186,9 @@
       "video_tokens": 0
     },
     "cost_details": {
-      "upstream_inference_cost": 0.0067979,
-      "upstream_inference_prompt_cost": 0.0010454,
-      "upstream_inference_completions_cost": 0.0057525
+      "upstream_inference_cost": 0.0055109,
+      "upstream_inference_prompt_cost": 0.0010384,
+      "upstream_inference_completions_cost": 0.0044725
     },
     "completion_tokens_details": {
       "reasoning_tokens": 0,
@@ -1116,43 +200,14 @@
 }
 ---
 {
-  "timestamp": "2026-04-17T12:01:21.158Z",
-  "channel": "memory_raw_error",
-  "model": "openai/gpt-5.4-nano",
-  "status": 400,
-  "errorMessage": "Request failed with status code 400",
-  "errorData": {
-    "error": {
-      "message": "Input must have at least 1 token.",
-      "code": 400,
-      "metadata": {
-        "provider_name": null
-      }
-    },
-    "user_id": "user_3BhuIRC5XfhMNdlMrWvQT98bPoF"
-  },
-  "attempt": 1
-}
----
-{
-  "timestamp": "2026-04-17T15:09:30.388Z",
-  "channel": "memory_raw_error",
-  "model": "openai/gpt-5.4-nano",
-  "status": null,
-  "errorMessage": "protocol mismatch",
-  "errorData": null,
-  "attempt": 1
-}
----
-{
-  "timestamp": "2026-04-17T15:32:17.699Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
+  "timestamp": "2026-04-17T16:39:22.985Z",
+  "channel": "reply",
+  "model": "deepseek/deepseek-v3.2-20251201",
   "usage": {
-    "prompt_tokens": 3692,
-    "completion_tokens": 859,
-    "total_tokens": 4551,
-    "cost": 0.00181215,
+    "prompt_tokens": 4694,
+    "completion_tokens": 1100,
+    "total_tokens": 5794,
+    "cost": 0.00455658,
     "is_byok": false,
     "prompt_tokens_details": {
       "cached_tokens": 0,
@@ -1161,9 +216,46 @@
       "video_tokens": 0
     },
     "cost_details": {
-      "upstream_inference_cost": 0.00181215,
-      "upstream_inference_prompt_cost": 0.0007384,
-      "upstream_inference_completions_cost": 0.00107375
+      "upstream_inference_cost": 0.00455658,
+      "upstream_inference_prompt_cost": 0.00267558,
+      "upstream_inference_completions_cost": 0.001881
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "cost": {
+    "promptTokens": 4694,
+    "completionTokens": 1100,
+    "totalTokens": 5794,
+    "inputCost": 0.002347,
+    "outputCost": 0.00165,
+    "totalCost": 0.0039970000000000006
+  }
+}
+---
+{
+  "timestamp": "2026-04-17T16:40:22.147Z",
+  "channel": "memory_raw",
+  "model": "openai/gpt-5.4-nano-20260317",
+  "usage": {
+    "prompt_tokens": 5920,
+    "completion_tokens": 4967,
+    "total_tokens": 10887,
+    "cost": 0.00688587,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 2816,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00688587,
+      "upstream_inference_prompt_cost": 0.00067712,
+      "upstream_inference_completions_cost": 0.00620875
     },
     "completion_tokens_details": {
       "reasoning_tokens": 0,
@@ -1175,33 +267,14 @@
 }
 ---
 {
-  "timestamp": "2026-04-17T15:32:17.775Z",
-  "channel": "memory_raw_error",
-  "model": "openai/gpt-5.4-nano",
-  "status": 400,
-  "errorMessage": "Request failed with status code 400",
-  "errorData": {
-    "error": {
-      "message": "Input must have at least 1 token.",
-      "code": 400,
-      "metadata": {
-        "provider_name": null
-      }
-    },
-    "user_id": "user_3BhuIRC5XfhMNdlMrWvQT98bPoF"
-  },
-  "attempt": 1
-}
----
-{
-  "timestamp": "2026-04-17T15:32:21.781Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
+  "timestamp": "2026-04-17T16:43:40.891Z",
+  "channel": "reply",
+  "model": "deepseek/deepseek-v3.2-20251201",
   "usage": {
-    "prompt_tokens": 1201,
-    "completion_tokens": 165,
-    "total_tokens": 1366,
-    "cost": 0.00044645,
+    "prompt_tokens": 4234,
+    "completion_tokens": 464,
+    "total_tokens": 4698,
+    "cost": 0.00127716,
     "is_byok": false,
     "prompt_tokens_details": {
       "cached_tokens": 0,
@@ -1210,9 +283,46 @@
       "video_tokens": 0
     },
     "cost_details": {
-      "upstream_inference_cost": 0.00044645,
-      "upstream_inference_prompt_cost": 0.0002402,
-      "upstream_inference_completions_cost": 0.00020625
+      "upstream_inference_cost": 0.00127716,
+      "upstream_inference_prompt_cost": 0.00110084,
+      "upstream_inference_completions_cost": 0.00017632
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "cost": {
+    "promptTokens": 4234,
+    "completionTokens": 464,
+    "totalTokens": 4698,
+    "inputCost": 0.002117,
+    "outputCost": 0.000696,
+    "totalCost": 0.002813
+  }
+}
+---
+{
+  "timestamp": "2026-04-17T16:43:58.939Z",
+  "channel": "memory_raw",
+  "model": "openai/gpt-5.4-nano-20260317",
+  "usage": {
+    "prompt_tokens": 5370,
+    "completion_tokens": 2200,
+    "total_tokens": 7570,
+    "cost": 0.003824,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.003824,
+      "upstream_inference_prompt_cost": 0.001074,
+      "upstream_inference_completions_cost": 0.00275
     },
     "completion_tokens_details": {
       "reasoning_tokens": 0,
@@ -1224,14 +334,14 @@
 }
 ---
 {
-  "timestamp": "2026-04-17T15:55:27.786Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
+  "timestamp": "2026-04-17T16:49:13.398Z",
+  "channel": "reply",
+  "model": "deepseek/deepseek-v3.2-20251201",
   "usage": {
-    "prompt_tokens": 3692,
-    "completion_tokens": 871,
-    "total_tokens": 4563,
-    "cost": 0.00182715,
+    "prompt_tokens": 4153,
+    "completion_tokens": 546,
+    "total_tokens": 4699,
+    "cost": 0.00128726,
     "is_byok": false,
     "prompt_tokens_details": {
       "cached_tokens": 0,
@@ -1240,9 +350,46 @@
       "video_tokens": 0
     },
     "cost_details": {
-      "upstream_inference_cost": 0.00182715,
-      "upstream_inference_prompt_cost": 0.0007384,
-      "upstream_inference_completions_cost": 0.00108875
+      "upstream_inference_cost": 0.00128726,
+      "upstream_inference_prompt_cost": 0.00107978,
+      "upstream_inference_completions_cost": 0.00020748
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "cost": {
+    "promptTokens": 4153,
+    "completionTokens": 546,
+    "totalTokens": 4699,
+    "inputCost": 0.0020765,
+    "outputCost": 0.0008190000000000001,
+    "totalCost": 0.0028954999999999996
+  }
+}
+---
+{
+  "timestamp": "2026-04-17T16:50:25.084Z",
+  "channel": "memory_raw",
+  "model": "openai/gpt-5.4-nano-20260317",
+  "usage": {
+    "prompt_tokens": 5287,
+    "completion_tokens": 5165,
+    "total_tokens": 10452,
+    "cost": 0.00751365,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00751365,
+      "upstream_inference_prompt_cost": 0.0010574,
+      "upstream_inference_completions_cost": 0.00645625
     },
     "completion_tokens_details": {
       "reasoning_tokens": 0,
@@ -1254,14 +401,14 @@
 }
 ---
 {
-  "timestamp": "2026-04-17T15:55:31.114Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
+  "timestamp": "2026-04-17T16:59:00.564Z",
+  "channel": "reply",
+  "model": "deepseek/deepseek-v3.2-20251201",
   "usage": {
-    "prompt_tokens": 1211,
-    "completion_tokens": 163,
-    "total_tokens": 1374,
-    "cost": 0.00044595,
+    "prompt_tokens": 4636,
+    "completion_tokens": 666,
+    "total_tokens": 5302,
+    "cost": 0.001513484,
     "is_byok": false,
     "prompt_tokens_details": {
       "cached_tokens": 0,
@@ -1270,9 +417,46 @@
       "video_tokens": 0
     },
     "cost_details": {
-      "upstream_inference_cost": 0.00044595,
-      "upstream_inference_prompt_cost": 0.0002422,
-      "upstream_inference_completions_cost": 0.00020375
+      "upstream_inference_cost": 0.001513484,
+      "upstream_inference_prompt_cost": 0.001247084,
+      "upstream_inference_completions_cost": 0.0002664
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "cost": {
+    "promptTokens": 4636,
+    "completionTokens": 666,
+    "totalTokens": 5302,
+    "inputCost": 0.002318,
+    "outputCost": 0.000999,
+    "totalCost": 0.0033170000000000005
+  }
+}
+---
+{
+  "timestamp": "2026-04-17T16:59:49.725Z",
+  "channel": "memory_raw",
+  "model": "openai/gpt-5.4-nano-20260317",
+  "usage": {
+    "prompt_tokens": 5692,
+    "completion_tokens": 5405,
+    "total_tokens": 11097,
+    "cost": 0.00789465,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00789465,
+      "upstream_inference_prompt_cost": 0.0011384,
+      "upstream_inference_completions_cost": 0.00675625
     },
     "completion_tokens_details": {
       "reasoning_tokens": 0,
@@ -1284,14 +468,14 @@
 }
 ---
 {
-  "timestamp": "2026-04-17T16:01:34.928Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
+  "timestamp": "2026-04-17T17:02:18.029Z",
+  "channel": "reply",
+  "model": "deepseek/deepseek-v3.2-20251201",
   "usage": {
-    "prompt_tokens": 3692,
-    "completion_tokens": 833,
-    "total_tokens": 4525,
-    "cost": 0.00177965,
+    "prompt_tokens": 4183,
+    "completion_tokens": 435,
+    "total_tokens": 4618,
+    "cost": 0.00125288,
     "is_byok": false,
     "prompt_tokens_details": {
       "cached_tokens": 0,
@@ -1300,9 +484,46 @@
       "video_tokens": 0
     },
     "cost_details": {
-      "upstream_inference_cost": 0.00177965,
-      "upstream_inference_prompt_cost": 0.0007384,
-      "upstream_inference_completions_cost": 0.00104125
+      "upstream_inference_cost": 0.00125288,
+      "upstream_inference_prompt_cost": 0.00108758,
+      "upstream_inference_completions_cost": 0.0001653
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "cost": {
+    "promptTokens": 4183,
+    "completionTokens": 435,
+    "totalTokens": 4618,
+    "inputCost": 0.0020915,
+    "outputCost": 0.0006525,
+    "totalCost": 0.002744
+  }
+}
+---
+{
+  "timestamp": "2026-04-17T17:02:33.542Z",
+  "channel": "memory_raw",
+  "model": "openai/gpt-5.4-nano-20260317",
+  "usage": {
+    "prompt_tokens": 5296,
+    "completion_tokens": 2302,
+    "total_tokens": 7598,
+    "cost": 0.00342982,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 2816,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00342982,
+      "upstream_inference_prompt_cost": 0.00055232,
+      "upstream_inference_completions_cost": 0.0028775
     },
     "completion_tokens_details": {
       "reasoning_tokens": 0,
@@ -1314,14 +535,14 @@
 }
 ---
 {
-  "timestamp": "2026-04-17T16:01:37.665Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
+  "timestamp": "2026-04-17T17:05:36.134Z",
+  "channel": "reply",
+  "model": "deepseek/deepseek-v3.2-20251201",
   "usage": {
-    "prompt_tokens": 1193,
-    "completion_tokens": 167,
-    "total_tokens": 1360,
-    "cost": 0.00044735,
+    "prompt_tokens": 4216,
+    "completion_tokens": 2,
+    "total_tokens": 4218,
+    "cost": 0.002111,
     "is_byok": false,
     "prompt_tokens_details": {
       "cached_tokens": 0,
@@ -1330,9 +551,83 @@
       "video_tokens": 0
     },
     "cost_details": {
-      "upstream_inference_cost": 0.00044735,
-      "upstream_inference_prompt_cost": 0.0002386,
-      "upstream_inference_completions_cost": 0.00020875
+      "upstream_inference_cost": 0.002111,
+      "upstream_inference_prompt_cost": 0.002108,
+      "upstream_inference_completions_cost": 0.000003
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "cost": {
+    "promptTokens": 4216,
+    "completionTokens": 2,
+    "totalTokens": 4218,
+    "inputCost": 0.002108,
+    "outputCost": 0.000003,
+    "totalCost": 0.002111
+  }
+}
+---
+{
+  "timestamp": "2026-04-17T17:05:46.334Z",
+  "channel": "reply",
+  "model": "deepseek/deepseek-v3.2-20251201",
+  "usage": {
+    "prompt_tokens": 3738,
+    "completion_tokens": 128,
+    "total_tokens": 3866,
+    "cost": 0.00230832,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00230832,
+      "upstream_inference_prompt_cost": 0.00209328,
+      "upstream_inference_completions_cost": 0.00021504
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "cost": {
+    "promptTokens": 3738,
+    "completionTokens": 128,
+    "totalTokens": 3866,
+    "inputCost": 0.001869,
+    "outputCost": 0.000192,
+    "totalCost": 0.002061
+  }
+}
+---
+{
+  "timestamp": "2026-04-17T17:06:04.676Z",
+  "channel": "memory_raw",
+  "model": "openai/gpt-5.4-nano-20260317",
+  "usage": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "cost": 0,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0,
+      "upstream_inference_prompt_cost": 0,
+      "upstream_inference_completions_cost": 0
     },
     "completion_tokens_details": {
       "reasoning_tokens": 0,
@@ -1344,14 +639,14 @@
 }
 ---
 {
-  "timestamp": "2026-04-17T16:06:52.664Z",
+  "timestamp": "2026-04-17T17:06:28.062Z",
   "channel": "memory_raw",
   "model": "openai/gpt-5.4-nano-20260317",
   "usage": {
-    "prompt_tokens": 3692,
-    "completion_tokens": 854,
-    "total_tokens": 4546,
-    "cost": 0.0018059,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "cost": 0,
     "is_byok": false,
     "prompt_tokens_details": {
       "cached_tokens": 0,
@@ -1360,159 +655,9 @@
       "video_tokens": 0
     },
     "cost_details": {
-      "upstream_inference_cost": 0.0018059,
-      "upstream_inference_prompt_cost": 0.0007384,
-      "upstream_inference_completions_cost": 0.0010675
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": null
-}
----
-{
-  "timestamp": "2026-04-17T16:06:55.476Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
-  "usage": {
-    "prompt_tokens": 1200,
-    "completion_tokens": 164,
-    "total_tokens": 1364,
-    "cost": 0.000445,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.000445,
-      "upstream_inference_prompt_cost": 0.00024,
-      "upstream_inference_completions_cost": 0.000205
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": null
-}
----
-{
-  "timestamp": "2026-04-17T16:10:50.932Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
-  "usage": {
-    "prompt_tokens": 3692,
-    "completion_tokens": 851,
-    "total_tokens": 4543,
-    "cost": 0.00180215,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00180215,
-      "upstream_inference_prompt_cost": 0.0007384,
-      "upstream_inference_completions_cost": 0.00106375
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": null
-}
----
-{
-  "timestamp": "2026-04-17T16:10:53.557Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
-  "usage": {
-    "prompt_tokens": 1196,
-    "completion_tokens": 163,
-    "total_tokens": 1359,
-    "cost": 0.00044295,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00044295,
-      "upstream_inference_prompt_cost": 0.0002392,
-      "upstream_inference_completions_cost": 0.00020375
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": null
-}
----
-{
-  "timestamp": "2026-04-17T16:21:12.629Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
-  "usage": {
-    "prompt_tokens": 3692,
-    "completion_tokens": 865,
-    "total_tokens": 4557,
-    "cost": 0.00181965,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00181965,
-      "upstream_inference_prompt_cost": 0.0007384,
-      "upstream_inference_completions_cost": 0.00108125
-    },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "image_tokens": 0,
-      "audio_tokens": 0
-    }
-  },
-  "cost": null
-}
----
-{
-  "timestamp": "2026-04-17T16:21:15.455Z",
-  "channel": "memory_raw",
-  "model": "openai/gpt-5.4-nano-20260317",
-  "usage": {
-    "prompt_tokens": 1198,
-    "completion_tokens": 167,
-    "total_tokens": 1365,
-    "cost": 0.00044835,
-    "is_byok": false,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "cache_write_tokens": 0,
-      "audio_tokens": 0,
-      "video_tokens": 0
-    },
-    "cost_details": {
-      "upstream_inference_cost": 0.00044835,
-      "upstream_inference_prompt_cost": 0.0002396,
-      "upstream_inference_completions_cost": 0.00020875
+      "upstream_inference_cost": 0,
+      "upstream_inference_prompt_cost": 0,
+      "upstream_inference_completions_cost": 0
     },
     "completion_tokens_details": {
       "reasoning_tokens": 0,

@@ -13,6 +13,7 @@ const {
   enrichMetaWithTimeContext
 } = require('../../services/time-context.service')
 const logger = require('../../services/logger.service')
+const { runExtractFilterObservePipeline } = require('./pipeline/extract-filter-observe.pipeline')
 
 function createEventId() {
   if (crypto.randomUUID) {
@@ -82,6 +83,25 @@ async function runRegexDebugPass(event) {
   }
 }
 
+async function runLlmObserveDebugPass(event) {
+  if (!event || event.role !== 'user') {
+    return
+  }
+
+  try {
+    await runExtractFilterObservePipeline({
+      threadId: event.threadId,
+      event
+    })
+  } catch (error) {
+    logger.warn('LLM observe debug pass failed', {
+      eventId: event?.id || null,
+      threadId: event?.threadId || null,
+      message: error.message
+    })
+  }
+}
+
 async function recordUserMessage({
   threadId,
   text,
@@ -108,16 +128,9 @@ async function recordUserMessage({
 
   appendEvent(threadId, event)
   refreshRecentDialogSnapshot(threadId)
-
   await runRegexDebugPass(event)
-
-  enqueueMemoryJob({
-    type: 'ingest_user_message',
-    payload: {
-      threadId,
-      eventId: event.id
-    }
-  })
+  await runLlmObserveDebugPass(event)
+  enqueueMemoryJob({ type: 'ingest_user_message', payload: { threadId, eventId: event.id } })
 
   return event
 }
