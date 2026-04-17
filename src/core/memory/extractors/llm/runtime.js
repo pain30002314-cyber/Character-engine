@@ -6,10 +6,6 @@ const { normalizeMemoryCandidatesPacket } = require('./normalize')
 const { postprocessLlmCandidates } = require('./postprocess')
 const { appendLlmDebugLog } = require('./debug/llm.debug')
 const { generateRawCompletion } = require('../../../../services/llm.service')
-const {
-  runSemanticTagsPatch,
-  applySemanticTagsPatch
-} = require('./tags.runtime')
 
 const EXTRACTOR_VERSION = '2.0.0'
 const PROMPT_VERSION = 'llm_memory_candidates_v1'
@@ -141,7 +137,7 @@ function finalizeResult({
   result.meta = {
     ...result.meta,
     source: 'llm',
-    usedModel: response?.model || env.memoryModel,
+    usedModel: response?.model || env.memoryModel || null,
     promptVersion: PROMPT_VERSION,
     extractorVersion: EXTRACTOR_VERSION,
     durationMs
@@ -181,18 +177,6 @@ function finalizeResult({
 
 function safeArray(value) {
   return Array.isArray(value) ? value : []
-}
-
-function needsSemanticTagsPatch(packet) {
-  const candidates = safeArray(packet?.candidates)
-  if (!candidates.length) return false
-
-  return candidates.some((candidate) => {
-    const tags = safeArray(candidate?.semantic?.tags)
-    if (!tags.length) return true
-
-    return safeArray(candidate?.flags).includes('invalid_semantic_tags')
-  })
 }
 
 async function runLlmExtractor({ event, eventWindow = [] }) {
@@ -243,61 +227,19 @@ async function runLlmExtractor({ event, eventWindow = [] }) {
       }
     })
 
+    const resolvedModel = response?.model || env.memoryModel || null
+
+    normalizedPacket.candidates = Array.isArray(normalizedPacket.candidates)
+      ? normalizedPacket.candidates.map((c) => ({
+          ...c,
+          source: {
+            ...(c.source || {}),
+            model: resolvedModel
+          }
+        }))
+      : []
+
     normalizedPacket = postprocessLlmCandidates(normalizedPacket)
-    if (needsSemanticTagsPatch(normalizedPacket)) {
-    try {
-      const tagPatchResult = await runSemanticTagsPatch({
-        event,
-        candidates: normalizedPacket.candidates
-      })
-
-        normalizedPacket = applySemanticTagsPatch(normalizedPacket, tagPatchResult)
-        normalizedPacket = postprocessLlmCandidates(normalizedPacket)
-      } catch (err) {
-        normalizedPacket = {
-          ...(normalizedPacket || {}),
-          debug: {
-            ...(normalizedPacket?.debug || {}),
-            semanticTagsPatch: {
-              error: err?.message || 'unknown_error'
-            }
-          }
-        }
-      }
-    }
-
-    try {
-      const tagPatchResult = await runSemanticTagsPatch({
-        event,
-        packet: normalizedPacket
-      })
-
-      if (tagPatchResult?.applied && tagPatchResult?.packet) {
-        normalizedPacket = {
-          ...tagPatchResult.packet,
-          debug: {
-            ...(tagPatchResult.packet?.debug || {}),
-            semanticTagsPatch: {
-              model: tagPatchResult?.model || null,
-              updatesApplied: Array.isArray(tagPatchResult?.patch?.tagUpdates)
-                ? tagPatchResult.patch.tagUpdates.length
-                : 0
-            }
-          }
-        }
-      }
-    } catch (err) {
-      normalizedPacket = {
-        ...(normalizedPacket || {}),
-        debug: {
-          ...(normalizedPacket?.debug || {}),
-          semanticTagsPatch: {
-            error: err?.message || 'unknown_error'
-          }
-        }
-      }
-    }
-
     
   } catch (err) {
     error = err?.message || 'unknown_error'

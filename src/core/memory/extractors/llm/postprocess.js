@@ -48,6 +48,20 @@ function safeArray(value) {
   return Array.isArray(value) ? value : []
 }
 
+function sanitizeSchemaId(value) {
+  const normalized = String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .replace(/_{2,}/g, '_')
+
+  if (!normalized) return null
+  if (!/^[a-z][a-z0-9_]{0,63}$/.test(normalized)) return null
+
+  return normalized
+}
+
 function normalizeInlineText(value) {
   return String(value || '')
     .replace(/\r\n/g, '\n')
@@ -163,11 +177,6 @@ function sanitizeSchema(candidate, packet) {
   return next.kind ? next : null
 }
 
-function sanitizeSchemaId(value) {
-  const normalized = String(value || '').trim().toLowerCase()
-  return SCHEMA_ID_RE.test(normalized) ? normalized : null
-}
-
 function sanitizeSemanticKey(value) {
   const normalized = String(value || '').trim().toLowerCase()
   return SEMANTIC_KEY_RE.test(normalized) ? normalized : null
@@ -231,31 +240,6 @@ function sanitizeSemantic(candidate) {
   }
 
   return next.semantic.class ? next : null
-}
-
-function sanitizeSchema(candidate, packet) {
-  const next = cloneCandidate(candidate)
-  const fallbackModel = sanitizeModelName(packet?.meta?.usedModel, null)
-
-  next.kind = VALID_KINDS.has(next.kind) ? next.kind : null
-  next.source.model = sanitizeModelName(next?.source?.model, fallbackModel)
-  next.source.promptVersion =
-    next?.source?.promptVersion && String(next.source.promptVersion).trim()
-      ? String(next.source.promptVersion).trim()
-      : String(packet?.meta?.promptVersion || 'llm_memory_candidates_v1')
-  next.source.extractor = 'llm'
-
-  if (
-    String(candidate?.source?.model || '').trim() &&
-    next.source.model == null
-  ) {
-    next.flags = Array.from(new Set([
-      ...safeFlags(next),
-      'broken_source_model'
-    ]))
-  }
-
-  return next.kind ? next : null
 }
 
 function collectSemanticIds(candidate) {
@@ -459,10 +443,6 @@ function refsChanged(before, after) {
 
 function flagCandidate(candidate) {
   let next = cloneCandidate(candidate)
-
-  if (hasInvalidSemanticTags(candidate) && !safeFlags(next).includes('invalid_semantic_tags')) {
-    next = withFlag(next, 'invalid_semantic_tags')
-  }
 
   if (hasWeakReferenceGrounding(candidate)) {
     next = withFlag(next, 'weak_reference_grounding')

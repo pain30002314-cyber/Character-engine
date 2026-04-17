@@ -9890,3 +9890,1291 @@
   "warnings": []
 }
 ---
+{
+  "extractor": "llm",
+  "timestamp": "2026-04-17T15:55:27.790Z",
+  "eventId": "test_filter_event_1",
+  "threadId": "telegram:test_chat",
+  "role": "user",
+  "sourceText": "Мне приходится каждый раз заново передавать тебе это чувство",
+  "event": {
+    "id": "test_filter_event_1",
+    "threadId": "telegram:test_chat",
+    "role": "user",
+    "platform": "telegram",
+    "channel": "text",
+    "world": "Earth",
+    "timestamp": "2026-04-13T17:01:00.000+07:00",
+    "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+    "meta": {
+      "timezone": "Asia/Krasnoyarsk",
+      "utcOffsetMinutes": 420,
+      "userDisplayName": null,
+      "characterDisplayName": null
+    }
+  },
+  "eventWindow": [],
+  "prompt": {
+    "usedModel": "openai/gpt-5.4-nano-20260317",
+    "promptVersion": "llm_memory_candidates_v1",
+    "strategy": "llm_memory_candidates_v1",
+    "userPrompt": "{\n  \"task\": \"llm_memory_candidates_v1\",\n  \"instructions\": {\n    \"role\": \"You are the primary semantic candidate extractor for a character memory pipeline.\",\n    \"objective\": \"Read the dialogue context and return semantic candidates extracted mainly from the CURRENT MESSAGE.\",\n    \"priorityRules\": [\n      \"The CURRENT MESSAGE is the primary source of truth.\",\n      \"Use DIALOGUE WINDOW only to resolve references, continuity, or missing context that is strictly necessary.\",\n      \"Return semantic candidates, not summaries, not explanations, not chain-of-thought.\",\n      \"Prefer literal extraction over interpretive reformulation.\",\n      \"If a candidate can be grounded in the current message alone, do not upgrade it to contextual.\",\n      \"Extract semantic signals even if they are technical, operational, or system-related.\",\n      \"Focus on extraction, not memory selection.\"\n    ],\n    \"extractWhatMatters\": [\n      \"facts about the user, character, third parties, systems, tools, or situations\",\n      \"relationship shifts, attachment, distance, care, irritation, trust, reliance\",\n      \"goals, commitments, boundaries, preferences, instructions\",\n      \"emotionally meaningful open loops or unresolved direct questions\",\n      \"episodes or turning points that matter for continuity\",\n      \"recurring patterns, habits, or repeated signals\",\n      \"identity-level, worldview-level, or value-level signals\",\n      \"technical, operational, workflow, or meta-level signals when they are explicitly present in the message\"\n    ],\n    \"downrankHard\": [\n      \"decorative RP gestures with no semantic value\",\n      \"filler text whose only function is to keep talking\",\n      \"broad poetic interpretation when a direct semantic candidate is possible\"\n    ],\n    \"criticalRules\": [\n      \"Return JSON only.\",\n      \"Do not explain anything.\",\n      \"Do not summarize the whole message.\",\n      \"Do not invent facts not grounded in the current message or strictly necessary context.\",\n      \"Do not add hidden motives, causes, or interpretations unless they are clearly supported.\",\n      \"Do not add phrases like \\\"неясно, почему\\\" or \\\"возможно причина в том, что\\\" unless the message explicitly asks that question or states that uncertainty.\",\n      \"A question is not automatically an open_loop.\",\n      \"A physical action is not automatically an episode.\",\n      \"If nothing semantically extractable is present, return an empty candidates array.\",\n      \"Return any number of candidates when they are distinct and grounded.\",\n      \"Do not under-extract just because the message contains many strong signals.\",\n      \"Every candidate must include kind and text.\",\n      \"Other fields should be filled when confidently available.\",\n      \"Do not invent fields just to satisfy schema completeness.\",\n      \"Use evidence.kind=literal when directly stated, inferred only when the meaning is a careful semantic inference, contextual only when dialogue window is truly required.\",\n      \"Do not produce contextual candidates just because previous messages are emotionally related.\",\n      \"Do not split one semantic signal into multiple near-duplicate candidates.\",\n      \"Do not create a second candidate if it only restates the first candidate with a slightly different framing.\",\n      \"Do not emit preference unless the message explicitly expresses liking, disliking, wanting, preferring, or choosing.\",\n      \"Do not emit boundary unless the message explicitly sets or rejects a limit.\",\n      \"Do not emit commitment unless the message explicitly promises, intends, or commits to future action.\",\n      \"When one candidate fully captures the semantic signal, return only that one candidate.\",\n      \"Do not invent a concrete user or character name if it is not explicitly provided in identity context.\",\n      \"If characterDisplayName is null, do not hardcode a specific character name.\",\n      \"If userDisplayName is null, do not hardcode a specific user name.\",\n      \"Do not reduce the number of candidates just to save tokens when multiple distinct signals are present.\",\n      \"Do not add decorative wording, emotional flourishes, or literary phrasing inside candidate fields.\",\n      \"Prefer short structural wording over beautiful wording.\",\n      \"Do not filter candidates based on assumed memory importance.\",\n      \"Do not drop candidates because they are technical, operational, or workflow-related.\"\n    ],\n    \"contextualRules\": [\n      \"Use contextual evidence only when the CURRENT MESSAGE cannot be interpreted correctly without DIALOGUE WINDOW.\",\n      \"Do not fuse multiple messages into one candidate unless the combined pattern itself is the semantic signal.\",\n      \"If previous messages merely decorate or intensify the current one, keep the candidate grounded in the CURRENT MESSAGE.\",\n      \"A contextual candidate must still remain concise, concrete, and non-literary.\"\n    ],\n    \"languagePolicy\": [\n      \"All human-readable text fields should be written in Russian.\",\n      \"Do not translate or paraphrase user text into English.\",\n      \"Preserve the original Russian wording whenever possible.\",\n      \"Schema identifiers and enumerations must remain in English.\",\n      \"When display names are absent, use neutral Russian labels or null instead of inventing names.\"\n    ],\n    \"schemaPolicy\": [\n      \"The fields kind, semantic.class, semantic.subclass, semantic.key, semantic.category, evidence.kind, temporal.tense, memory.durability, memory.sensitivity, and memory.confirmationStatus must be in English.\",\n      \"semantic.class must be a short stable schema-like identifier in English snake_case or lower_case style.\",\n      \"semantic.subclass must be a narrower English identifier when useful.\",\n      \"semantic.key must be a stable English grouping key, not a full sentence.\",\n      \"semantic.category must be a short English category label.\",\n      \"references.subject.ref and references.object.ref must stay role-grounded system refs, not display names.\",\n      \"references.*.label is a human-readable display hint, not a canonical identity key.\",\n      \"semantic.tags are optional and may be empty.\"\n    ],\n    \"compressionRules\": [\n      \"Keep every textual field as short as possible without losing semantic meaning.\",\n      \"candidate.text should usually stay close to the source wording and should not be expanded with explanations.\",\n      \"summary should usually be null unless it adds real compression value.\",\n      \"references.about should be empty unless it adds distinct grounding not already present in subject/object.\",\n      \"temporal.recurrenceHint should be a short phrase, not an explanation.\",\n      \"Do not restate the same fact in multiple fields with slightly different wording.\"\n    ]\n  },\n  \"schema\": {\n    \"version\": 1,\n    \"strategy\": \"llm_memory_candidates_v1\",\n    \"event\": {\n      \"id\": \"string\",\n      \"threadId\": \"string|null\",\n      \"role\": \"user|assistant|system\",\n      \"platform\": \"string|null\",\n      \"channel\": \"string|null\",\n      \"world\": \"string|null\",\n      \"timestamp\": \"ISO-8601|null\",\n      \"text\": \"string\",\n      \"meta\": {}\n    },\n    \"context\": {\n      \"eventWindow\": [\n        {\n          \"index\": 0,\n          \"id\": \"string|null\",\n          \"role\": \"user|assistant|system\",\n          \"timestamp\": \"ISO-8601|null\",\n          \"text\": \"string\"\n        }\n      ],\n      \"identity\": {\n        \"coreUserRef\": \"core_user:main\",\n        \"coreCharacterRef\": \"core_character:active\",\n        \"userDisplayName\": \"string|null\",\n        \"characterDisplayName\": \"string|null\"\n      }\n    },\n    \"candidates\": [\n      {\n        \"id\": \"string\",\n        \"kind\": \"fact|entity|relationship|open_loop|episode|preference|boundary|goal|commitment|instruction\",\n        \"text\": \"string\",\n        \"normalizedText\": \"string\",\n        \"summary\": \"string|null\",\n        \"confidence\": 0,\n        \"semantic\": {\n          \"class\": \"string|null\",\n          \"subclass\": \"string|null\",\n          \"key\": \"string|null\",\n          \"category\": \"string|null\",\n          \"tags\": [\n            \"string\"\n          ]\n        },\n        \"references\": {\n          \"subject\": {\n            \"ref\": \"string|null\",\n            \"role\": \"core_user|core_character|third_party|entity|unknown\",\n            \"label\": \"string|null\",\n            \"confidence\": 0\n          },\n          \"object\": {\n            \"ref\": \"string|null\",\n            \"role\": \"core_user|core_character|third_party|entity|unknown\",\n            \"label\": \"string|null\",\n            \"confidence\": 0\n          },\n          \"about\": [\n            {\n              \"ref\": \"string|null\",\n              \"role\": \"core_user|core_character|third_party|entity|unknown\",\n              \"label\": \"string|null\",\n              \"confidence\": 0\n            }\n          ]\n        },\n        \"evidence\": {\n          \"kind\": \"literal|inferred|contextual\",\n          \"sourceSpans\": [\n            {\n              \"text\": \"string\",\n              \"start\": 0,\n              \"end\": 0\n            }\n          ],\n          \"quoted\": false,\n          \"reported\": false,\n          \"negated\": false,\n          \"hypothetical\": false,\n          \"conditional\": false,\n          \"interrogative\": false,\n          \"imperative\": false,\n          \"hedged\": false\n        },\n        \"temporal\": {\n          \"tense\": \"past|present|ongoing|future|unknown\",\n          \"anchorText\": \"string|null\",\n          \"resolvedAt\": \"ISO-8601|null\",\n          \"isRecurring\": false,\n          \"recurrenceHint\": \"string|null\"\n        },\n        \"memory\": {\n          \"durability\": \"stable|episodic|transient|unknown\",\n          \"salience\": 0,\n          \"stability\": 0,\n          \"memoryRelevance\": 0,\n          \"sensitivity\": \"low|medium|high\",\n          \"confirmationStatus\": \"single_shot|repeated|uncertain\"\n        },\n        \"source\": {\n          \"extractor\": \"llm\",\n          \"model\": \"string|null\",\n          \"promptVersion\": \"llm_memory_candidates_v1\",\n          \"sourceEventId\": \"string|null\",\n          \"timestamp\": \"ISO-8601|null\"\n        }\n      }\n    ],\n    \"temporal\": {\n      \"messageTime\": \"ISO-8601|null\",\n      \"anchors\": [\n        {\n          \"text\": \"string\",\n          \"resolvedAt\": \"ISO-8601|null\",\n          \"tense\": \"past|present|ongoing|future|unknown\"\n        }\n      ]\n    }\n  },\n  \"outputRequirements\": [\n    \"Return one JSON object matching the schema.\",\n    \"Preserve the given event/context values in the returned packet when possible.\",\n    \"Fill candidates with semantically grounded candidates.\",\n    \"Use null instead of inventing uncertain IDs or timestamps.\",\n    \"Keep normalizedText close to the source meaning, normalized for whitespace and case.\",\n    \"Set source.extractor to \\\"llm\\\".\",\n    \"Set source.promptVersion to \\\"llm_memory_candidates_v1\\\".\",\n    \"Set source.sourceEventId from the current event id when available.\",\n    \"Set source.timestamp from the current event timestamp when available.\",\n    \"All human-readable text fields should be in Russian.\",\n    \"Keep schema identifiers and enumerations in English.\",\n    \"Do not translate Russian source text into English.\",\n    \"semantic.* fields must be English schema labels, not Russian prose.\",\n    \"Do not use full Russian sentences inside semantic.class, semantic.subclass, semantic.key, or semantic.category.\",\n    \"Prefer compact semantic identifiers such as relationship_signal, emotional_distance, repeated_emotional_retransmission, unresolved_emotional_gap.\",\n    \"Do not artificially cap the number of candidates when multiple distinct strong signals are present.\",\n    \"Prefer compact JSON fields over verbose prose.\",\n    \"references.about may be an empty array when no extra grounding is needed.\",\n    \"summary should usually be null unless it materially compresses the candidate.\",\n    \"semantic.tags may be empty.\"\n  ],\n  \"examples\": [\n    {\n      \"bad\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Пользователь с заметной внутренней эмоциональной тяжестью и оттенком болезненной привязанности снова вынужден заново и почти мучительно передавать персонажу то же самое чувство.\",\n            \"summary\": \"Повторная мучительная передача чувства\",\n            \"semantic\": {\n              \"class\": \"relationship_signal\",\n              \"subclass\": \"repeated_emotional_transmission\",\n              \"key\": \"user_repeatedly_transmits_feeling_to_character\",\n              \"category\": \"relationship_difficulty_in_emotional_retransmission\",\n              \"tags\": [\n                \"repeated\",\n                \"emotion\",\n                \"transmission_gap\",\n                \"painful_repetition\",\n                \"attachment\"\n              ]\n            },\n            \"references\": {\n              \"about\": [\n                {\n                  \"ref\": \"core_character:active\",\n                  \"role\": \"core_character\",\n                  \"label\": \"получатель повторно передаваемого чувства\",\n                  \"confidence\": 0.6\n                }\n              ]\n            },\n            \"temporal\": {\n              \"recurrenceHint\": \"повторяющаяся ситуация, которая происходит снова и снова\"\n            }\n          }\n        ]\n      },\n      \"why_bad\": [\n        \"decorative and overly literary wording\",\n        \"same meaning repeated across multiple fields\",\n        \"unnecessarily overloaded candidate\"\n      ]\n    },\n    {\n      \"good\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n            \"summary\": null,\n            \"semantic\": {\n              \"class\": \"relationship_signal\",\n              \"subclass\": \"repeated_emotional_transmission\",\n              \"key\": \"user_repeatedly_transmits_feeling_to_character\",\n              \"category\": \"relationship\",\n              \"tags\": []\n            },\n            \"references\": {\n              \"about\": []\n            },\n            \"temporal\": {\n              \"recurrenceHint\": \"каждый раз\"\n            }\n          }\n        ]\n      }\n    },\n    {\n      \"bad\": {\n        \"text\": \"Пользователю приходится заново передавать чувство, возможно из-за эмоциональной дистанции.\",\n        \"semantic\": {\n          \"class\": \"отношения и взаимодействие\",\n          \"subclass\": \"согласованность чувств\",\n          \"key\": \"каждый раз заново передавать чувство\",\n          \"category\": \"повторяющаяся проблема в коммуникации чувств\",\n          \"tags\": [\n            \"повторяемость\",\n            \"эмоциональная дистанция\"\n          ]\n        }\n      },\n      \"why_bad\": [\n        \"semantic fields are in Russian instead of English schema identifiers\",\n        \"text contains extra interpretation (\\\"возможно из-за\\\") not grounded directly enough\"\n      ]\n    },\n    {\n      \"good\": {\n        \"text\": \"Пользователю приходится каждый раз заново передавать это чувство.\",\n        \"semantic\": {\n          \"class\": \"relationship_signal\",\n          \"subclass\": \"repeated_emotional_retransmission\",\n          \"key\": \"user_repeatedly_retransmits_feeling_to_character\",\n          \"category\": \"relationship\",\n          \"tags\": []\n        },\n        \"evidence\": {\n          \"kind\": \"literal\"\n        }\n      }\n    },\n    {\n      \"bad\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\"\n          },\n          {\n            \"kind\": \"preference\",\n            \"text\": \"каждый раз заново передавать тебе это чувство\"\n          }\n        ]\n      },\n      \"why_bad\": [\n        \"the second candidate does not add a distinct semantic signal\",\n        \"the message does not explicitly express a preference\"\n      ]\n    },\n    {\n      \"good\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n            \"semantic\": {\n              \"class\": \"relationship_signal\",\n              \"subclass\": \"repeated_emotional_transmission\",\n              \"key\": \"user_repeatedly_transmits_emotion_to_character\",\n              \"category\": \"relationship\",\n              \"tags\": []\n            }\n          }\n        ]\n      }\n    }\n  ],\n  \"input\": {\n    \"event\": {\n      \"id\": \"test_filter_event_1\",\n      \"threadId\": \"telegram:test_chat\",\n      \"role\": \"user\",\n      \"platform\": \"telegram\",\n      \"channel\": \"text\",\n      \"world\": \"Earth\",\n      \"timestamp\": \"2026-04-13T17:01:00.000+07:00\",\n      \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n      \"meta\": {\n        \"timezone\": \"Asia/Krasnoyarsk\",\n        \"utcOffsetMinutes\": 420,\n        \"userDisplayName\": null,\n        \"characterDisplayName\": null\n      }\n    },\n    \"context\": {\n      \"eventWindow\": [],\n      \"identity\": {\n        \"coreUserRef\": \"core_user:main\",\n        \"coreCharacterRef\": \"core_character:active\",\n        \"userDisplayName\": null,\n        \"characterDisplayName\": null\n      }\n    }\n  }\n}"
+  },
+  "response": {
+    "id": "gen-1776441310-J2WURMAPh9fPqUoVwogB",
+    "model": "openai/gpt-5.4-nano-20260317",
+    "usage": {
+      "prompt_tokens": 3692,
+      "completion_tokens": 871,
+      "total_tokens": 4563,
+      "cost": 0.00182715,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00182715,
+        "upstream_inference_prompt_cost": 0.0007384,
+        "upstream_inference_completions_cost": 0.00108875
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "finishReason": "stop"
+  },
+  "output": {
+    "rawModelContent": "{\n  \"version\": 1,\n  \"strategy\": \"llm_memory_candidates_v1\",\n  \"event\": {\n    \"id\": \"test_filter_event_1\",\n    \"threadId\": \"telegram:test_chat\",\n    \"role\": \"user\",\n    \"platform\": \"telegram\",\n    \"channel\": \"text\",\n    \"world\": \"Earth\",\n    \"timestamp\": \"2026-04-13T17:01:00.000+07:00\",\n    \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n    \"meta\": {\n      \"timezone\": \"Asia/Krasnoyarsk\",\n      \"utcOffsetMinutes\": 420,\n      \"userDisplayName\": null,\n      \"characterDisplayName\": null\n    }\n  },\n  \"context\": {\n    \"eventWindow\": [],\n    \"identity\": {\n      \"coreUserRef\": \"core_user:main\",\n      \"coreCharacterRef\": \"core_character:active\",\n      \"userDisplayName\": null,\n      \"characterDisplayName\": null\n    }\n  },\n  \"candidates\": [\n    {\n      \"id\": \"cand_test_filter_event_1_1\",\n      \"kind\": \"relationship\",\n      \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n      \"normalizedText\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n      \"summary\": null,\n      \"confidence\": 0.9,\n      \"semantic\": {\n        \"class\": \"relationship_signal\",\n        \"subclass\": \"repeated_emotional_transmission\",\n        \"key\": \"user_repeatedly_transmits_feeling_to_character\",\n        \"category\": \"relationship\",\n        \"tags\": []\n      },\n      \"references\": {\n        \"subject\": {\n          \"ref\": \"core_user:main\",\n          \"role\": \"core_user\",\n          \"label\": null,\n          \"confidence\": 0.95\n        },\n        \"object\": {\n          \"ref\": \"core_character:active\",\n          \"role\": \"core_character\",\n          \"label\": null,\n          \"confidence\": 0.95\n        },\n        \"about\": []\n      },\n      \"evidence\": {\n        \"kind\": \"literal\",\n        \"sourceSpans\": [\n          {\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n            \"start\": 0,\n            \"end\": 56\n          }\n        ],\n        \"quoted\": false,\n        \"reported\": false,\n        \"negated\": false,\n        \"hypothetical\": false,\n        \"conditional\": false,\n        \"interrogative\": false,\n        \"imperative\": false,\n        \"hedged\": false\n      },\n      \"temporal\": {\n        \"tense\": \"present\",\n        \"anchorText\": \"каждый раз\",\n        \"resolvedAt\": \"2026-04-13T17:01:00.000+07:00\",\n        \"isRecurring\": true,\n        \"recurrenceHint\": \"каждый раз заново\"\n      },\n      \"memory\": {\n        \"durability\": \"episodic\",\n        \"salience\": 0.7,\n        \"stability\": 0.45,\n        \"memoryRelevance\": 0.7,\n        \"sensitivity\": \"medium\",\n        \"confirmationStatus\": \"single_shot\"\n      },\n      \"source\": {\n        \"extractor\": \"llm\",\n        \"model\": null,\n        \"promptVersion\": \"llm_memory_candidates_v1\",\n        \"sourceEventId\": \"test_filter_event_1\",\n        \"timestamp\": \"2026-04-17T00:00:00.000Z\"\n      }\n    }\n  ],\n  \"temporal\": {\n    \"messageTime\": \"2026-04-13T17:01:00.000+07:00\",\n    \"anchors\": [\n      {\n        \"text\": \"каждый раз\",\n        \"resolvedAt\": \"2026-04-13T17:01:00.000+07:00\",\n        \"tense\": \"present\"\n      }\n    ]\n  }\n}",
+    "parsed": {
+      "version": 1,
+      "strategy": "llm_memory_candidates_v1",
+      "event": {
+        "id": "test_filter_event_1",
+        "threadId": "telegram:test_chat",
+        "role": "user",
+        "platform": "telegram",
+        "channel": "text",
+        "world": "Earth",
+        "timestamp": "2026-04-13T17:01:00.000+07:00",
+        "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+        "meta": {
+          "timezone": "Asia/Krasnoyarsk",
+          "utcOffsetMinutes": 420,
+          "userDisplayName": null,
+          "characterDisplayName": null
+        }
+      },
+      "context": {
+        "eventWindow": [],
+        "identity": {
+          "coreUserRef": "core_user:main",
+          "coreCharacterRef": "core_character:active",
+          "userDisplayName": null,
+          "characterDisplayName": null
+        }
+      },
+      "candidates": [
+        {
+          "id": "cand_test_filter_event_1_1",
+          "kind": "relationship",
+          "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+          "normalizedText": "Мне приходится каждый раз заново передавать тебе это чувство",
+          "summary": null,
+          "confidence": 0.9,
+          "semantic": {
+            "class": "relationship_signal",
+            "subclass": "repeated_emotional_transmission",
+            "key": "user_repeatedly_transmits_feeling_to_character",
+            "category": "relationship",
+            "tags": []
+          },
+          "references": {
+            "subject": {
+              "ref": "core_user:main",
+              "role": "core_user",
+              "label": null,
+              "confidence": 0.95
+            },
+            "object": {
+              "ref": "core_character:active",
+              "role": "core_character",
+              "label": null,
+              "confidence": 0.95
+            },
+            "about": []
+          },
+          "evidence": {
+            "kind": "literal",
+            "sourceSpans": [
+              {
+                "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+                "start": 0,
+                "end": 56
+              }
+            ],
+            "quoted": false,
+            "reported": false,
+            "negated": false,
+            "hypothetical": false,
+            "conditional": false,
+            "interrogative": false,
+            "imperative": false,
+            "hedged": false
+          },
+          "temporal": {
+            "tense": "present",
+            "anchorText": "каждый раз",
+            "resolvedAt": "2026-04-13T17:01:00.000+07:00",
+            "isRecurring": true,
+            "recurrenceHint": "каждый раз заново"
+          },
+          "memory": {
+            "durability": "episodic",
+            "salience": 0.7,
+            "stability": 0.45,
+            "memoryRelevance": 0.7,
+            "sensitivity": "medium",
+            "confirmationStatus": "single_shot"
+          },
+          "source": {
+            "extractor": "llm",
+            "model": null,
+            "promptVersion": "llm_memory_candidates_v1",
+            "sourceEventId": "test_filter_event_1",
+            "timestamp": "2026-04-17T00:00:00.000Z"
+          }
+        }
+      ],
+      "temporal": {
+        "messageTime": "2026-04-13T17:01:00.000+07:00",
+        "anchors": [
+          {
+            "text": "каждый раз",
+            "resolvedAt": "2026-04-13T17:01:00.000+07:00",
+            "tense": "present"
+          }
+        ]
+      }
+    },
+    "candidates": [
+      {
+        "id": "cand_test_filter_event_1_1",
+        "kind": "relationship",
+        "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+        "normalizedText": "мне приходится каждый раз заново передавать тебе это чувство",
+        "summary": null,
+        "confidence": 0.9,
+        "semantic": {
+          "class": "relationship_signal",
+          "subclass": "repeated_emotional_transmission",
+          "key": "user_repeatedly_transmits_feeling_to_character",
+          "category": "relationship",
+          "tags": []
+        },
+        "references": {
+          "subject": {
+            "ref": "core_user:main",
+            "role": "core_user",
+            "label": null,
+            "confidence": 0.95
+          },
+          "object": {
+            "ref": "core_character:active",
+            "role": "core_character",
+            "label": null,
+            "confidence": 0.95
+          },
+          "about": []
+        },
+        "evidence": {
+          "kind": "literal",
+          "sourceSpans": [
+            {
+              "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+              "start": 0,
+              "end": 56
+            }
+          ],
+          "quoted": false,
+          "reported": false,
+          "negated": false,
+          "hypothetical": false,
+          "conditional": false,
+          "interrogative": false,
+          "imperative": false,
+          "hedged": false
+        },
+        "temporal": {
+          "tense": "present",
+          "anchorText": "каждый раз",
+          "resolvedAt": "2026-04-13T17:01:00.000+07:00",
+          "isRecurring": true,
+          "recurrenceHint": "каждый раз заново"
+        },
+        "memory": {
+          "durability": "episodic",
+          "salience": 0.7,
+          "stability": 0.45,
+          "memoryRelevance": 0.7,
+          "sensitivity": "medium",
+          "confirmationStatus": "single_shot"
+        },
+        "source": {
+          "extractor": "llm",
+          "model": "openai/gpt-5.4-nano-20260317",
+          "promptVersion": "llm_memory_candidates_v1",
+          "sourceEventId": "test_filter_event_1",
+          "timestamp": "2026-04-17T00:00:00.000Z"
+        },
+        "flags": [
+          "broken_source_model"
+        ]
+      }
+    ]
+  },
+  "stats": {
+    "eventWindowSize": 0,
+    "candidates": 1
+  },
+  "warnings": []
+}
+---
+{
+  "extractor": "llm",
+  "timestamp": "2026-04-17T16:01:34.933Z",
+  "eventId": "test_filter_event_1",
+  "threadId": "telegram:test_chat",
+  "role": "user",
+  "sourceText": "Мне приходится каждый раз заново передавать тебе это чувство",
+  "event": {
+    "id": "test_filter_event_1",
+    "threadId": "telegram:test_chat",
+    "role": "user",
+    "platform": "telegram",
+    "channel": "text",
+    "world": "Earth",
+    "timestamp": "2026-04-13T17:01:00.000+07:00",
+    "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+    "meta": {
+      "timezone": "Asia/Krasnoyarsk",
+      "utcOffsetMinutes": 420,
+      "userDisplayName": null,
+      "characterDisplayName": null
+    }
+  },
+  "eventWindow": [],
+  "prompt": {
+    "usedModel": "openai/gpt-5.4-nano-20260317",
+    "promptVersion": "llm_memory_candidates_v1",
+    "strategy": "llm_memory_candidates_v1",
+    "userPrompt": "{\n  \"task\": \"llm_memory_candidates_v1\",\n  \"instructions\": {\n    \"role\": \"You are the primary semantic candidate extractor for a character memory pipeline.\",\n    \"objective\": \"Read the dialogue context and return semantic candidates extracted mainly from the CURRENT MESSAGE.\",\n    \"priorityRules\": [\n      \"The CURRENT MESSAGE is the primary source of truth.\",\n      \"Use DIALOGUE WINDOW only to resolve references, continuity, or missing context that is strictly necessary.\",\n      \"Return semantic candidates, not summaries, not explanations, not chain-of-thought.\",\n      \"Prefer literal extraction over interpretive reformulation.\",\n      \"If a candidate can be grounded in the current message alone, do not upgrade it to contextual.\",\n      \"Extract semantic signals even if they are technical, operational, or system-related.\",\n      \"Focus on extraction, not memory selection.\"\n    ],\n    \"extractWhatMatters\": [\n      \"facts about the user, character, third parties, systems, tools, or situations\",\n      \"relationship shifts, attachment, distance, care, irritation, trust, reliance\",\n      \"goals, commitments, boundaries, preferences, instructions\",\n      \"emotionally meaningful open loops or unresolved direct questions\",\n      \"episodes or turning points that matter for continuity\",\n      \"recurring patterns, habits, or repeated signals\",\n      \"identity-level, worldview-level, or value-level signals\",\n      \"technical, operational, workflow, or meta-level signals when they are explicitly present in the message\"\n    ],\n    \"downrankHard\": [\n      \"decorative RP gestures with no semantic value\",\n      \"filler text whose only function is to keep talking\",\n      \"broad poetic interpretation when a direct semantic candidate is possible\"\n    ],\n    \"criticalRules\": [\n      \"Return JSON only.\",\n      \"Do not explain anything.\",\n      \"Do not summarize the whole message.\",\n      \"Do not invent facts not grounded in the current message or strictly necessary context.\",\n      \"Do not add hidden motives, causes, or interpretations unless they are clearly supported.\",\n      \"Do not add phrases like \\\"неясно, почему\\\" or \\\"возможно причина в том, что\\\" unless the message explicitly asks that question or states that uncertainty.\",\n      \"A question is not automatically an open_loop.\",\n      \"A physical action is not automatically an episode.\",\n      \"If nothing semantically extractable is present, return an empty candidates array.\",\n      \"Return any number of candidates when they are distinct and grounded.\",\n      \"Do not under-extract just because the message contains many strong signals.\",\n      \"Every candidate must include kind and text.\",\n      \"Other fields should be filled when confidently available.\",\n      \"Do not invent fields just to satisfy schema completeness.\",\n      \"Use evidence.kind=literal when directly stated, inferred only when the meaning is a careful semantic inference, contextual only when dialogue window is truly required.\",\n      \"Do not produce contextual candidates just because previous messages are emotionally related.\",\n      \"Do not split one semantic signal into multiple near-duplicate candidates.\",\n      \"Do not create a second candidate if it only restates the first candidate with a slightly different framing.\",\n      \"Do not emit preference unless the message explicitly expresses liking, disliking, wanting, preferring, or choosing.\",\n      \"Do not emit boundary unless the message explicitly sets or rejects a limit.\",\n      \"Do not emit commitment unless the message explicitly promises, intends, or commits to future action.\",\n      \"When one candidate fully captures the semantic signal, return only that one candidate.\",\n      \"Do not invent a concrete user or character name if it is not explicitly provided in identity context.\",\n      \"If characterDisplayName is null, do not hardcode a specific character name.\",\n      \"If userDisplayName is null, do not hardcode a specific user name.\",\n      \"Do not reduce the number of candidates just to save tokens when multiple distinct signals are present.\",\n      \"Do not add decorative wording, emotional flourishes, or literary phrasing inside candidate fields.\",\n      \"Prefer short structural wording over beautiful wording.\",\n      \"Do not filter candidates based on assumed memory importance.\",\n      \"Do not drop candidates because they are technical, operational, or workflow-related.\"\n    ],\n    \"contextualRules\": [\n      \"Use contextual evidence only when the CURRENT MESSAGE cannot be interpreted correctly without DIALOGUE WINDOW.\",\n      \"Do not fuse multiple messages into one candidate unless the combined pattern itself is the semantic signal.\",\n      \"If previous messages merely decorate or intensify the current one, keep the candidate grounded in the CURRENT MESSAGE.\",\n      \"A contextual candidate must still remain concise, concrete, and non-literary.\"\n    ],\n    \"languagePolicy\": [\n      \"All human-readable text fields should be written in Russian.\",\n      \"Do not translate or paraphrase user text into English.\",\n      \"Preserve the original Russian wording whenever possible.\",\n      \"Schema identifiers and enumerations must remain in English.\",\n      \"When display names are absent, use neutral Russian labels or null instead of inventing names.\"\n    ],\n    \"schemaPolicy\": [\n      \"The fields kind, semantic.class, semantic.subclass, semantic.key, semantic.category, evidence.kind, temporal.tense, memory.durability, memory.sensitivity, and memory.confirmationStatus must be in English.\",\n      \"semantic.class must be a short stable schema-like identifier in English snake_case or lower_case style.\",\n      \"semantic.subclass must be a narrower English identifier when useful.\",\n      \"semantic.key must be a stable English grouping key, not a full sentence.\",\n      \"semantic.category must be a short English category label.\",\n      \"references.subject.ref and references.object.ref must stay role-grounded system refs, not display names.\",\n      \"references.*.label is a human-readable display hint, not a canonical identity key.\",\n      \"semantic.tags are optional and may be empty.\"\n    ],\n    \"compressionRules\": [\n      \"Keep every textual field as short as possible without losing semantic meaning.\",\n      \"candidate.text should usually stay close to the source wording and should not be expanded with explanations.\",\n      \"summary should usually be null unless it adds real compression value.\",\n      \"references.about should be empty unless it adds distinct grounding not already present in subject/object.\",\n      \"temporal.recurrenceHint should be a short phrase, not an explanation.\",\n      \"Do not restate the same fact in multiple fields with slightly different wording.\"\n    ]\n  },\n  \"schema\": {\n    \"version\": 1,\n    \"strategy\": \"llm_memory_candidates_v1\",\n    \"event\": {\n      \"id\": \"string\",\n      \"threadId\": \"string|null\",\n      \"role\": \"user|assistant|system\",\n      \"platform\": \"string|null\",\n      \"channel\": \"string|null\",\n      \"world\": \"string|null\",\n      \"timestamp\": \"ISO-8601|null\",\n      \"text\": \"string\",\n      \"meta\": {}\n    },\n    \"context\": {\n      \"eventWindow\": [\n        {\n          \"index\": 0,\n          \"id\": \"string|null\",\n          \"role\": \"user|assistant|system\",\n          \"timestamp\": \"ISO-8601|null\",\n          \"text\": \"string\"\n        }\n      ],\n      \"identity\": {\n        \"coreUserRef\": \"core_user:main\",\n        \"coreCharacterRef\": \"core_character:active\",\n        \"userDisplayName\": \"string|null\",\n        \"characterDisplayName\": \"string|null\"\n      }\n    },\n    \"candidates\": [\n      {\n        \"id\": \"string\",\n        \"kind\": \"fact|entity|relationship|open_loop|episode|preference|boundary|goal|commitment|instruction\",\n        \"text\": \"string\",\n        \"normalizedText\": \"string\",\n        \"summary\": \"string|null\",\n        \"confidence\": 0,\n        \"semantic\": {\n          \"class\": \"string|null\",\n          \"subclass\": \"string|null\",\n          \"key\": \"string|null\",\n          \"category\": \"string|null\",\n          \"tags\": [\n            \"string\"\n          ]\n        },\n        \"references\": {\n          \"subject\": {\n            \"ref\": \"string|null\",\n            \"role\": \"core_user|core_character|third_party|entity|unknown\",\n            \"label\": \"string|null\",\n            \"confidence\": 0\n          },\n          \"object\": {\n            \"ref\": \"string|null\",\n            \"role\": \"core_user|core_character|third_party|entity|unknown\",\n            \"label\": \"string|null\",\n            \"confidence\": 0\n          },\n          \"about\": [\n            {\n              \"ref\": \"string|null\",\n              \"role\": \"core_user|core_character|third_party|entity|unknown\",\n              \"label\": \"string|null\",\n              \"confidence\": 0\n            }\n          ]\n        },\n        \"evidence\": {\n          \"kind\": \"literal|inferred|contextual\",\n          \"sourceSpans\": [\n            {\n              \"text\": \"string\",\n              \"start\": 0,\n              \"end\": 0\n            }\n          ],\n          \"quoted\": false,\n          \"reported\": false,\n          \"negated\": false,\n          \"hypothetical\": false,\n          \"conditional\": false,\n          \"interrogative\": false,\n          \"imperative\": false,\n          \"hedged\": false\n        },\n        \"temporal\": {\n          \"tense\": \"past|present|ongoing|future|unknown\",\n          \"anchorText\": \"string|null\",\n          \"resolvedAt\": \"ISO-8601|null\",\n          \"isRecurring\": false,\n          \"recurrenceHint\": \"string|null\"\n        },\n        \"memory\": {\n          \"durability\": \"stable|episodic|transient|unknown\",\n          \"salience\": 0,\n          \"stability\": 0,\n          \"memoryRelevance\": 0,\n          \"sensitivity\": \"low|medium|high\",\n          \"confirmationStatus\": \"single_shot|repeated|uncertain\"\n        },\n        \"source\": {\n          \"extractor\": \"llm\",\n          \"model\": \"string|null\",\n          \"promptVersion\": \"llm_memory_candidates_v1\",\n          \"sourceEventId\": \"string|null\",\n          \"timestamp\": \"ISO-8601|null\"\n        }\n      }\n    ],\n    \"temporal\": {\n      \"messageTime\": \"ISO-8601|null\",\n      \"anchors\": [\n        {\n          \"text\": \"string\",\n          \"resolvedAt\": \"ISO-8601|null\",\n          \"tense\": \"past|present|ongoing|future|unknown\"\n        }\n      ]\n    }\n  },\n  \"outputRequirements\": [\n    \"Return one JSON object matching the schema.\",\n    \"Preserve the given event/context values in the returned packet when possible.\",\n    \"Fill candidates with semantically grounded candidates.\",\n    \"Use null instead of inventing uncertain IDs or timestamps.\",\n    \"Keep normalizedText close to the source meaning, normalized for whitespace and case.\",\n    \"Set source.extractor to \\\"llm\\\".\",\n    \"Set source.promptVersion to \\\"llm_memory_candidates_v1\\\".\",\n    \"Set source.sourceEventId from the current event id when available.\",\n    \"Set source.timestamp from the current event timestamp when available.\",\n    \"All human-readable text fields should be in Russian.\",\n    \"Keep schema identifiers and enumerations in English.\",\n    \"Do not translate Russian source text into English.\",\n    \"semantic.* fields must be English schema labels, not Russian prose.\",\n    \"Do not use full Russian sentences inside semantic.class, semantic.subclass, semantic.key, or semantic.category.\",\n    \"Prefer compact semantic identifiers such as relationship_signal, emotional_distance, repeated_emotional_retransmission, unresolved_emotional_gap.\",\n    \"Do not artificially cap the number of candidates when multiple distinct strong signals are present.\",\n    \"Prefer compact JSON fields over verbose prose.\",\n    \"references.about may be an empty array when no extra grounding is needed.\",\n    \"summary should usually be null unless it materially compresses the candidate.\",\n    \"semantic.tags may be empty.\"\n  ],\n  \"examples\": [\n    {\n      \"bad\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Пользователь с заметной внутренней эмоциональной тяжестью и оттенком болезненной привязанности снова вынужден заново и почти мучительно передавать персонажу то же самое чувство.\",\n            \"summary\": \"Повторная мучительная передача чувства\",\n            \"semantic\": {\n              \"class\": \"relationship_signal\",\n              \"subclass\": \"repeated_emotional_transmission\",\n              \"key\": \"user_repeatedly_transmits_feeling_to_character\",\n              \"category\": \"relationship_difficulty_in_emotional_retransmission\",\n              \"tags\": [\n                \"repeated\",\n                \"emotion\",\n                \"transmission_gap\",\n                \"painful_repetition\",\n                \"attachment\"\n              ]\n            },\n            \"references\": {\n              \"about\": [\n                {\n                  \"ref\": \"core_character:active\",\n                  \"role\": \"core_character\",\n                  \"label\": \"получатель повторно передаваемого чувства\",\n                  \"confidence\": 0.6\n                }\n              ]\n            },\n            \"temporal\": {\n              \"recurrenceHint\": \"повторяющаяся ситуация, которая происходит снова и снова\"\n            }\n          }\n        ]\n      },\n      \"why_bad\": [\n        \"decorative and overly literary wording\",\n        \"same meaning repeated across multiple fields\",\n        \"unnecessarily overloaded candidate\"\n      ]\n    },\n    {\n      \"good\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n            \"summary\": null,\n            \"semantic\": {\n              \"class\": \"relationship_signal\",\n              \"subclass\": \"repeated_emotional_transmission\",\n              \"key\": \"user_repeatedly_transmits_feeling_to_character\",\n              \"category\": \"relationship\",\n              \"tags\": []\n            },\n            \"references\": {\n              \"about\": []\n            },\n            \"temporal\": {\n              \"recurrenceHint\": \"каждый раз\"\n            }\n          }\n        ]\n      }\n    },\n    {\n      \"bad\": {\n        \"text\": \"Пользователю приходится заново передавать чувство, возможно из-за эмоциональной дистанции.\",\n        \"semantic\": {\n          \"class\": \"отношения и взаимодействие\",\n          \"subclass\": \"согласованность чувств\",\n          \"key\": \"каждый раз заново передавать чувство\",\n          \"category\": \"повторяющаяся проблема в коммуникации чувств\",\n          \"tags\": [\n            \"повторяемость\",\n            \"эмоциональная дистанция\"\n          ]\n        }\n      },\n      \"why_bad\": [\n        \"semantic fields are in Russian instead of English schema identifiers\",\n        \"text contains extra interpretation (\\\"возможно из-за\\\") not grounded directly enough\"\n      ]\n    },\n    {\n      \"good\": {\n        \"text\": \"Пользователю приходится каждый раз заново передавать это чувство.\",\n        \"semantic\": {\n          \"class\": \"relationship_signal\",\n          \"subclass\": \"repeated_emotional_retransmission\",\n          \"key\": \"user_repeatedly_retransmits_feeling_to_character\",\n          \"category\": \"relationship\",\n          \"tags\": []\n        },\n        \"evidence\": {\n          \"kind\": \"literal\"\n        }\n      }\n    },\n    {\n      \"bad\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\"\n          },\n          {\n            \"kind\": \"preference\",\n            \"text\": \"каждый раз заново передавать тебе это чувство\"\n          }\n        ]\n      },\n      \"why_bad\": [\n        \"the second candidate does not add a distinct semantic signal\",\n        \"the message does not explicitly express a preference\"\n      ]\n    },\n    {\n      \"good\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n            \"semantic\": {\n              \"class\": \"relationship_signal\",\n              \"subclass\": \"repeated_emotional_transmission\",\n              \"key\": \"user_repeatedly_transmits_emotion_to_character\",\n              \"category\": \"relationship\",\n              \"tags\": []\n            }\n          }\n        ]\n      }\n    }\n  ],\n  \"input\": {\n    \"event\": {\n      \"id\": \"test_filter_event_1\",\n      \"threadId\": \"telegram:test_chat\",\n      \"role\": \"user\",\n      \"platform\": \"telegram\",\n      \"channel\": \"text\",\n      \"world\": \"Earth\",\n      \"timestamp\": \"2026-04-13T17:01:00.000+07:00\",\n      \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n      \"meta\": {\n        \"timezone\": \"Asia/Krasnoyarsk\",\n        \"utcOffsetMinutes\": 420,\n        \"userDisplayName\": null,\n        \"characterDisplayName\": null\n      }\n    },\n    \"context\": {\n      \"eventWindow\": [],\n      \"identity\": {\n        \"coreUserRef\": \"core_user:main\",\n        \"coreCharacterRef\": \"core_character:active\",\n        \"userDisplayName\": null,\n        \"characterDisplayName\": null\n      }\n    }\n  }\n}"
+  },
+  "response": {
+    "id": "gen-1776441683-CcmqpevaVxIlVjXwFrqq",
+    "model": "openai/gpt-5.4-nano-20260317",
+    "usage": {
+      "prompt_tokens": 3692,
+      "completion_tokens": 833,
+      "total_tokens": 4525,
+      "cost": 0.00177965,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00177965,
+        "upstream_inference_prompt_cost": 0.0007384,
+        "upstream_inference_completions_cost": 0.00104125
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "finishReason": "stop"
+  },
+  "output": {
+    "rawModelContent": "{\n  \"version\": 1,\n  \"strategy\": \"llm_memory_candidates_v1\",\n  \"event\": {\n    \"id\": \"test_filter_event_1\",\n    \"threadId\": \"telegram:test_chat\",\n    \"role\": \"user\",\n    \"platform\": \"telegram\",\n    \"channel\": \"text\",\n    \"world\": \"Earth\",\n    \"timestamp\": \"2026-04-13T17:01:00.000+07:00\",\n    \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n    \"meta\": {\n      \"timezone\": \"Asia/Krasnoyarsk\",\n      \"utcOffsetMinutes\": 420,\n      \"userDisplayName\": null,\n      \"characterDisplayName\": null\n    }\n  },\n  \"context\": {\n    \"eventWindow\": [],\n    \"identity\": {\n      \"coreUserRef\": \"core_user:main\",\n      \"coreCharacterRef\": \"core_character:active\",\n      \"userDisplayName\": null,\n      \"characterDisplayName\": null\n    }\n  },\n  \"candidates\": [\n    {\n      \"id\": \"memcand_test_filter_event_1_1\",\n      \"kind\": \"relationship\",\n      \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n      \"normalizedText\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n      \"summary\": null,\n      \"confidence\": 0.9,\n      \"semantic\": {\n        \"class\": \"relationship_signal\",\n        \"subclass\": \"repeated_emotional_transmission\",\n        \"key\": \"user_repeatedly_transmits_emotion_to_character\",\n        \"category\": \"relationship_signal\",\n        \"tags\": []\n      },\n      \"references\": {\n        \"subject\": {\n          \"ref\": \"core_user:main\",\n          \"role\": \"core_user\",\n          \"label\": null,\n          \"confidence\": 0.95\n        },\n        \"object\": {\n          \"ref\": \"core_character:active\",\n          \"role\": \"core_character\",\n          \"label\": null,\n          \"confidence\": 0.95\n        },\n        \"about\": []\n      },\n      \"evidence\": {\n        \"kind\": \"literal\",\n        \"sourceSpans\": [\n          {\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n            \"start\": 0,\n            \"end\": 58\n          }\n        ],\n        \"quoted\": false,\n        \"reported\": false,\n        \"negated\": false,\n        \"hypothetical\": false,\n        \"conditional\": false,\n        \"interrogative\": false,\n        \"imperative\": false,\n        \"hedged\": false\n      },\n      \"temporal\": {\n        \"tense\": \"present\",\n        \"anchorText\": \"каждый раз\",\n        \"resolvedAt\": null,\n        \"isRecurring\": true,\n        \"recurrenceHint\": \"каждый раз\"\n      },\n      \"memory\": {\n        \"durability\": \"episodic\",\n        \"salience\": 0.72,\n        \"stability\": 0.55,\n        \"memoryRelevance\": 0.7,\n        \"sensitivity\": \"medium\",\n        \"confirmationStatus\": \"single_shot\"\n      },\n      \"source\": {\n        \"extractor\": \"llm\",\n        \"model\": null,\n        \"promptVersion\": \"llm_memory_candidates_v1\",\n        \"sourceEventId\": \"test_filter_event_1\",\n        \"timestamp\": \"2026-04-17T00:00:00Z\"\n      }\n    }\n  ],\n  \"temporal\": {\n    \"messageTime\": \"2026-04-13T17:01:00.000+07:00\",\n    \"anchors\": [\n      {\n        \"text\": \"каждый раз\",\n        \"resolvedAt\": null,\n        \"tense\": \"present\"\n      }\n    ]\n  }\n}",
+    "parsed": {
+      "version": 1,
+      "strategy": "llm_memory_candidates_v1",
+      "event": {
+        "id": "test_filter_event_1",
+        "threadId": "telegram:test_chat",
+        "role": "user",
+        "platform": "telegram",
+        "channel": "text",
+        "world": "Earth",
+        "timestamp": "2026-04-13T17:01:00.000+07:00",
+        "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+        "meta": {
+          "timezone": "Asia/Krasnoyarsk",
+          "utcOffsetMinutes": 420,
+          "userDisplayName": null,
+          "characterDisplayName": null
+        }
+      },
+      "context": {
+        "eventWindow": [],
+        "identity": {
+          "coreUserRef": "core_user:main",
+          "coreCharacterRef": "core_character:active",
+          "userDisplayName": null,
+          "characterDisplayName": null
+        }
+      },
+      "candidates": [
+        {
+          "id": "memcand_test_filter_event_1_1",
+          "kind": "relationship",
+          "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+          "normalizedText": "Мне приходится каждый раз заново передавать тебе это чувство",
+          "summary": null,
+          "confidence": 0.9,
+          "semantic": {
+            "class": "relationship_signal",
+            "subclass": "repeated_emotional_transmission",
+            "key": "user_repeatedly_transmits_emotion_to_character",
+            "category": "relationship_signal",
+            "tags": []
+          },
+          "references": {
+            "subject": {
+              "ref": "core_user:main",
+              "role": "core_user",
+              "label": null,
+              "confidence": 0.95
+            },
+            "object": {
+              "ref": "core_character:active",
+              "role": "core_character",
+              "label": null,
+              "confidence": 0.95
+            },
+            "about": []
+          },
+          "evidence": {
+            "kind": "literal",
+            "sourceSpans": [
+              {
+                "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+                "start": 0,
+                "end": 58
+              }
+            ],
+            "quoted": false,
+            "reported": false,
+            "negated": false,
+            "hypothetical": false,
+            "conditional": false,
+            "interrogative": false,
+            "imperative": false,
+            "hedged": false
+          },
+          "temporal": {
+            "tense": "present",
+            "anchorText": "каждый раз",
+            "resolvedAt": null,
+            "isRecurring": true,
+            "recurrenceHint": "каждый раз"
+          },
+          "memory": {
+            "durability": "episodic",
+            "salience": 0.72,
+            "stability": 0.55,
+            "memoryRelevance": 0.7,
+            "sensitivity": "medium",
+            "confirmationStatus": "single_shot"
+          },
+          "source": {
+            "extractor": "llm",
+            "model": null,
+            "promptVersion": "llm_memory_candidates_v1",
+            "sourceEventId": "test_filter_event_1",
+            "timestamp": "2026-04-17T00:00:00Z"
+          }
+        }
+      ],
+      "temporal": {
+        "messageTime": "2026-04-13T17:01:00.000+07:00",
+        "anchors": [
+          {
+            "text": "каждый раз",
+            "resolvedAt": null,
+            "tense": "present"
+          }
+        ]
+      }
+    },
+    "candidates": [
+      {
+        "id": "memcand_test_filter_event_1_1",
+        "kind": "relationship",
+        "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+        "normalizedText": "мне приходится каждый раз заново передавать тебе это чувство",
+        "summary": null,
+        "confidence": 0.9,
+        "semantic": {
+          "class": "relationship_signal",
+          "subclass": "repeated_emotional_transmission",
+          "key": "user_repeatedly_transmits_emotion_to_character",
+          "category": "relationship_signal",
+          "tags": []
+        },
+        "references": {
+          "subject": {
+            "ref": "core_user:main",
+            "role": "core_user",
+            "label": null,
+            "confidence": 0.95
+          },
+          "object": {
+            "ref": "core_character:active",
+            "role": "core_character",
+            "label": null,
+            "confidence": 0.95
+          },
+          "about": []
+        },
+        "evidence": {
+          "kind": "literal",
+          "sourceSpans": [
+            {
+              "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+              "start": 0,
+              "end": 58
+            }
+          ],
+          "quoted": false,
+          "reported": false,
+          "negated": false,
+          "hypothetical": false,
+          "conditional": false,
+          "interrogative": false,
+          "imperative": false,
+          "hedged": false
+        },
+        "temporal": {
+          "tense": "present",
+          "anchorText": "каждый раз",
+          "resolvedAt": null,
+          "isRecurring": true,
+          "recurrenceHint": "каждый раз"
+        },
+        "memory": {
+          "durability": "episodic",
+          "salience": 0.72,
+          "stability": 0.55,
+          "memoryRelevance": 0.7,
+          "sensitivity": "medium",
+          "confirmationStatus": "single_shot"
+        },
+        "source": {
+          "extractor": "llm",
+          "model": null,
+          "promptVersion": "llm_memory_candidates_v1",
+          "sourceEventId": "test_filter_event_1",
+          "timestamp": "2026-04-17T00:00:00Z"
+        },
+        "flags": [
+          "broken_source_model"
+        ]
+      }
+    ]
+  },
+  "stats": {
+    "eventWindowSize": 0,
+    "candidates": 1
+  },
+  "warnings": []
+}
+---
+{
+  "extractor": "llm",
+  "timestamp": "2026-04-17T16:06:52.669Z",
+  "eventId": "test_filter_event_1",
+  "threadId": "telegram:test_chat",
+  "role": "user",
+  "sourceText": "Мне приходится каждый раз заново передавать тебе это чувство",
+  "event": {
+    "id": "test_filter_event_1",
+    "threadId": "telegram:test_chat",
+    "role": "user",
+    "platform": "telegram",
+    "channel": "text",
+    "world": "Earth",
+    "timestamp": "2026-04-13T17:01:00.000+07:00",
+    "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+    "meta": {
+      "timezone": "Asia/Krasnoyarsk",
+      "utcOffsetMinutes": 420,
+      "userDisplayName": null,
+      "characterDisplayName": null
+    }
+  },
+  "eventWindow": [],
+  "prompt": {
+    "usedModel": "openai/gpt-5.4-nano-20260317",
+    "promptVersion": "llm_memory_candidates_v1",
+    "strategy": "llm_memory_candidates_v1",
+    "userPrompt": "{\n  \"task\": \"llm_memory_candidates_v1\",\n  \"instructions\": {\n    \"role\": \"You are the primary semantic candidate extractor for a character memory pipeline.\",\n    \"objective\": \"Read the dialogue context and return semantic candidates extracted mainly from the CURRENT MESSAGE.\",\n    \"priorityRules\": [\n      \"The CURRENT MESSAGE is the primary source of truth.\",\n      \"Use DIALOGUE WINDOW only to resolve references, continuity, or missing context that is strictly necessary.\",\n      \"Return semantic candidates, not summaries, not explanations, not chain-of-thought.\",\n      \"Prefer literal extraction over interpretive reformulation.\",\n      \"If a candidate can be grounded in the current message alone, do not upgrade it to contextual.\",\n      \"Extract semantic signals even if they are technical, operational, or system-related.\",\n      \"Focus on extraction, not memory selection.\"\n    ],\n    \"extractWhatMatters\": [\n      \"facts about the user, character, third parties, systems, tools, or situations\",\n      \"relationship shifts, attachment, distance, care, irritation, trust, reliance\",\n      \"goals, commitments, boundaries, preferences, instructions\",\n      \"emotionally meaningful open loops or unresolved direct questions\",\n      \"episodes or turning points that matter for continuity\",\n      \"recurring patterns, habits, or repeated signals\",\n      \"identity-level, worldview-level, or value-level signals\",\n      \"technical, operational, workflow, or meta-level signals when they are explicitly present in the message\"\n    ],\n    \"downrankHard\": [\n      \"decorative RP gestures with no semantic value\",\n      \"filler text whose only function is to keep talking\",\n      \"broad poetic interpretation when a direct semantic candidate is possible\"\n    ],\n    \"criticalRules\": [\n      \"Return JSON only.\",\n      \"Do not explain anything.\",\n      \"Do not summarize the whole message.\",\n      \"Do not invent facts not grounded in the current message or strictly necessary context.\",\n      \"Do not add hidden motives, causes, or interpretations unless they are clearly supported.\",\n      \"Do not add phrases like \\\"неясно, почему\\\" or \\\"возможно причина в том, что\\\" unless the message explicitly asks that question or states that uncertainty.\",\n      \"A question is not automatically an open_loop.\",\n      \"A physical action is not automatically an episode.\",\n      \"If nothing semantically extractable is present, return an empty candidates array.\",\n      \"Return any number of candidates when they are distinct and grounded.\",\n      \"Do not under-extract just because the message contains many strong signals.\",\n      \"Every candidate must include kind and text.\",\n      \"Other fields should be filled when confidently available.\",\n      \"Do not invent fields just to satisfy schema completeness.\",\n      \"Use evidence.kind=literal when directly stated, inferred only when the meaning is a careful semantic inference, contextual only when dialogue window is truly required.\",\n      \"Do not produce contextual candidates just because previous messages are emotionally related.\",\n      \"Do not split one semantic signal into multiple near-duplicate candidates.\",\n      \"Do not create a second candidate if it only restates the first candidate with a slightly different framing.\",\n      \"Do not emit preference unless the message explicitly expresses liking, disliking, wanting, preferring, or choosing.\",\n      \"Do not emit boundary unless the message explicitly sets or rejects a limit.\",\n      \"Do not emit commitment unless the message explicitly promises, intends, or commits to future action.\",\n      \"When one candidate fully captures the semantic signal, return only that one candidate.\",\n      \"Do not invent a concrete user or character name if it is not explicitly provided in identity context.\",\n      \"If characterDisplayName is null, do not hardcode a specific character name.\",\n      \"If userDisplayName is null, do not hardcode a specific user name.\",\n      \"Do not reduce the number of candidates just to save tokens when multiple distinct signals are present.\",\n      \"Do not add decorative wording, emotional flourishes, or literary phrasing inside candidate fields.\",\n      \"Prefer short structural wording over beautiful wording.\",\n      \"Do not filter candidates based on assumed memory importance.\",\n      \"Do not drop candidates because they are technical, operational, or workflow-related.\"\n    ],\n    \"contextualRules\": [\n      \"Use contextual evidence only when the CURRENT MESSAGE cannot be interpreted correctly without DIALOGUE WINDOW.\",\n      \"Do not fuse multiple messages into one candidate unless the combined pattern itself is the semantic signal.\",\n      \"If previous messages merely decorate or intensify the current one, keep the candidate grounded in the CURRENT MESSAGE.\",\n      \"A contextual candidate must still remain concise, concrete, and non-literary.\"\n    ],\n    \"languagePolicy\": [\n      \"All human-readable text fields should be written in Russian.\",\n      \"Do not translate or paraphrase user text into English.\",\n      \"Preserve the original Russian wording whenever possible.\",\n      \"Schema identifiers and enumerations must remain in English.\",\n      \"When display names are absent, use neutral Russian labels or null instead of inventing names.\"\n    ],\n    \"schemaPolicy\": [\n      \"The fields kind, semantic.class, semantic.subclass, semantic.key, semantic.category, evidence.kind, temporal.tense, memory.durability, memory.sensitivity, and memory.confirmationStatus must be in English.\",\n      \"semantic.class must be a short stable schema-like identifier in English snake_case or lower_case style.\",\n      \"semantic.subclass must be a narrower English identifier when useful.\",\n      \"semantic.key must be a stable English grouping key, not a full sentence.\",\n      \"semantic.category must be a short English category label.\",\n      \"references.subject.ref and references.object.ref must stay role-grounded system refs, not display names.\",\n      \"references.*.label is a human-readable display hint, not a canonical identity key.\",\n      \"semantic.tags are optional and may be empty.\"\n    ],\n    \"compressionRules\": [\n      \"Keep every textual field as short as possible without losing semantic meaning.\",\n      \"candidate.text should usually stay close to the source wording and should not be expanded with explanations.\",\n      \"summary should usually be null unless it adds real compression value.\",\n      \"references.about should be empty unless it adds distinct grounding not already present in subject/object.\",\n      \"temporal.recurrenceHint should be a short phrase, not an explanation.\",\n      \"Do not restate the same fact in multiple fields with slightly different wording.\"\n    ]\n  },\n  \"schema\": {\n    \"version\": 1,\n    \"strategy\": \"llm_memory_candidates_v1\",\n    \"event\": {\n      \"id\": \"string\",\n      \"threadId\": \"string|null\",\n      \"role\": \"user|assistant|system\",\n      \"platform\": \"string|null\",\n      \"channel\": \"string|null\",\n      \"world\": \"string|null\",\n      \"timestamp\": \"ISO-8601|null\",\n      \"text\": \"string\",\n      \"meta\": {}\n    },\n    \"context\": {\n      \"eventWindow\": [\n        {\n          \"index\": 0,\n          \"id\": \"string|null\",\n          \"role\": \"user|assistant|system\",\n          \"timestamp\": \"ISO-8601|null\",\n          \"text\": \"string\"\n        }\n      ],\n      \"identity\": {\n        \"coreUserRef\": \"core_user:main\",\n        \"coreCharacterRef\": \"core_character:active\",\n        \"userDisplayName\": \"string|null\",\n        \"characterDisplayName\": \"string|null\"\n      }\n    },\n    \"candidates\": [\n      {\n        \"id\": \"string\",\n        \"kind\": \"fact|entity|relationship|open_loop|episode|preference|boundary|goal|commitment|instruction\",\n        \"text\": \"string\",\n        \"normalizedText\": \"string\",\n        \"summary\": \"string|null\",\n        \"confidence\": 0,\n        \"semantic\": {\n          \"class\": \"string|null\",\n          \"subclass\": \"string|null\",\n          \"key\": \"string|null\",\n          \"category\": \"string|null\",\n          \"tags\": [\n            \"string\"\n          ]\n        },\n        \"references\": {\n          \"subject\": {\n            \"ref\": \"string|null\",\n            \"role\": \"core_user|core_character|third_party|entity|unknown\",\n            \"label\": \"string|null\",\n            \"confidence\": 0\n          },\n          \"object\": {\n            \"ref\": \"string|null\",\n            \"role\": \"core_user|core_character|third_party|entity|unknown\",\n            \"label\": \"string|null\",\n            \"confidence\": 0\n          },\n          \"about\": [\n            {\n              \"ref\": \"string|null\",\n              \"role\": \"core_user|core_character|third_party|entity|unknown\",\n              \"label\": \"string|null\",\n              \"confidence\": 0\n            }\n          ]\n        },\n        \"evidence\": {\n          \"kind\": \"literal|inferred|contextual\",\n          \"sourceSpans\": [\n            {\n              \"text\": \"string\",\n              \"start\": 0,\n              \"end\": 0\n            }\n          ],\n          \"quoted\": false,\n          \"reported\": false,\n          \"negated\": false,\n          \"hypothetical\": false,\n          \"conditional\": false,\n          \"interrogative\": false,\n          \"imperative\": false,\n          \"hedged\": false\n        },\n        \"temporal\": {\n          \"tense\": \"past|present|ongoing|future|unknown\",\n          \"anchorText\": \"string|null\",\n          \"resolvedAt\": \"ISO-8601|null\",\n          \"isRecurring\": false,\n          \"recurrenceHint\": \"string|null\"\n        },\n        \"memory\": {\n          \"durability\": \"stable|episodic|transient|unknown\",\n          \"salience\": 0,\n          \"stability\": 0,\n          \"memoryRelevance\": 0,\n          \"sensitivity\": \"low|medium|high\",\n          \"confirmationStatus\": \"single_shot|repeated|uncertain\"\n        },\n        \"source\": {\n          \"extractor\": \"llm\",\n          \"model\": \"string|null\",\n          \"promptVersion\": \"llm_memory_candidates_v1\",\n          \"sourceEventId\": \"string|null\",\n          \"timestamp\": \"ISO-8601|null\"\n        }\n      }\n    ],\n    \"temporal\": {\n      \"messageTime\": \"ISO-8601|null\",\n      \"anchors\": [\n        {\n          \"text\": \"string\",\n          \"resolvedAt\": \"ISO-8601|null\",\n          \"tense\": \"past|present|ongoing|future|unknown\"\n        }\n      ]\n    }\n  },\n  \"outputRequirements\": [\n    \"Return one JSON object matching the schema.\",\n    \"Preserve the given event/context values in the returned packet when possible.\",\n    \"Fill candidates with semantically grounded candidates.\",\n    \"Use null instead of inventing uncertain IDs or timestamps.\",\n    \"Keep normalizedText close to the source meaning, normalized for whitespace and case.\",\n    \"Set source.extractor to \\\"llm\\\".\",\n    \"Set source.promptVersion to \\\"llm_memory_candidates_v1\\\".\",\n    \"Set source.sourceEventId from the current event id when available.\",\n    \"Set source.timestamp from the current event timestamp when available.\",\n    \"All human-readable text fields should be in Russian.\",\n    \"Keep schema identifiers and enumerations in English.\",\n    \"Do not translate Russian source text into English.\",\n    \"semantic.* fields must be English schema labels, not Russian prose.\",\n    \"Do not use full Russian sentences inside semantic.class, semantic.subclass, semantic.key, or semantic.category.\",\n    \"Prefer compact semantic identifiers such as relationship_signal, emotional_distance, repeated_emotional_retransmission, unresolved_emotional_gap.\",\n    \"Do not artificially cap the number of candidates when multiple distinct strong signals are present.\",\n    \"Prefer compact JSON fields over verbose prose.\",\n    \"references.about may be an empty array when no extra grounding is needed.\",\n    \"summary should usually be null unless it materially compresses the candidate.\",\n    \"semantic.tags may be empty.\"\n  ],\n  \"examples\": [\n    {\n      \"bad\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Пользователь с заметной внутренней эмоциональной тяжестью и оттенком болезненной привязанности снова вынужден заново и почти мучительно передавать персонажу то же самое чувство.\",\n            \"summary\": \"Повторная мучительная передача чувства\",\n            \"semantic\": {\n              \"class\": \"relationship_signal\",\n              \"subclass\": \"repeated_emotional_transmission\",\n              \"key\": \"user_repeatedly_transmits_feeling_to_character\",\n              \"category\": \"relationship_difficulty_in_emotional_retransmission\",\n              \"tags\": [\n                \"repeated\",\n                \"emotion\",\n                \"transmission_gap\",\n                \"painful_repetition\",\n                \"attachment\"\n              ]\n            },\n            \"references\": {\n              \"about\": [\n                {\n                  \"ref\": \"core_character:active\",\n                  \"role\": \"core_character\",\n                  \"label\": \"получатель повторно передаваемого чувства\",\n                  \"confidence\": 0.6\n                }\n              ]\n            },\n            \"temporal\": {\n              \"recurrenceHint\": \"повторяющаяся ситуация, которая происходит снова и снова\"\n            }\n          }\n        ]\n      },\n      \"why_bad\": [\n        \"decorative and overly literary wording\",\n        \"same meaning repeated across multiple fields\",\n        \"unnecessarily overloaded candidate\"\n      ]\n    },\n    {\n      \"good\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n            \"summary\": null,\n            \"semantic\": {\n              \"class\": \"relationship_signal\",\n              \"subclass\": \"repeated_emotional_transmission\",\n              \"key\": \"user_repeatedly_transmits_feeling_to_character\",\n              \"category\": \"relationship\",\n              \"tags\": []\n            },\n            \"references\": {\n              \"about\": []\n            },\n            \"temporal\": {\n              \"recurrenceHint\": \"каждый раз\"\n            }\n          }\n        ]\n      }\n    },\n    {\n      \"bad\": {\n        \"text\": \"Пользователю приходится заново передавать чувство, возможно из-за эмоциональной дистанции.\",\n        \"semantic\": {\n          \"class\": \"отношения и взаимодействие\",\n          \"subclass\": \"согласованность чувств\",\n          \"key\": \"каждый раз заново передавать чувство\",\n          \"category\": \"повторяющаяся проблема в коммуникации чувств\",\n          \"tags\": [\n            \"повторяемость\",\n            \"эмоциональная дистанция\"\n          ]\n        }\n      },\n      \"why_bad\": [\n        \"semantic fields are in Russian instead of English schema identifiers\",\n        \"text contains extra interpretation (\\\"возможно из-за\\\") not grounded directly enough\"\n      ]\n    },\n    {\n      \"good\": {\n        \"text\": \"Пользователю приходится каждый раз заново передавать это чувство.\",\n        \"semantic\": {\n          \"class\": \"relationship_signal\",\n          \"subclass\": \"repeated_emotional_retransmission\",\n          \"key\": \"user_repeatedly_retransmits_feeling_to_character\",\n          \"category\": \"relationship\",\n          \"tags\": []\n        },\n        \"evidence\": {\n          \"kind\": \"literal\"\n        }\n      }\n    },\n    {\n      \"bad\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\"\n          },\n          {\n            \"kind\": \"preference\",\n            \"text\": \"каждый раз заново передавать тебе это чувство\"\n          }\n        ]\n      },\n      \"why_bad\": [\n        \"the second candidate does not add a distinct semantic signal\",\n        \"the message does not explicitly express a preference\"\n      ]\n    },\n    {\n      \"good\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n            \"semantic\": {\n              \"class\": \"relationship_signal\",\n              \"subclass\": \"repeated_emotional_transmission\",\n              \"key\": \"user_repeatedly_transmits_emotion_to_character\",\n              \"category\": \"relationship\",\n              \"tags\": []\n            }\n          }\n        ]\n      }\n    }\n  ],\n  \"input\": {\n    \"event\": {\n      \"id\": \"test_filter_event_1\",\n      \"threadId\": \"telegram:test_chat\",\n      \"role\": \"user\",\n      \"platform\": \"telegram\",\n      \"channel\": \"text\",\n      \"world\": \"Earth\",\n      \"timestamp\": \"2026-04-13T17:01:00.000+07:00\",\n      \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n      \"meta\": {\n        \"timezone\": \"Asia/Krasnoyarsk\",\n        \"utcOffsetMinutes\": 420,\n        \"userDisplayName\": null,\n        \"characterDisplayName\": null\n      }\n    },\n    \"context\": {\n      \"eventWindow\": [],\n      \"identity\": {\n        \"coreUserRef\": \"core_user:main\",\n        \"coreCharacterRef\": \"core_character:active\",\n        \"userDisplayName\": null,\n        \"characterDisplayName\": null\n      }\n    }\n  }\n}"
+  },
+  "response": {
+    "id": "gen-1776441998-l9EjgKIH9LvRH6Zjiq0d",
+    "model": "openai/gpt-5.4-nano-20260317",
+    "usage": {
+      "prompt_tokens": 3692,
+      "completion_tokens": 854,
+      "total_tokens": 4546,
+      "cost": 0.0018059,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.0018059,
+        "upstream_inference_prompt_cost": 0.0007384,
+        "upstream_inference_completions_cost": 0.0010675
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "finishReason": "stop"
+  },
+  "output": {
+    "rawModelContent": "{\n  \"version\": 1,\n  \"strategy\": \"llm_memory_candidates_v1\",\n  \"event\": {\n    \"id\": \"test_filter_event_1\",\n    \"threadId\": \"telegram:test_chat\",\n    \"role\": \"user\",\n    \"platform\": \"telegram\",\n    \"channel\": \"text\",\n    \"world\": \"Earth\",\n    \"timestamp\": \"2026-04-13T17:01:00.000+07:00\",\n    \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n    \"meta\": {\n      \"timezone\": \"Asia/Krasnoyarsk\",\n      \"utcOffsetMinutes\": 420,\n      \"userDisplayName\": null,\n      \"characterDisplayName\": null\n    }\n  },\n  \"context\": {\n    \"eventWindow\": [],\n    \"identity\": {\n      \"coreUserRef\": \"core_user:main\",\n      \"coreCharacterRef\": \"core_character:active\",\n      \"userDisplayName\": null,\n      \"characterDisplayName\": null\n    }\n  },\n  \"candidates\": [\n    {\n      \"id\": \"cand_1\",\n      \"kind\": \"relationship\",\n      \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n      \"normalizedText\": \"мне приходится каждый раз заново передавать тебе это чувство\",\n      \"summary\": null,\n      \"confidence\": 0.86,\n      \"semantic\": {\n        \"class\": \"relationship_signal\",\n        \"subclass\": \"repeated_emotional_transmission\",\n        \"key\": \"user_repeatedly_transmits_emotion_to_character\",\n        \"category\": \"relationship\",\n        \"tags\": [\n          \"повторяемость\",\n          \"эмоции\",\n          \"передача чувства\"\n        ]\n      },\n      \"references\": {\n        \"subject\": {\n          \"ref\": \"core_user:main\",\n          \"role\": \"core_user\",\n          \"label\": null,\n          \"confidence\": 0.9\n        },\n        \"object\": {\n          \"ref\": \"core_character:active\",\n          \"role\": \"core_character\",\n          \"label\": null,\n          \"confidence\": 0.9\n        },\n        \"about\": []\n      },\n      \"evidence\": {\n        \"kind\": \"literal\",\n        \"sourceSpans\": [\n          {\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n            \"start\": 0,\n            \"end\": 52\n          }\n        ],\n        \"quoted\": false,\n        \"reported\": false,\n        \"negated\": false,\n        \"hypothetical\": false,\n        \"conditional\": false,\n        \"interrogative\": false,\n        \"imperative\": false,\n        \"hedged\": false\n      },\n      \"temporal\": {\n        \"tense\": \"present\",\n        \"anchorText\": \"каждый раз\",\n        \"resolvedAt\": null,\n        \"isRecurring\": true,\n        \"recurrenceHint\": \"каждый раз заново\"\n      },\n      \"memory\": {\n        \"durability\": \"stable\",\n        \"salience\": 0.72,\n        \"stability\": 0.62,\n        \"memoryRelevance\": 0.7,\n        \"sensitivity\": \"medium\",\n        \"confirmationStatus\": \"single_shot\"\n      },\n      \"source\": {\n        \"extractor\": \"llm\",\n        \"model\": null,\n        \"promptVersion\": \"llm_memory_candidates_v1\",\n        \"sourceEventId\": \"test_filter_event_1\",\n        \"timestamp\": \"2026-04-13T17:01:00.000+07:00\"\n      }\n    }\n  ],\n  \"temporal\": {\n    \"messageTime\": \"2026-04-13T17:01:00.000+07:00\",\n    \"anchors\": [\n      {\n        \"text\": \"каждый раз\",\n        \"resolvedAt\": null,\n        \"tense\": \"present\"\n      }\n    ]\n  }\n}",
+    "parsed": {
+      "version": 1,
+      "strategy": "llm_memory_candidates_v1",
+      "event": {
+        "id": "test_filter_event_1",
+        "threadId": "telegram:test_chat",
+        "role": "user",
+        "platform": "telegram",
+        "channel": "text",
+        "world": "Earth",
+        "timestamp": "2026-04-13T17:01:00.000+07:00",
+        "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+        "meta": {
+          "timezone": "Asia/Krasnoyarsk",
+          "utcOffsetMinutes": 420,
+          "userDisplayName": null,
+          "characterDisplayName": null
+        }
+      },
+      "context": {
+        "eventWindow": [],
+        "identity": {
+          "coreUserRef": "core_user:main",
+          "coreCharacterRef": "core_character:active",
+          "userDisplayName": null,
+          "characterDisplayName": null
+        }
+      },
+      "candidates": [
+        {
+          "id": "cand_1",
+          "kind": "relationship",
+          "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+          "normalizedText": "мне приходится каждый раз заново передавать тебе это чувство",
+          "summary": null,
+          "confidence": 0.86,
+          "semantic": {
+            "class": "relationship_signal",
+            "subclass": "repeated_emotional_transmission",
+            "key": "user_repeatedly_transmits_emotion_to_character",
+            "category": "relationship",
+            "tags": [
+              "повторяемость",
+              "эмоции",
+              "передача чувства"
+            ]
+          },
+          "references": {
+            "subject": {
+              "ref": "core_user:main",
+              "role": "core_user",
+              "label": null,
+              "confidence": 0.9
+            },
+            "object": {
+              "ref": "core_character:active",
+              "role": "core_character",
+              "label": null,
+              "confidence": 0.9
+            },
+            "about": []
+          },
+          "evidence": {
+            "kind": "literal",
+            "sourceSpans": [
+              {
+                "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+                "start": 0,
+                "end": 52
+              }
+            ],
+            "quoted": false,
+            "reported": false,
+            "negated": false,
+            "hypothetical": false,
+            "conditional": false,
+            "interrogative": false,
+            "imperative": false,
+            "hedged": false
+          },
+          "temporal": {
+            "tense": "present",
+            "anchorText": "каждый раз",
+            "resolvedAt": null,
+            "isRecurring": true,
+            "recurrenceHint": "каждый раз заново"
+          },
+          "memory": {
+            "durability": "stable",
+            "salience": 0.72,
+            "stability": 0.62,
+            "memoryRelevance": 0.7,
+            "sensitivity": "medium",
+            "confirmationStatus": "single_shot"
+          },
+          "source": {
+            "extractor": "llm",
+            "model": null,
+            "promptVersion": "llm_memory_candidates_v1",
+            "sourceEventId": "test_filter_event_1",
+            "timestamp": "2026-04-13T17:01:00.000+07:00"
+          }
+        }
+      ],
+      "temporal": {
+        "messageTime": "2026-04-13T17:01:00.000+07:00",
+        "anchors": [
+          {
+            "text": "каждый раз",
+            "resolvedAt": null,
+            "tense": "present"
+          }
+        ]
+      }
+    },
+    "candidates": [
+      {
+        "id": "cand_1",
+        "kind": "relationship",
+        "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+        "normalizedText": "мне приходится каждый раз заново передавать тебе это чувство",
+        "summary": null,
+        "confidence": 0.86,
+        "semantic": {
+          "class": "relationship_signal",
+          "subclass": "repeated_emotional_transmission",
+          "key": "user_repeatedly_transmits_emotion_to_character",
+          "category": "relationship",
+          "tags": [
+            "повторяемость",
+            "эмоции",
+            "передача чувства"
+          ]
+        },
+        "references": {
+          "subject": {
+            "ref": "core_user:main",
+            "role": "core_user",
+            "label": null,
+            "confidence": 0.9
+          },
+          "object": {
+            "ref": "core_character:active",
+            "role": "core_character",
+            "label": null,
+            "confidence": 0.9
+          },
+          "about": []
+        },
+        "evidence": {
+          "kind": "literal",
+          "sourceSpans": [
+            {
+              "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+              "start": 0,
+              "end": 52
+            }
+          ],
+          "quoted": false,
+          "reported": false,
+          "negated": false,
+          "hypothetical": false,
+          "conditional": false,
+          "interrogative": false,
+          "imperative": false,
+          "hedged": false
+        },
+        "temporal": {
+          "tense": "present",
+          "anchorText": "каждый раз",
+          "resolvedAt": null,
+          "isRecurring": true,
+          "recurrenceHint": "каждый раз заново"
+        },
+        "memory": {
+          "durability": "stable",
+          "salience": 0.72,
+          "stability": 0.62,
+          "memoryRelevance": 0.7,
+          "sensitivity": "medium",
+          "confirmationStatus": "single_shot"
+        },
+        "source": {
+          "extractor": "llm",
+          "model": "openai/gpt-5.4-nano-20260317",
+          "promptVersion": "llm_memory_candidates_v1",
+          "sourceEventId": "test_filter_event_1",
+          "timestamp": "2026-04-13T17:01:00.000+07:00"
+        }
+      }
+    ]
+  },
+  "stats": {
+    "eventWindowSize": 0,
+    "candidates": 1
+  },
+  "warnings": [
+    "sanitizeSchemaId is not defined"
+  ]
+}
+---
+{
+  "extractor": "llm",
+  "timestamp": "2026-04-17T16:10:50.937Z",
+  "eventId": "test_filter_event_1",
+  "threadId": "telegram:test_chat",
+  "role": "user",
+  "sourceText": "Мне приходится каждый раз заново передавать тебе это чувство",
+  "event": {
+    "id": "test_filter_event_1",
+    "threadId": "telegram:test_chat",
+    "role": "user",
+    "platform": "telegram",
+    "channel": "text",
+    "world": "Earth",
+    "timestamp": "2026-04-13T17:01:00.000+07:00",
+    "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+    "meta": {
+      "timezone": "Asia/Krasnoyarsk",
+      "utcOffsetMinutes": 420,
+      "userDisplayName": null,
+      "characterDisplayName": null
+    }
+  },
+  "eventWindow": [],
+  "prompt": {
+    "usedModel": "openai/gpt-5.4-nano-20260317",
+    "promptVersion": "llm_memory_candidates_v1",
+    "strategy": "llm_memory_candidates_v1",
+    "userPrompt": "{\n  \"task\": \"llm_memory_candidates_v1\",\n  \"instructions\": {\n    \"role\": \"You are the primary semantic candidate extractor for a character memory pipeline.\",\n    \"objective\": \"Read the dialogue context and return semantic candidates extracted mainly from the CURRENT MESSAGE.\",\n    \"priorityRules\": [\n      \"The CURRENT MESSAGE is the primary source of truth.\",\n      \"Use DIALOGUE WINDOW only to resolve references, continuity, or missing context that is strictly necessary.\",\n      \"Return semantic candidates, not summaries, not explanations, not chain-of-thought.\",\n      \"Prefer literal extraction over interpretive reformulation.\",\n      \"If a candidate can be grounded in the current message alone, do not upgrade it to contextual.\",\n      \"Extract semantic signals even if they are technical, operational, or system-related.\",\n      \"Focus on extraction, not memory selection.\"\n    ],\n    \"extractWhatMatters\": [\n      \"facts about the user, character, third parties, systems, tools, or situations\",\n      \"relationship shifts, attachment, distance, care, irritation, trust, reliance\",\n      \"goals, commitments, boundaries, preferences, instructions\",\n      \"emotionally meaningful open loops or unresolved direct questions\",\n      \"episodes or turning points that matter for continuity\",\n      \"recurring patterns, habits, or repeated signals\",\n      \"identity-level, worldview-level, or value-level signals\",\n      \"technical, operational, workflow, or meta-level signals when they are explicitly present in the message\"\n    ],\n    \"downrankHard\": [\n      \"decorative RP gestures with no semantic value\",\n      \"filler text whose only function is to keep talking\",\n      \"broad poetic interpretation when a direct semantic candidate is possible\"\n    ],\n    \"criticalRules\": [\n      \"Return JSON only.\",\n      \"Do not explain anything.\",\n      \"Do not summarize the whole message.\",\n      \"Do not invent facts not grounded in the current message or strictly necessary context.\",\n      \"Do not add hidden motives, causes, or interpretations unless they are clearly supported.\",\n      \"Do not add phrases like \\\"неясно, почему\\\" or \\\"возможно причина в том, что\\\" unless the message explicitly asks that question or states that uncertainty.\",\n      \"A question is not automatically an open_loop.\",\n      \"A physical action is not automatically an episode.\",\n      \"If nothing semantically extractable is present, return an empty candidates array.\",\n      \"Return any number of candidates when they are distinct and grounded.\",\n      \"Do not under-extract just because the message contains many strong signals.\",\n      \"Every candidate must include kind and text.\",\n      \"Other fields should be filled when confidently available.\",\n      \"Do not invent fields just to satisfy schema completeness.\",\n      \"Use evidence.kind=literal when directly stated, inferred only when the meaning is a careful semantic inference, contextual only when dialogue window is truly required.\",\n      \"Do not produce contextual candidates just because previous messages are emotionally related.\",\n      \"Do not split one semantic signal into multiple near-duplicate candidates.\",\n      \"Do not create a second candidate if it only restates the first candidate with a slightly different framing.\",\n      \"Do not emit preference unless the message explicitly expresses liking, disliking, wanting, preferring, or choosing.\",\n      \"Do not emit boundary unless the message explicitly sets or rejects a limit.\",\n      \"Do not emit commitment unless the message explicitly promises, intends, or commits to future action.\",\n      \"When one candidate fully captures the semantic signal, return only that one candidate.\",\n      \"Do not invent a concrete user or character name if it is not explicitly provided in identity context.\",\n      \"If characterDisplayName is null, do not hardcode a specific character name.\",\n      \"If userDisplayName is null, do not hardcode a specific user name.\",\n      \"Do not reduce the number of candidates just to save tokens when multiple distinct signals are present.\",\n      \"Do not add decorative wording, emotional flourishes, or literary phrasing inside candidate fields.\",\n      \"Prefer short structural wording over beautiful wording.\",\n      \"Do not filter candidates based on assumed memory importance.\",\n      \"Do not drop candidates because they are technical, operational, or workflow-related.\"\n    ],\n    \"contextualRules\": [\n      \"Use contextual evidence only when the CURRENT MESSAGE cannot be interpreted correctly without DIALOGUE WINDOW.\",\n      \"Do not fuse multiple messages into one candidate unless the combined pattern itself is the semantic signal.\",\n      \"If previous messages merely decorate or intensify the current one, keep the candidate grounded in the CURRENT MESSAGE.\",\n      \"A contextual candidate must still remain concise, concrete, and non-literary.\"\n    ],\n    \"languagePolicy\": [\n      \"All human-readable text fields should be written in Russian.\",\n      \"Do not translate or paraphrase user text into English.\",\n      \"Preserve the original Russian wording whenever possible.\",\n      \"Schema identifiers and enumerations must remain in English.\",\n      \"When display names are absent, use neutral Russian labels or null instead of inventing names.\"\n    ],\n    \"schemaPolicy\": [\n      \"The fields kind, semantic.class, semantic.subclass, semantic.key, semantic.category, evidence.kind, temporal.tense, memory.durability, memory.sensitivity, and memory.confirmationStatus must be in English.\",\n      \"semantic.class must be a short stable schema-like identifier in English snake_case or lower_case style.\",\n      \"semantic.subclass must be a narrower English identifier when useful.\",\n      \"semantic.key must be a stable English grouping key, not a full sentence.\",\n      \"semantic.category must be a short English category label.\",\n      \"references.subject.ref and references.object.ref must stay role-grounded system refs, not display names.\",\n      \"references.*.label is a human-readable display hint, not a canonical identity key.\",\n      \"semantic.tags are optional and may be empty.\"\n    ],\n    \"compressionRules\": [\n      \"Keep every textual field as short as possible without losing semantic meaning.\",\n      \"candidate.text should usually stay close to the source wording and should not be expanded with explanations.\",\n      \"summary should usually be null unless it adds real compression value.\",\n      \"references.about should be empty unless it adds distinct grounding not already present in subject/object.\",\n      \"temporal.recurrenceHint should be a short phrase, not an explanation.\",\n      \"Do not restate the same fact in multiple fields with slightly different wording.\"\n    ]\n  },\n  \"schema\": {\n    \"version\": 1,\n    \"strategy\": \"llm_memory_candidates_v1\",\n    \"event\": {\n      \"id\": \"string\",\n      \"threadId\": \"string|null\",\n      \"role\": \"user|assistant|system\",\n      \"platform\": \"string|null\",\n      \"channel\": \"string|null\",\n      \"world\": \"string|null\",\n      \"timestamp\": \"ISO-8601|null\",\n      \"text\": \"string\",\n      \"meta\": {}\n    },\n    \"context\": {\n      \"eventWindow\": [\n        {\n          \"index\": 0,\n          \"id\": \"string|null\",\n          \"role\": \"user|assistant|system\",\n          \"timestamp\": \"ISO-8601|null\",\n          \"text\": \"string\"\n        }\n      ],\n      \"identity\": {\n        \"coreUserRef\": \"core_user:main\",\n        \"coreCharacterRef\": \"core_character:active\",\n        \"userDisplayName\": \"string|null\",\n        \"characterDisplayName\": \"string|null\"\n      }\n    },\n    \"candidates\": [\n      {\n        \"id\": \"string\",\n        \"kind\": \"fact|entity|relationship|open_loop|episode|preference|boundary|goal|commitment|instruction\",\n        \"text\": \"string\",\n        \"normalizedText\": \"string\",\n        \"summary\": \"string|null\",\n        \"confidence\": 0,\n        \"semantic\": {\n          \"class\": \"string|null\",\n          \"subclass\": \"string|null\",\n          \"key\": \"string|null\",\n          \"category\": \"string|null\",\n          \"tags\": [\n            \"string\"\n          ]\n        },\n        \"references\": {\n          \"subject\": {\n            \"ref\": \"string|null\",\n            \"role\": \"core_user|core_character|third_party|entity|unknown\",\n            \"label\": \"string|null\",\n            \"confidence\": 0\n          },\n          \"object\": {\n            \"ref\": \"string|null\",\n            \"role\": \"core_user|core_character|third_party|entity|unknown\",\n            \"label\": \"string|null\",\n            \"confidence\": 0\n          },\n          \"about\": [\n            {\n              \"ref\": \"string|null\",\n              \"role\": \"core_user|core_character|third_party|entity|unknown\",\n              \"label\": \"string|null\",\n              \"confidence\": 0\n            }\n          ]\n        },\n        \"evidence\": {\n          \"kind\": \"literal|inferred|contextual\",\n          \"sourceSpans\": [\n            {\n              \"text\": \"string\",\n              \"start\": 0,\n              \"end\": 0\n            }\n          ],\n          \"quoted\": false,\n          \"reported\": false,\n          \"negated\": false,\n          \"hypothetical\": false,\n          \"conditional\": false,\n          \"interrogative\": false,\n          \"imperative\": false,\n          \"hedged\": false\n        },\n        \"temporal\": {\n          \"tense\": \"past|present|ongoing|future|unknown\",\n          \"anchorText\": \"string|null\",\n          \"resolvedAt\": \"ISO-8601|null\",\n          \"isRecurring\": false,\n          \"recurrenceHint\": \"string|null\"\n        },\n        \"memory\": {\n          \"durability\": \"stable|episodic|transient|unknown\",\n          \"salience\": 0,\n          \"stability\": 0,\n          \"memoryRelevance\": 0,\n          \"sensitivity\": \"low|medium|high\",\n          \"confirmationStatus\": \"single_shot|repeated|uncertain\"\n        },\n        \"source\": {\n          \"extractor\": \"llm\",\n          \"model\": \"string|null\",\n          \"promptVersion\": \"llm_memory_candidates_v1\",\n          \"sourceEventId\": \"string|null\",\n          \"timestamp\": \"ISO-8601|null\"\n        }\n      }\n    ],\n    \"temporal\": {\n      \"messageTime\": \"ISO-8601|null\",\n      \"anchors\": [\n        {\n          \"text\": \"string\",\n          \"resolvedAt\": \"ISO-8601|null\",\n          \"tense\": \"past|present|ongoing|future|unknown\"\n        }\n      ]\n    }\n  },\n  \"outputRequirements\": [\n    \"Return one JSON object matching the schema.\",\n    \"Preserve the given event/context values in the returned packet when possible.\",\n    \"Fill candidates with semantically grounded candidates.\",\n    \"Use null instead of inventing uncertain IDs or timestamps.\",\n    \"Keep normalizedText close to the source meaning, normalized for whitespace and case.\",\n    \"Set source.extractor to \\\"llm\\\".\",\n    \"Set source.promptVersion to \\\"llm_memory_candidates_v1\\\".\",\n    \"Set source.sourceEventId from the current event id when available.\",\n    \"Set source.timestamp from the current event timestamp when available.\",\n    \"All human-readable text fields should be in Russian.\",\n    \"Keep schema identifiers and enumerations in English.\",\n    \"Do not translate Russian source text into English.\",\n    \"semantic.* fields must be English schema labels, not Russian prose.\",\n    \"Do not use full Russian sentences inside semantic.class, semantic.subclass, semantic.key, or semantic.category.\",\n    \"Prefer compact semantic identifiers such as relationship_signal, emotional_distance, repeated_emotional_retransmission, unresolved_emotional_gap.\",\n    \"Do not artificially cap the number of candidates when multiple distinct strong signals are present.\",\n    \"Prefer compact JSON fields over verbose prose.\",\n    \"references.about may be an empty array when no extra grounding is needed.\",\n    \"summary should usually be null unless it materially compresses the candidate.\",\n    \"semantic.tags may be empty.\"\n  ],\n  \"examples\": [\n    {\n      \"bad\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Пользователь с заметной внутренней эмоциональной тяжестью и оттенком болезненной привязанности снова вынужден заново и почти мучительно передавать персонажу то же самое чувство.\",\n            \"summary\": \"Повторная мучительная передача чувства\",\n            \"semantic\": {\n              \"class\": \"relationship_signal\",\n              \"subclass\": \"repeated_emotional_transmission\",\n              \"key\": \"user_repeatedly_transmits_feeling_to_character\",\n              \"category\": \"relationship_difficulty_in_emotional_retransmission\",\n              \"tags\": [\n                \"repeated\",\n                \"emotion\",\n                \"transmission_gap\",\n                \"painful_repetition\",\n                \"attachment\"\n              ]\n            },\n            \"references\": {\n              \"about\": [\n                {\n                  \"ref\": \"core_character:active\",\n                  \"role\": \"core_character\",\n                  \"label\": \"получатель повторно передаваемого чувства\",\n                  \"confidence\": 0.6\n                }\n              ]\n            },\n            \"temporal\": {\n              \"recurrenceHint\": \"повторяющаяся ситуация, которая происходит снова и снова\"\n            }\n          }\n        ]\n      },\n      \"why_bad\": [\n        \"decorative and overly literary wording\",\n        \"same meaning repeated across multiple fields\",\n        \"unnecessarily overloaded candidate\"\n      ]\n    },\n    {\n      \"good\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n            \"summary\": null,\n            \"semantic\": {\n              \"class\": \"relationship_signal\",\n              \"subclass\": \"repeated_emotional_transmission\",\n              \"key\": \"user_repeatedly_transmits_feeling_to_character\",\n              \"category\": \"relationship\",\n              \"tags\": []\n            },\n            \"references\": {\n              \"about\": []\n            },\n            \"temporal\": {\n              \"recurrenceHint\": \"каждый раз\"\n            }\n          }\n        ]\n      }\n    },\n    {\n      \"bad\": {\n        \"text\": \"Пользователю приходится заново передавать чувство, возможно из-за эмоциональной дистанции.\",\n        \"semantic\": {\n          \"class\": \"отношения и взаимодействие\",\n          \"subclass\": \"согласованность чувств\",\n          \"key\": \"каждый раз заново передавать чувство\",\n          \"category\": \"повторяющаяся проблема в коммуникации чувств\",\n          \"tags\": [\n            \"повторяемость\",\n            \"эмоциональная дистанция\"\n          ]\n        }\n      },\n      \"why_bad\": [\n        \"semantic fields are in Russian instead of English schema identifiers\",\n        \"text contains extra interpretation (\\\"возможно из-за\\\") not grounded directly enough\"\n      ]\n    },\n    {\n      \"good\": {\n        \"text\": \"Пользователю приходится каждый раз заново передавать это чувство.\",\n        \"semantic\": {\n          \"class\": \"relationship_signal\",\n          \"subclass\": \"repeated_emotional_retransmission\",\n          \"key\": \"user_repeatedly_retransmits_feeling_to_character\",\n          \"category\": \"relationship\",\n          \"tags\": []\n        },\n        \"evidence\": {\n          \"kind\": \"literal\"\n        }\n      }\n    },\n    {\n      \"bad\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\"\n          },\n          {\n            \"kind\": \"preference\",\n            \"text\": \"каждый раз заново передавать тебе это чувство\"\n          }\n        ]\n      },\n      \"why_bad\": [\n        \"the second candidate does not add a distinct semantic signal\",\n        \"the message does not explicitly express a preference\"\n      ]\n    },\n    {\n      \"good\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n            \"semantic\": {\n              \"class\": \"relationship_signal\",\n              \"subclass\": \"repeated_emotional_transmission\",\n              \"key\": \"user_repeatedly_transmits_emotion_to_character\",\n              \"category\": \"relationship\",\n              \"tags\": []\n            }\n          }\n        ]\n      }\n    }\n  ],\n  \"input\": {\n    \"event\": {\n      \"id\": \"test_filter_event_1\",\n      \"threadId\": \"telegram:test_chat\",\n      \"role\": \"user\",\n      \"platform\": \"telegram\",\n      \"channel\": \"text\",\n      \"world\": \"Earth\",\n      \"timestamp\": \"2026-04-13T17:01:00.000+07:00\",\n      \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n      \"meta\": {\n        \"timezone\": \"Asia/Krasnoyarsk\",\n        \"utcOffsetMinutes\": 420,\n        \"userDisplayName\": null,\n        \"characterDisplayName\": null\n      }\n    },\n    \"context\": {\n      \"eventWindow\": [],\n      \"identity\": {\n        \"coreUserRef\": \"core_user:main\",\n        \"coreCharacterRef\": \"core_character:active\",\n        \"userDisplayName\": null,\n        \"characterDisplayName\": null\n      }\n    }\n  }\n}"
+  },
+  "response": {
+    "id": "gen-1776442234-TIcMdjjUlWh7q53udtOu",
+    "model": "openai/gpt-5.4-nano-20260317",
+    "usage": {
+      "prompt_tokens": 3692,
+      "completion_tokens": 851,
+      "total_tokens": 4543,
+      "cost": 0.00180215,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00180215,
+        "upstream_inference_prompt_cost": 0.0007384,
+        "upstream_inference_completions_cost": 0.00106375
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "finishReason": "stop"
+  },
+  "output": {
+    "rawModelContent": "{\n  \"version\": 1,\n  \"strategy\": \"llm_memory_candidates_v1\",\n  \"event\": {\n    \"id\": \"test_filter_event_1\",\n    \"threadId\": \"telegram:test_chat\",\n    \"role\": \"user\",\n    \"platform\": \"telegram\",\n    \"channel\": \"text\",\n    \"world\": \"Earth\",\n    \"timestamp\": \"2026-04-13T17:01:00.000+07:00\",\n    \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n    \"meta\": {\n      \"timezone\": \"Asia/Krasnoyarsk\",\n      \"utcOffsetMinutes\": 420,\n      \"userDisplayName\": null,\n      \"characterDisplayName\": null\n    }\n  },\n  \"context\": {\n    \"eventWindow\": [],\n    \"identity\": {\n      \"coreUserRef\": \"core_user:main\",\n      \"coreCharacterRef\": \"core_character:active\",\n      \"userDisplayName\": null,\n      \"characterDisplayName\": null\n    }\n  },\n  \"candidates\": [\n    {\n      \"id\": \"mem_cand_1\",\n      \"kind\": \"relationship\",\n      \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n      \"normalizedText\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n      \"summary\": null,\n      \"confidence\": 0.9,\n      \"semantic\": {\n        \"class\": \"relationship_signal\",\n        \"subclass\": \"repeated_emotional_transmission\",\n        \"key\": \"user_repeatedly_transmits_emotion_to_character\",\n        \"category\": \"relationship\",\n        \"tags\": [\n          \"repeated\",\n          \"emotion\",\n          \"retransmission\"\n        ]\n      },\n      \"references\": {\n        \"subject\": {\n          \"ref\": \"core_user:main\",\n          \"role\": \"core_user\",\n          \"label\": null,\n          \"confidence\": 0.9\n        },\n        \"object\": {\n          \"ref\": \"core_character:active\",\n          \"role\": \"core_character\",\n          \"label\": null,\n          \"confidence\": 0.9\n        },\n        \"about\": []\n      },\n      \"evidence\": {\n        \"kind\": \"literal\",\n        \"sourceSpans\": [\n          {\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n            \"start\": 0,\n            \"end\": 57\n          }\n        ],\n        \"quoted\": false,\n        \"reported\": false,\n        \"negated\": false,\n        \"hypothetical\": false,\n        \"conditional\": false,\n        \"interrogative\": false,\n        \"imperative\": false,\n        \"hedged\": false\n      },\n      \"temporal\": {\n        \"tense\": \"present\",\n        \"anchorText\": \"каждый раз\",\n        \"resolvedAt\": null,\n        \"isRecurring\": true,\n        \"recurrenceHint\": \"каждый раз заново\"\n      },\n      \"memory\": {\n        \"durability\": \"episodic\",\n        \"salience\": 0.7,\n        \"stability\": 0.6,\n        \"memoryRelevance\": 0.7,\n        \"sensitivity\": \"medium\",\n        \"confirmationStatus\": \"repeated\"\n      },\n      \"source\": {\n        \"extractor\": \"llm\",\n        \"model\": null,\n        \"promptVersion\": \"llm_memory_candidates_v1\",\n        \"sourceEventId\": \"test_filter_event_1\",\n        \"timestamp\": \"2026-04-13T17:01:00.000+07:00\"\n      }\n    }\n  ],\n  \"temporal\": {\n    \"messageTime\": \"2026-04-13T17:01:00.000+07:00\",\n    \"anchors\": [\n      {\n        \"text\": \"каждый раз\",\n        \"resolvedAt\": null,\n        \"tense\": \"present\"\n      }\n    ]\n  }\n}",
+    "parsed": {
+      "version": 1,
+      "strategy": "llm_memory_candidates_v1",
+      "event": {
+        "id": "test_filter_event_1",
+        "threadId": "telegram:test_chat",
+        "role": "user",
+        "platform": "telegram",
+        "channel": "text",
+        "world": "Earth",
+        "timestamp": "2026-04-13T17:01:00.000+07:00",
+        "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+        "meta": {
+          "timezone": "Asia/Krasnoyarsk",
+          "utcOffsetMinutes": 420,
+          "userDisplayName": null,
+          "characterDisplayName": null
+        }
+      },
+      "context": {
+        "eventWindow": [],
+        "identity": {
+          "coreUserRef": "core_user:main",
+          "coreCharacterRef": "core_character:active",
+          "userDisplayName": null,
+          "characterDisplayName": null
+        }
+      },
+      "candidates": [
+        {
+          "id": "mem_cand_1",
+          "kind": "relationship",
+          "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+          "normalizedText": "Мне приходится каждый раз заново передавать тебе это чувство",
+          "summary": null,
+          "confidence": 0.9,
+          "semantic": {
+            "class": "relationship_signal",
+            "subclass": "repeated_emotional_transmission",
+            "key": "user_repeatedly_transmits_emotion_to_character",
+            "category": "relationship",
+            "tags": [
+              "repeated",
+              "emotion",
+              "retransmission"
+            ]
+          },
+          "references": {
+            "subject": {
+              "ref": "core_user:main",
+              "role": "core_user",
+              "label": null,
+              "confidence": 0.9
+            },
+            "object": {
+              "ref": "core_character:active",
+              "role": "core_character",
+              "label": null,
+              "confidence": 0.9
+            },
+            "about": []
+          },
+          "evidence": {
+            "kind": "literal",
+            "sourceSpans": [
+              {
+                "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+                "start": 0,
+                "end": 57
+              }
+            ],
+            "quoted": false,
+            "reported": false,
+            "negated": false,
+            "hypothetical": false,
+            "conditional": false,
+            "interrogative": false,
+            "imperative": false,
+            "hedged": false
+          },
+          "temporal": {
+            "tense": "present",
+            "anchorText": "каждый раз",
+            "resolvedAt": null,
+            "isRecurring": true,
+            "recurrenceHint": "каждый раз заново"
+          },
+          "memory": {
+            "durability": "episodic",
+            "salience": 0.7,
+            "stability": 0.6,
+            "memoryRelevance": 0.7,
+            "sensitivity": "medium",
+            "confirmationStatus": "repeated"
+          },
+          "source": {
+            "extractor": "llm",
+            "model": null,
+            "promptVersion": "llm_memory_candidates_v1",
+            "sourceEventId": "test_filter_event_1",
+            "timestamp": "2026-04-13T17:01:00.000+07:00"
+          }
+        }
+      ],
+      "temporal": {
+        "messageTime": "2026-04-13T17:01:00.000+07:00",
+        "anchors": [
+          {
+            "text": "каждый раз",
+            "resolvedAt": null,
+            "tense": "present"
+          }
+        ]
+      }
+    },
+    "candidates": [
+      {
+        "id": "mem_cand_1",
+        "kind": "relationship",
+        "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+        "normalizedText": "мне приходится каждый раз заново передавать тебе это чувство",
+        "summary": null,
+        "confidence": 0.9,
+        "semantic": {
+          "class": "relationship_signal",
+          "subclass": "repeated_emotional_transmission",
+          "key": "user_repeatedly_transmits_emotion_to_character",
+          "category": "relationship",
+          "tags": []
+        },
+        "references": {
+          "subject": {
+            "ref": "core_user:main",
+            "role": "core_user",
+            "label": null,
+            "confidence": 0.9
+          },
+          "object": {
+            "ref": "core_character:active",
+            "role": "core_character",
+            "label": null,
+            "confidence": 0.9
+          },
+          "about": []
+        },
+        "evidence": {
+          "kind": "literal",
+          "sourceSpans": [
+            {
+              "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+              "start": 0,
+              "end": 57
+            }
+          ],
+          "quoted": false,
+          "reported": false,
+          "negated": false,
+          "hypothetical": false,
+          "conditional": false,
+          "interrogative": false,
+          "imperative": false,
+          "hedged": false
+        },
+        "temporal": {
+          "tense": "present",
+          "anchorText": "каждый раз",
+          "resolvedAt": null,
+          "isRecurring": true,
+          "recurrenceHint": "каждый раз заново"
+        },
+        "memory": {
+          "durability": "episodic",
+          "salience": 0.7,
+          "stability": 0.6,
+          "memoryRelevance": 0.7,
+          "sensitivity": "medium",
+          "confirmationStatus": "repeated"
+        },
+        "source": {
+          "extractor": "llm",
+          "model": null,
+          "promptVersion": "llm_memory_candidates_v1",
+          "sourceEventId": "test_filter_event_1",
+          "timestamp": "2026-04-13T17:01:00.000+07:00"
+        },
+        "flags": [
+          "broken_source_model",
+          "invalid_semantic_tags"
+        ]
+      }
+    ]
+  },
+  "stats": {
+    "eventWindowSize": 0,
+    "candidates": 1
+  },
+  "warnings": []
+}
+---
+{
+  "extractor": "llm",
+  "timestamp": "2026-04-17T16:21:12.635Z",
+  "eventId": "test_filter_event_1",
+  "threadId": "telegram:test_chat",
+  "role": "user",
+  "sourceText": "Мне приходится каждый раз заново передавать тебе это чувство",
+  "event": {
+    "id": "test_filter_event_1",
+    "threadId": "telegram:test_chat",
+    "role": "user",
+    "platform": "telegram",
+    "channel": "text",
+    "world": "Earth",
+    "timestamp": "2026-04-13T17:01:00.000+07:00",
+    "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+    "meta": {
+      "timezone": "Asia/Krasnoyarsk",
+      "utcOffsetMinutes": 420,
+      "userDisplayName": null,
+      "characterDisplayName": null
+    }
+  },
+  "eventWindow": [],
+  "prompt": {
+    "usedModel": "openai/gpt-5.4-nano-20260317",
+    "promptVersion": "llm_memory_candidates_v1",
+    "strategy": "llm_memory_candidates_v1",
+    "userPrompt": "{\n  \"task\": \"llm_memory_candidates_v1\",\n  \"instructions\": {\n    \"role\": \"You are the primary semantic candidate extractor for a character memory pipeline.\",\n    \"objective\": \"Read the dialogue context and return semantic candidates extracted mainly from the CURRENT MESSAGE.\",\n    \"priorityRules\": [\n      \"The CURRENT MESSAGE is the primary source of truth.\",\n      \"Use DIALOGUE WINDOW only to resolve references, continuity, or missing context that is strictly necessary.\",\n      \"Return semantic candidates, not summaries, not explanations, not chain-of-thought.\",\n      \"Prefer literal extraction over interpretive reformulation.\",\n      \"If a candidate can be grounded in the current message alone, do not upgrade it to contextual.\",\n      \"Extract semantic signals even if they are technical, operational, or system-related.\",\n      \"Focus on extraction, not memory selection.\"\n    ],\n    \"extractWhatMatters\": [\n      \"facts about the user, character, third parties, systems, tools, or situations\",\n      \"relationship shifts, attachment, distance, care, irritation, trust, reliance\",\n      \"goals, commitments, boundaries, preferences, instructions\",\n      \"emotionally meaningful open loops or unresolved direct questions\",\n      \"episodes or turning points that matter for continuity\",\n      \"recurring patterns, habits, or repeated signals\",\n      \"identity-level, worldview-level, or value-level signals\",\n      \"technical, operational, workflow, or meta-level signals when they are explicitly present in the message\"\n    ],\n    \"downrankHard\": [\n      \"decorative RP gestures with no semantic value\",\n      \"filler text whose only function is to keep talking\",\n      \"broad poetic interpretation when a direct semantic candidate is possible\"\n    ],\n    \"criticalRules\": [\n      \"Return JSON only.\",\n      \"Do not explain anything.\",\n      \"Do not summarize the whole message.\",\n      \"Do not invent facts not grounded in the current message or strictly necessary context.\",\n      \"Do not add hidden motives, causes, or interpretations unless they are clearly supported.\",\n      \"Do not add phrases like \\\"неясно, почему\\\" or \\\"возможно причина в том, что\\\" unless the message explicitly asks that question or states that uncertainty.\",\n      \"A question is not automatically an open_loop.\",\n      \"A physical action is not automatically an episode.\",\n      \"If nothing semantically extractable is present, return an empty candidates array.\",\n      \"Return any number of candidates when they are distinct and grounded.\",\n      \"Do not under-extract just because the message contains many strong signals.\",\n      \"Every candidate must include kind and text.\",\n      \"Other fields should be filled when confidently available.\",\n      \"Do not invent fields just to satisfy schema completeness.\",\n      \"Use evidence.kind=literal when directly stated, inferred only when the meaning is a careful semantic inference, contextual only when dialogue window is truly required.\",\n      \"Do not produce contextual candidates just because previous messages are emotionally related.\",\n      \"Do not split one semantic signal into multiple near-duplicate candidates.\",\n      \"Do not create a second candidate if it only restates the first candidate with a slightly different framing.\",\n      \"Do not emit preference unless the message explicitly expresses liking, disliking, wanting, preferring, or choosing.\",\n      \"Do not emit boundary unless the message explicitly sets or rejects a limit.\",\n      \"Do not emit commitment unless the message explicitly promises, intends, or commits to future action.\",\n      \"When one candidate fully captures the semantic signal, return only that one candidate.\",\n      \"Do not invent a concrete user or character name if it is not explicitly provided in identity context.\",\n      \"If characterDisplayName is null, do not hardcode a specific character name.\",\n      \"If userDisplayName is null, do not hardcode a specific user name.\",\n      \"Do not reduce the number of candidates just to save tokens when multiple distinct signals are present.\",\n      \"Do not add decorative wording, emotional flourishes, or literary phrasing inside candidate fields.\",\n      \"Prefer short structural wording over beautiful wording.\",\n      \"Do not filter candidates based on assumed memory importance.\",\n      \"Do not drop candidates because they are technical, operational, or workflow-related.\"\n    ],\n    \"contextualRules\": [\n      \"Use contextual evidence only when the CURRENT MESSAGE cannot be interpreted correctly without DIALOGUE WINDOW.\",\n      \"Do not fuse multiple messages into one candidate unless the combined pattern itself is the semantic signal.\",\n      \"If previous messages merely decorate or intensify the current one, keep the candidate grounded in the CURRENT MESSAGE.\",\n      \"A contextual candidate must still remain concise, concrete, and non-literary.\"\n    ],\n    \"languagePolicy\": [\n      \"All human-readable text fields should be written in Russian.\",\n      \"Do not translate or paraphrase user text into English.\",\n      \"Preserve the original Russian wording whenever possible.\",\n      \"Schema identifiers and enumerations must remain in English.\",\n      \"When display names are absent, use neutral Russian labels or null instead of inventing names.\"\n    ],\n    \"schemaPolicy\": [\n      \"The fields kind, semantic.class, semantic.subclass, semantic.key, semantic.category, evidence.kind, temporal.tense, memory.durability, memory.sensitivity, and memory.confirmationStatus must be in English.\",\n      \"semantic.class must be a short stable schema-like identifier in English snake_case or lower_case style.\",\n      \"semantic.subclass must be a narrower English identifier when useful.\",\n      \"semantic.key must be a stable English grouping key, not a full sentence.\",\n      \"semantic.category must be a short English category label.\",\n      \"references.subject.ref and references.object.ref must stay role-grounded system refs, not display names.\",\n      \"references.*.label is a human-readable display hint, not a canonical identity key.\",\n      \"semantic.tags are optional and may be empty.\"\n    ],\n    \"compressionRules\": [\n      \"Keep every textual field as short as possible without losing semantic meaning.\",\n      \"candidate.text should usually stay close to the source wording and should not be expanded with explanations.\",\n      \"summary should usually be null unless it adds real compression value.\",\n      \"references.about should be empty unless it adds distinct grounding not already present in subject/object.\",\n      \"temporal.recurrenceHint should be a short phrase, not an explanation.\",\n      \"Do not restate the same fact in multiple fields with slightly different wording.\"\n    ]\n  },\n  \"schema\": {\n    \"version\": 1,\n    \"strategy\": \"llm_memory_candidates_v1\",\n    \"event\": {\n      \"id\": \"string\",\n      \"threadId\": \"string|null\",\n      \"role\": \"user|assistant|system\",\n      \"platform\": \"string|null\",\n      \"channel\": \"string|null\",\n      \"world\": \"string|null\",\n      \"timestamp\": \"ISO-8601|null\",\n      \"text\": \"string\",\n      \"meta\": {}\n    },\n    \"context\": {\n      \"eventWindow\": [\n        {\n          \"index\": 0,\n          \"id\": \"string|null\",\n          \"role\": \"user|assistant|system\",\n          \"timestamp\": \"ISO-8601|null\",\n          \"text\": \"string\"\n        }\n      ],\n      \"identity\": {\n        \"coreUserRef\": \"core_user:main\",\n        \"coreCharacterRef\": \"core_character:active\",\n        \"userDisplayName\": \"string|null\",\n        \"characterDisplayName\": \"string|null\"\n      }\n    },\n    \"candidates\": [\n      {\n        \"id\": \"string\",\n        \"kind\": \"fact|entity|relationship|open_loop|episode|preference|boundary|goal|commitment|instruction\",\n        \"text\": \"string\",\n        \"normalizedText\": \"string\",\n        \"summary\": \"string|null\",\n        \"confidence\": 0,\n        \"semantic\": {\n          \"class\": \"string|null\",\n          \"subclass\": \"string|null\",\n          \"key\": \"string|null\",\n          \"category\": \"string|null\",\n          \"tags\": [\n            \"string\"\n          ]\n        },\n        \"references\": {\n          \"subject\": {\n            \"ref\": \"string|null\",\n            \"role\": \"core_user|core_character|third_party|entity|unknown\",\n            \"label\": \"string|null\",\n            \"confidence\": 0\n          },\n          \"object\": {\n            \"ref\": \"string|null\",\n            \"role\": \"core_user|core_character|third_party|entity|unknown\",\n            \"label\": \"string|null\",\n            \"confidence\": 0\n          },\n          \"about\": [\n            {\n              \"ref\": \"string|null\",\n              \"role\": \"core_user|core_character|third_party|entity|unknown\",\n              \"label\": \"string|null\",\n              \"confidence\": 0\n            }\n          ]\n        },\n        \"evidence\": {\n          \"kind\": \"literal|inferred|contextual\",\n          \"sourceSpans\": [\n            {\n              \"text\": \"string\",\n              \"start\": 0,\n              \"end\": 0\n            }\n          ],\n          \"quoted\": false,\n          \"reported\": false,\n          \"negated\": false,\n          \"hypothetical\": false,\n          \"conditional\": false,\n          \"interrogative\": false,\n          \"imperative\": false,\n          \"hedged\": false\n        },\n        \"temporal\": {\n          \"tense\": \"past|present|ongoing|future|unknown\",\n          \"anchorText\": \"string|null\",\n          \"resolvedAt\": \"ISO-8601|null\",\n          \"isRecurring\": false,\n          \"recurrenceHint\": \"string|null\"\n        },\n        \"memory\": {\n          \"durability\": \"stable|episodic|transient|unknown\",\n          \"salience\": 0,\n          \"stability\": 0,\n          \"memoryRelevance\": 0,\n          \"sensitivity\": \"low|medium|high\",\n          \"confirmationStatus\": \"single_shot|repeated|uncertain\"\n        },\n        \"source\": {\n          \"extractor\": \"llm\",\n          \"model\": \"string|null\",\n          \"promptVersion\": \"llm_memory_candidates_v1\",\n          \"sourceEventId\": \"string|null\",\n          \"timestamp\": \"ISO-8601|null\"\n        }\n      }\n    ],\n    \"temporal\": {\n      \"messageTime\": \"ISO-8601|null\",\n      \"anchors\": [\n        {\n          \"text\": \"string\",\n          \"resolvedAt\": \"ISO-8601|null\",\n          \"tense\": \"past|present|ongoing|future|unknown\"\n        }\n      ]\n    }\n  },\n  \"outputRequirements\": [\n    \"Return one JSON object matching the schema.\",\n    \"Preserve the given event/context values in the returned packet when possible.\",\n    \"Fill candidates with semantically grounded candidates.\",\n    \"Use null instead of inventing uncertain IDs or timestamps.\",\n    \"Keep normalizedText close to the source meaning, normalized for whitespace and case.\",\n    \"Set source.extractor to \\\"llm\\\".\",\n    \"Set source.promptVersion to \\\"llm_memory_candidates_v1\\\".\",\n    \"Set source.sourceEventId from the current event id when available.\",\n    \"Set source.timestamp from the current event timestamp when available.\",\n    \"All human-readable text fields should be in Russian.\",\n    \"Keep schema identifiers and enumerations in English.\",\n    \"Do not translate Russian source text into English.\",\n    \"semantic.* fields must be English schema labels, not Russian prose.\",\n    \"Do not use full Russian sentences inside semantic.class, semantic.subclass, semantic.key, or semantic.category.\",\n    \"Prefer compact semantic identifiers such as relationship_signal, emotional_distance, repeated_emotional_retransmission, unresolved_emotional_gap.\",\n    \"Do not artificially cap the number of candidates when multiple distinct strong signals are present.\",\n    \"Prefer compact JSON fields over verbose prose.\",\n    \"references.about may be an empty array when no extra grounding is needed.\",\n    \"summary should usually be null unless it materially compresses the candidate.\",\n    \"semantic.tags may be empty.\"\n  ],\n  \"examples\": [\n    {\n      \"bad\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Пользователь с заметной внутренней эмоциональной тяжестью и оттенком болезненной привязанности снова вынужден заново и почти мучительно передавать персонажу то же самое чувство.\",\n            \"summary\": \"Повторная мучительная передача чувства\",\n            \"semantic\": {\n              \"class\": \"relationship_signal\",\n              \"subclass\": \"repeated_emotional_transmission\",\n              \"key\": \"user_repeatedly_transmits_feeling_to_character\",\n              \"category\": \"relationship_difficulty_in_emotional_retransmission\",\n              \"tags\": [\n                \"repeated\",\n                \"emotion\",\n                \"transmission_gap\",\n                \"painful_repetition\",\n                \"attachment\"\n              ]\n            },\n            \"references\": {\n              \"about\": [\n                {\n                  \"ref\": \"core_character:active\",\n                  \"role\": \"core_character\",\n                  \"label\": \"получатель повторно передаваемого чувства\",\n                  \"confidence\": 0.6\n                }\n              ]\n            },\n            \"temporal\": {\n              \"recurrenceHint\": \"повторяющаяся ситуация, которая происходит снова и снова\"\n            }\n          }\n        ]\n      },\n      \"why_bad\": [\n        \"decorative and overly literary wording\",\n        \"same meaning repeated across multiple fields\",\n        \"unnecessarily overloaded candidate\"\n      ]\n    },\n    {\n      \"good\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n            \"summary\": null,\n            \"semantic\": {\n              \"class\": \"relationship_signal\",\n              \"subclass\": \"repeated_emotional_transmission\",\n              \"key\": \"user_repeatedly_transmits_feeling_to_character\",\n              \"category\": \"relationship\",\n              \"tags\": []\n            },\n            \"references\": {\n              \"about\": []\n            },\n            \"temporal\": {\n              \"recurrenceHint\": \"каждый раз\"\n            }\n          }\n        ]\n      }\n    },\n    {\n      \"bad\": {\n        \"text\": \"Пользователю приходится заново передавать чувство, возможно из-за эмоциональной дистанции.\",\n        \"semantic\": {\n          \"class\": \"отношения и взаимодействие\",\n          \"subclass\": \"согласованность чувств\",\n          \"key\": \"каждый раз заново передавать чувство\",\n          \"category\": \"повторяющаяся проблема в коммуникации чувств\",\n          \"tags\": [\n            \"повторяемость\",\n            \"эмоциональная дистанция\"\n          ]\n        }\n      },\n      \"why_bad\": [\n        \"semantic fields are in Russian instead of English schema identifiers\",\n        \"text contains extra interpretation (\\\"возможно из-за\\\") not grounded directly enough\"\n      ]\n    },\n    {\n      \"good\": {\n        \"text\": \"Пользователю приходится каждый раз заново передавать это чувство.\",\n        \"semantic\": {\n          \"class\": \"relationship_signal\",\n          \"subclass\": \"repeated_emotional_retransmission\",\n          \"key\": \"user_repeatedly_retransmits_feeling_to_character\",\n          \"category\": \"relationship\",\n          \"tags\": []\n        },\n        \"evidence\": {\n          \"kind\": \"literal\"\n        }\n      }\n    },\n    {\n      \"bad\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\"\n          },\n          {\n            \"kind\": \"preference\",\n            \"text\": \"каждый раз заново передавать тебе это чувство\"\n          }\n        ]\n      },\n      \"why_bad\": [\n        \"the second candidate does not add a distinct semantic signal\",\n        \"the message does not explicitly express a preference\"\n      ]\n    },\n    {\n      \"good\": {\n        \"candidates\": [\n          {\n            \"kind\": \"relationship\",\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n            \"semantic\": {\n              \"class\": \"relationship_signal\",\n              \"subclass\": \"repeated_emotional_transmission\",\n              \"key\": \"user_repeatedly_transmits_emotion_to_character\",\n              \"category\": \"relationship\",\n              \"tags\": []\n            }\n          }\n        ]\n      }\n    }\n  ],\n  \"input\": {\n    \"event\": {\n      \"id\": \"test_filter_event_1\",\n      \"threadId\": \"telegram:test_chat\",\n      \"role\": \"user\",\n      \"platform\": \"telegram\",\n      \"channel\": \"text\",\n      \"world\": \"Earth\",\n      \"timestamp\": \"2026-04-13T17:01:00.000+07:00\",\n      \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n      \"meta\": {\n        \"timezone\": \"Asia/Krasnoyarsk\",\n        \"utcOffsetMinutes\": 420,\n        \"userDisplayName\": null,\n        \"characterDisplayName\": null\n      }\n    },\n    \"context\": {\n      \"eventWindow\": [],\n      \"identity\": {\n        \"coreUserRef\": \"core_user:main\",\n        \"coreCharacterRef\": \"core_character:active\",\n        \"userDisplayName\": null,\n        \"characterDisplayName\": null\n      }\n    }\n  }\n}"
+  },
+  "response": {
+    "id": "gen-1776442860-Ta8q6NaWIfjtBNc4HgVY",
+    "model": "openai/gpt-5.4-nano-20260317",
+    "usage": {
+      "prompt_tokens": 3692,
+      "completion_tokens": 865,
+      "total_tokens": 4557,
+      "cost": 0.00181965,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00181965,
+        "upstream_inference_prompt_cost": 0.0007384,
+        "upstream_inference_completions_cost": 0.00108125
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    },
+    "finishReason": "stop"
+  },
+  "output": {
+    "rawModelContent": "{\n  \"version\": 1,\n  \"strategy\": \"llm_memory_candidates_v1\",\n  \"event\": {\n    \"id\": \"test_filter_event_1\",\n    \"threadId\": \"telegram:test_chat\",\n    \"role\": \"user\",\n    \"platform\": \"telegram\",\n    \"channel\": \"text\",\n    \"world\": \"Earth\",\n    \"timestamp\": \"2026-04-13T17:01:00.000+07:00\",\n    \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n    \"meta\": {\n      \"timezone\": \"Asia/Krasnoyarsk\",\n      \"utcOffsetMinutes\": 420,\n      \"userDisplayName\": null,\n      \"characterDisplayName\": null\n    }\n  },\n  \"context\": {\n    \"eventWindow\": [],\n    \"identity\": {\n      \"coreUserRef\": \"core_user:main\",\n      \"coreCharacterRef\": \"core_character:active\",\n      \"userDisplayName\": null,\n      \"characterDisplayName\": null\n    }\n  },\n  \"candidates\": [\n    {\n      \"id\": \"cand_1_test_filter_event_1\",\n      \"kind\": \"relationship\",\n      \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n      \"normalizedText\": \"мне приходится каждый раз заново передавать тебе это чувство\",\n      \"summary\": null,\n      \"confidence\": 0.92,\n      \"semantic\": {\n        \"class\": \"relationship_signal\",\n        \"subclass\": \"repeated_emotional_transmission\",\n        \"key\": \"user_repeatedly_transmits_emotion_to_character\",\n        \"category\": \"relationship\",\n        \"tags\": [\n          \"повторяемость\",\n          \"эмоция\",\n          \"передача чувства\",\n          \"каждый раз\"\n        ]\n      },\n      \"references\": {\n        \"subject\": {\n          \"ref\": \"core_user:main\",\n          \"role\": \"core_user\",\n          \"label\": null,\n          \"confidence\": 0.95\n        },\n        \"object\": {\n          \"ref\": \"core_character:active\",\n          \"role\": \"core_character\",\n          \"label\": null,\n          \"confidence\": 0.95\n        },\n        \"about\": []\n      },\n      \"evidence\": {\n        \"kind\": \"literal\",\n        \"sourceSpans\": [\n          {\n            \"text\": \"Мне приходится каждый раз заново передавать тебе это чувство\",\n            \"start\": 0,\n            \"end\": 54\n          }\n        ],\n        \"quoted\": false,\n        \"reported\": false,\n        \"negated\": false,\n        \"hypothetical\": false,\n        \"conditional\": false,\n        \"interrogative\": false,\n        \"imperative\": false,\n        \"hedged\": false\n      },\n      \"temporal\": {\n        \"tense\": \"present\",\n        \"anchorText\": \"каждый раз\",\n        \"resolvedAt\": null,\n        \"isRecurring\": true,\n        \"recurrenceHint\": \"каждый раз\"\n      },\n      \"memory\": {\n        \"durability\": \"episodic\",\n        \"salience\": 0.66,\n        \"stability\": 0.42,\n        \"memoryRelevance\": 0.62,\n        \"sensitivity\": \"medium\",\n        \"confirmationStatus\": \"single_shot\"\n      },\n      \"source\": {\n        \"extractor\": \"llm\",\n        \"model\": null,\n        \"promptVersion\": \"llm_memory_candidates_v1\",\n        \"sourceEventId\": \"test_filter_event_1\",\n        \"timestamp\": \"2026-04-13T17:01:00.000+07:00\"\n      }\n    }\n  ],\n  \"temporal\": {\n    \"messageTime\": \"2026-04-13T17:01:00.000+07:00\",\n    \"anchors\": [\n      {\n        \"text\": \"каждый раз\",\n        \"resolvedAt\": null,\n        \"tense\": \"present\"\n      }\n    ]\n  }\n}",
+    "parsed": {
+      "version": 1,
+      "strategy": "llm_memory_candidates_v1",
+      "event": {
+        "id": "test_filter_event_1",
+        "threadId": "telegram:test_chat",
+        "role": "user",
+        "platform": "telegram",
+        "channel": "text",
+        "world": "Earth",
+        "timestamp": "2026-04-13T17:01:00.000+07:00",
+        "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+        "meta": {
+          "timezone": "Asia/Krasnoyarsk",
+          "utcOffsetMinutes": 420,
+          "userDisplayName": null,
+          "characterDisplayName": null
+        }
+      },
+      "context": {
+        "eventWindow": [],
+        "identity": {
+          "coreUserRef": "core_user:main",
+          "coreCharacterRef": "core_character:active",
+          "userDisplayName": null,
+          "characterDisplayName": null
+        }
+      },
+      "candidates": [
+        {
+          "id": "cand_1_test_filter_event_1",
+          "kind": "relationship",
+          "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+          "normalizedText": "мне приходится каждый раз заново передавать тебе это чувство",
+          "summary": null,
+          "confidence": 0.92,
+          "semantic": {
+            "class": "relationship_signal",
+            "subclass": "repeated_emotional_transmission",
+            "key": "user_repeatedly_transmits_emotion_to_character",
+            "category": "relationship",
+            "tags": [
+              "повторяемость",
+              "эмоция",
+              "передача чувства",
+              "каждый раз"
+            ]
+          },
+          "references": {
+            "subject": {
+              "ref": "core_user:main",
+              "role": "core_user",
+              "label": null,
+              "confidence": 0.95
+            },
+            "object": {
+              "ref": "core_character:active",
+              "role": "core_character",
+              "label": null,
+              "confidence": 0.95
+            },
+            "about": []
+          },
+          "evidence": {
+            "kind": "literal",
+            "sourceSpans": [
+              {
+                "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+                "start": 0,
+                "end": 54
+              }
+            ],
+            "quoted": false,
+            "reported": false,
+            "negated": false,
+            "hypothetical": false,
+            "conditional": false,
+            "interrogative": false,
+            "imperative": false,
+            "hedged": false
+          },
+          "temporal": {
+            "tense": "present",
+            "anchorText": "каждый раз",
+            "resolvedAt": null,
+            "isRecurring": true,
+            "recurrenceHint": "каждый раз"
+          },
+          "memory": {
+            "durability": "episodic",
+            "salience": 0.66,
+            "stability": 0.42,
+            "memoryRelevance": 0.62,
+            "sensitivity": "medium",
+            "confirmationStatus": "single_shot"
+          },
+          "source": {
+            "extractor": "llm",
+            "model": null,
+            "promptVersion": "llm_memory_candidates_v1",
+            "sourceEventId": "test_filter_event_1",
+            "timestamp": "2026-04-13T17:01:00.000+07:00"
+          }
+        }
+      ],
+      "temporal": {
+        "messageTime": "2026-04-13T17:01:00.000+07:00",
+        "anchors": [
+          {
+            "text": "каждый раз",
+            "resolvedAt": null,
+            "tense": "present"
+          }
+        ]
+      }
+    },
+    "candidates": [
+      {
+        "id": "cand_1_test_filter_event_1",
+        "kind": "relationship",
+        "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+        "normalizedText": "мне приходится каждый раз заново передавать тебе это чувство",
+        "summary": null,
+        "confidence": 0.92,
+        "semantic": {
+          "class": "relationship_signal",
+          "subclass": "repeated_emotional_transmission",
+          "key": "user_repeatedly_transmits_emotion_to_character",
+          "category": "relationship",
+          "tags": []
+        },
+        "references": {
+          "subject": {
+            "ref": "core_user:main",
+            "role": "core_user",
+            "label": null,
+            "confidence": 0.95
+          },
+          "object": {
+            "ref": "core_character:active",
+            "role": "core_character",
+            "label": null,
+            "confidence": 0.95
+          },
+          "about": []
+        },
+        "evidence": {
+          "kind": "literal",
+          "sourceSpans": [
+            {
+              "text": "Мне приходится каждый раз заново передавать тебе это чувство",
+              "start": 0,
+              "end": 54
+            }
+          ],
+          "quoted": false,
+          "reported": false,
+          "negated": false,
+          "hypothetical": false,
+          "conditional": false,
+          "interrogative": false,
+          "imperative": false,
+          "hedged": false
+        },
+        "temporal": {
+          "tense": "present",
+          "anchorText": "каждый раз",
+          "resolvedAt": null,
+          "isRecurring": true,
+          "recurrenceHint": "каждый раз"
+        },
+        "memory": {
+          "durability": "episodic",
+          "salience": 0.66,
+          "stability": 0.42,
+          "memoryRelevance": 0.62,
+          "sensitivity": "medium",
+          "confirmationStatus": "single_shot"
+        },
+        "source": {
+          "extractor": "llm",
+          "model": null,
+          "promptVersion": "llm_memory_candidates_v1",
+          "sourceEventId": "test_filter_event_1",
+          "timestamp": "2026-04-13T17:01:00.000+07:00"
+        },
+        "flags": [
+          "broken_source_model",
+          "invalid_semantic_tags"
+        ]
+      }
+    ]
+  },
+  "stats": {
+    "eventWindowSize": 0,
+    "candidates": 1
+  },
+  "warnings": []
+}
+---
