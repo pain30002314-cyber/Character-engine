@@ -4,7 +4,6 @@ const env = require('../../../../config/env')
 const { buildPrompt } = require('./prompt')
 const { normalizeMemoryCandidatesPacket } = require('./normalize')
 const { postprocessLlmCandidates } = require('./postprocess')
-const { runSemanticTagsPatch } = require('./tags/runtime')
 const { appendLlmDebugLog } = require('./debug/llm.debug')
 const { generateRawCompletion } = require('../../../../services/llm.service')
 const {
