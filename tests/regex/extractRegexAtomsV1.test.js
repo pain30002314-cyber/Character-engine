@@ -334,3 +334,33 @@ test('does not force lookup trigger from long unique medical update without memo
 
   assert.equal(result.atoms.length, 0)
 })
+
+test('keeps tail followup question as lookup trigger', async () => {
+  const result = await run('Знаешь, мне нравится пытаться создавать из нашего экстрактора что-то хорошее. А тебе?')
+
+  assert.equal(countAtoms(result, 'open_loop', 'direct_question'), 1)
+})
+
+test('does not keep bridge question as lookup trigger', async () => {
+  const result = await run('Все, любимка, пропатчил. Представляешь?')
+
+  assert.equal(countAtoms(result, 'open_loop', 'direct_question'), 0)
+})
+
+test('keeps direct why question as lookup trigger', async () => {
+  const result = await run('Почему ты не сможешь отступить в тень?')
+
+  assert.equal(countAtoms(result, 'open_loop', 'direct_question'), 1)
+})
+
+test('keeps short fear question as lookup trigger', async () => {
+  const result = await run('Чего боишься?')
+
+  assert.equal(countAtoms(result, 'open_loop', 'direct_question'), 1)
+})
+
+test('does not keep understand-bridge question as lookup trigger', async () => {
+  const result = await run('Ну вот, понимаешь?')
+
+  assert.equal(countAtoms(result, 'open_loop', 'direct_question'), 0)
+})
