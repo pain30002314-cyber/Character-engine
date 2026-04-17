@@ -133,6 +133,36 @@ function withFlag(candidate, flag) {
   return next
 }
 
+function sanitizeSchema(candidate, packet) {
+  const next = cloneCandidate(candidate)
+  const fallbackModel = sanitizeModelName(packet?.meta?.usedModel, null)
+
+  next.kind = VALID_KINDS.has(next.kind) ? next.kind : null
+
+  const rawModel = String(next?.source?.model || '').trim()
+  next.source.model = sanitizeModelName(rawModel, fallbackModel)
+
+  next.source.promptVersion =
+    next?.source?.promptVersion && String(next.source.promptVersion).trim()
+      ? String(next.source.promptVersion).trim()
+      : String(packet?.meta?.promptVersion || 'llm_memory_candidates_v1')
+
+  next.source.extractor = 'llm'
+
+  if (!next.source.model && fallbackModel) {
+    next.source.model = fallbackModel
+  }
+
+  if (rawModel && next.source.model == null) {
+    next.flags = Array.from(new Set([
+      ...safeFlags(next),
+      'broken_source_model'
+    ]))
+  }
+
+  return next.kind ? next : null
+}
+
 function sanitizeSchemaId(value) {
   const normalized = String(value || '').trim().toLowerCase()
   return SCHEMA_ID_RE.test(normalized) ? normalized : null
@@ -430,10 +460,7 @@ function refsChanged(before, after) {
 function flagCandidate(candidate) {
   let next = cloneCandidate(candidate)
 
-  const flags = safeFlags(next).filter((flag) => flag !== 'invalid_semantic_tags')
-  next.flags = flags
-
-  if (hasInvalidSemanticTags(candidate)) {
+  if (hasInvalidSemanticTags(candidate) && !safeFlags(next).includes('invalid_semantic_tags')) {
     next = withFlag(next, 'invalid_semantic_tags')
   }
 

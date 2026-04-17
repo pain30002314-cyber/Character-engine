@@ -4,6 +4,7 @@ const env = require('../../../../config/env')
 const { buildPrompt } = require('./prompt')
 const { normalizeMemoryCandidatesPacket } = require('./normalize')
 const { postprocessLlmCandidates } = require('./postprocess')
+const { runSemanticTagsPatch } = require('./tags/runtime')
 const { appendLlmDebugLog } = require('./debug/llm.debug')
 const { generateRawCompletion } = require('../../../../services/llm.service')
 const {
@@ -251,8 +252,41 @@ async function runLlmExtractor({ event, eventWindow = [] }) {
         candidates: normalizedPacket.candidates
       })
 
-      normalizedPacket = applySemanticTagsPatch(normalizedPacket, tagPatchResult)
-      normalizedPacket = postprocessLlmCandidates(normalizedPacket)
+        normalizedPacket = applySemanticTagsPatch(normalizedPacket, tagPatchResult)
+        normalizedPacket = postprocessLlmCandidates(normalizedPacket)
+      } catch (err) {
+        normalizedPacket = {
+          ...(normalizedPacket || {}),
+          debug: {
+            ...(normalizedPacket?.debug || {}),
+            semanticTagsPatch: {
+              error: err?.message || 'unknown_error'
+            }
+          }
+        }
+      }
+    }
+
+    try {
+      const tagPatchResult = await runSemanticTagsPatch({
+        event,
+        packet: normalizedPacket
+      })
+
+      if (tagPatchResult?.applied && tagPatchResult?.packet) {
+        normalizedPacket = {
+          ...tagPatchResult.packet,
+          debug: {
+            ...(tagPatchResult.packet?.debug || {}),
+            semanticTagsPatch: {
+              model: tagPatchResult?.model || null,
+              updatesApplied: Array.isArray(tagPatchResult?.patch?.tagUpdates)
+                ? tagPatchResult.patch.tagUpdates.length
+                : 0
+            }
+          }
+        }
+      }
     } catch (err) {
       normalizedPacket = {
         ...(normalizedPacket || {}),
@@ -264,7 +298,6 @@ async function runLlmExtractor({ event, eventWindow = [] }) {
         }
       }
     }
-  }
 
     
   } catch (err) {

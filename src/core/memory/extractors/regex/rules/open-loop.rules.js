@@ -58,6 +58,40 @@ function normalize(text) {
     .trim()
 }
 
+function isBridgeQuestion(text) {
+  const source = normalize(text).toLowerCase()
+
+  return (
+    /^представляешь\?$/.test(source) ||
+    /^понимаешь\?$/.test(source) ||
+    /^чувствуешь\?$/.test(source) ||
+    /^видишь\?$/.test(source) ||
+    /^прикинь\?$/.test(source) ||
+    /^сечешь\?$/.test(source) ||
+    /^да\?$/.test(source) ||
+    /^правда\?$/.test(source) ||
+    /^серьезно\?$/.test(source) ||
+    /^серьёзно\?$/.test(source) ||
+    /^честно\?$/.test(source)
+  )
+}
+
+function isTailFollowupQuestion(text) {
+  const source = normalize(text).toLowerCase()
+
+  return (
+    /^а\s+тебе\?$/.test(source) ||
+    /^а\s+у\s+тебя\?$/.test(source) ||
+    /^а\s+ты\?$/.test(source) ||
+    /^а\s+как\s+ты\?$/.test(source) ||
+    /^а\s+что\s+ты\?$/.test(source) ||
+    /^а\s+почему\??$/.test(source) ||
+    /^а\s+чего\??$/.test(source) ||
+    /^тебе\?$/.test(source) ||
+    /^у\s+тебя\?$/.test(source)
+  )
+}
+
 function extractQuestionCore(text) {
   const source = normalize(text)
   if (!source || !source.includes('?')) return source
@@ -173,6 +207,12 @@ function shouldCreateDirectQuestion(text, context) {
   if (isQuotedOrReportedQuestion(source, context)) return false
   if (!source.endsWith('?')) return false
 
+  // ❗ сначала фильтруем мусор
+  if (isBridgeQuestion(source)) return false
+
+  // ❗ потом явно разрешаем короткие follow-up вопросы
+  if (isTailFollowupQuestion(source)) return true
+
   const startsLikeQuestion =
     STRICT_QUESTION_RE.test(source) ||
     SOFT_QUESTION_RE.test(source)
@@ -184,7 +224,7 @@ function shouldCreateDirectQuestion(text, context) {
   if (/^чтобы\b/i.test(source.toLowerCase())) return false
   if (source.length > 140) return false
 
-  return startsLikeQuestion || source.endsWith('?')
+  return startsLikeQuestion
 }
 
 function detectOne({ clause, context }) {
