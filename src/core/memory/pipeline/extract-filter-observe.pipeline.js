@@ -1,43 +1,60 @@
 'use strict'
 
-const memoryConfig = require('../memory.config')
 const { extractLlmAtomsV1 } = require('../extractors/llm')
 const { evaluateLlmCandidateBatchV1 } = require('../filters/llm')
-const { getThreadEvents } = require('../store/events.store')
 const { buildEventWindow } = require('./event-window')
 
-async function runExtractFilterObservePipeline({ threadId, event }) {
+const DEFAULT_PIPELINE_LIMITS = {
+  rawContextEvents: 8,
+  rawContextCharsPerEvent: 280
+}
+
+async function runExtractFilterObservePipeline({
+  threadId,
+  event,
+  history = [],
+  eventWindow = null,
+  pipelineLimits = {},
+  filterConfig = {}
+}) {
+  const resolvedLimits = {
+    ...DEFAULT_PIPELINE_LIMITS,
+    ...(pipelineLimits || {})
+  }
+
   const resolvedThreadId = threadId || event?.threadId || null
-  const history = resolvedThreadId
-    ? getThreadEvents(resolvedThreadId, { includeInvalidForMemory: true })
-    : []
 
   const filteredHistory = Array.isArray(history)
     ? history.filter((item) => item?.id !== event?.id)
     : []
 
-  const eventWindow = buildEventWindow(
-    filteredHistory,
-    memoryConfig.limits.rawContextEvents,
-    memoryConfig.limits.rawContextCharsPerEvent
-  )
+  const resolvedEventWindow = Array.isArray(eventWindow)
+    ? eventWindow
+    : buildEventWindow(
+        filteredHistory,
+        resolvedLimits.rawContextEvents,
+        resolvedLimits.rawContextCharsPerEvent
+      )
 
   const extractorPacket = await extractLlmAtomsV1({
     event,
-    eventWindow
+    eventWindow: resolvedEventWindow
   })
 
   const filterPacket = await evaluateLlmCandidateBatchV1({
-    extractorPacket
+    extractorPacket,
+    config: filterConfig
   })
 
   return {
-    eventWindow,
+    thread_id: resolvedThreadId,
+    eventWindow: resolvedEventWindow,
     extractorPacket,
     filterPacket
   }
 }
 
 module.exports = {
-  runExtractFilterObservePipeline
+  runExtractFilterObservePipeline,
+  DEFAULT_PIPELINE_LIMITS
 }

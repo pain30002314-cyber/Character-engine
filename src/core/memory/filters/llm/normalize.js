@@ -150,13 +150,26 @@ function parseFilterEvaluatorResponse(rawContent) {
 
   try {
     const parsed = JSON.parse(rawContent)
-    const evaluations = Array.isArray(parsed)
-      ? parsed
-      : safeArray(parsed?.evaluations || parsed?.candidates)
+
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return {
+        parsed,
+        evaluations: [],
+        parseError: 'root_object_required'
+      }
+    }
+
+    if (!Array.isArray(parsed.evaluations)) {
+      return {
+        parsed,
+        evaluations: [],
+        parseError: 'evaluations_array_required'
+      }
+    }
 
     return {
       parsed,
-      evaluations,
+      evaluations: parsed.evaluations,
       parseError: null
     }
   } catch (error) {

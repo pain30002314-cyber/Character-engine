@@ -136,3 +136,16 @@ test('buildBatchSummary counts routing decisions from enriched candidates', () =
     fast_track_canonical: 1
   })
 })
+
+test('parseFilterEvaluatorResponse rejects non-object root shape', () => {
+  const raw = JSON.stringify([
+    {
+      candidate_id: 'c1'
+    }
+  ])
+
+  const result = parseFilterEvaluatorResponse(raw)
+
+  assert.equal(result.parseError, 'root_object_required')
+  assert.deepEqual(result.evaluations, [])
+})

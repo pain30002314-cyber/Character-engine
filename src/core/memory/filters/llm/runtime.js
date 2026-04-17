@@ -1,18 +1,15 @@
 'use strict'
 
-const env = require('../../../../config/env')
 const { generateRawCompletion } = require('../../../../services/llm.service')
 const { buildFilterPrompt } = require('./prompt')
-const {
-  FILTER_VERSION,
-  FILTER_STRATEGY
-} = require('./constants')
+const { FILTER_VERSION, FILTER_STRATEGY } = require('./constants')
 const {
   parseFilterEvaluatorResponse,
   enrichCandidatesWithFilterEvaluations,
   buildBatchSummary
 } = require('./normalize')
 const { appendFilterDebugLog } = require('./debug/llm-filter.debug')
+const { getLlmFilterConfig } = require('./config')
 
 function safeArray(value) {
   return Array.isArray(value) ? value : []
@@ -30,11 +27,7 @@ function buildResponseMeta(response, fallbackModel) {
 }
 
 function getExtractorVersion(packet) {
-  return (
-    packet?.meta?.extractorVersion ||
-    packet?.service?.extractorVersion ||
-    null
-  )
+  return packet?.meta?.extractorVersion || packet?.service?.extractorVersion || null
 }
 
 function buildPromptInput(packet) {
@@ -62,7 +55,7 @@ function buildPromptInput(packet) {
   }
 }
 
-function buildBaseResult(packet, durationMs = 0, response = null, warnings = []) {
+function buildBaseResult(packet, config, durationMs = 0, response = null, warnings = []) {
   return {
     thread_id: packet?.event?.threadId || null,
     message_id: packet?.event?.id || null,
@@ -74,22 +67,25 @@ function buildBaseResult(packet, durationMs = 0, response = null, warnings = [])
     batch_summary: buildBatchSummary([]),
     meta: {
       source: FILTER_STRATEGY,
-      used_model: response?.model || env.memoryModel || null,
+      used_model: response?.model || config.model || null,
       duration_ms: durationMs,
       warnings
     }
   }
 }
 
-async function evaluateLlmCandidateBatchV1({ extractorPacket }) {
+async function evaluateLlmCandidateBatchV1({ extractorPacket, config = {} }) {
   const startedAt = Date.now()
   const warnings = []
+  const resolvedConfig = getLlmFilterConfig(config)
+
   const promptInput = buildPromptInput(extractorPacket)
   const userPrompt = buildFilterPrompt({ input: promptInput })
   const systemPrompt = [
     'You are a strict JSON-only candidate evaluator for memory-ingestion triage.',
     'You only evaluate extracted candidates.',
     'You do not write memory, resolve conflicts, link entities, or reconcile contradictions.',
+    'Return exactly one root JSON object with an "evaluations" array.',
     'Return only JSON matching the requested schema.'
   ].join(' ')
 
@@ -101,12 +97,7 @@ async function evaluateLlmCandidateBatchV1({ extractorPacket }) {
 
   if (!safeArray(extractorPacket?.candidates).length) {
     const durationMs = Date.now() - startedAt
-    const result = buildBaseResult(
-      extractorPacket,
-      durationMs,
-      null,
-      ['no_candidates']
-    )
+    const result = buildBaseResult(extractorPacket, resolvedConfig, durationMs, null, ['no_candidates'])
 
     await appendFilterDebugLog({
       layer: FILTER_STRATEGY,
@@ -123,7 +114,7 @@ async function evaluateLlmCandidateBatchV1({ extractorPacket }) {
       prompt: {
         systemPrompt,
         userPrompt,
-        usedModel: env.memoryModel || null
+        usedModel: resolvedConfig.model
       },
       response: null,
       parsedResponse: null,
@@ -138,10 +129,10 @@ async function evaluateLlmCandidateBatchV1({ extractorPacket }) {
     response = await generateRawCompletion({
       systemPrompt,
       userPrompt,
-      temperature: 0,
-      max_tokens: 4000,
-      model: env.memoryModel,
-      title: 'Hu Tao LLM Candidate Filter Evaluator'
+      temperature: resolvedConfig.temperature,
+      max_tokens: resolvedConfig.maxTokens,
+      model: resolvedConfig.model,
+      title: resolvedConfig.title
     })
 
     rawModelContent = response?.choices?.[0]?.message?.content || ''
@@ -157,24 +148,21 @@ async function evaluateLlmCandidateBatchV1({ extractorPacket }) {
     finalCandidates = enrichCandidatesWithFilterEvaluations(
       extractorPacket?.candidates,
       parsedResponse.evaluations,
-      {
-        parseError
-      }
+      { parseError }
     )
   } catch (error) {
     warnings.push(error?.message || 'unknown_error')
     parseError = error?.message || 'llm_request_failed'
+
     finalCandidates = enrichCandidatesWithFilterEvaluations(
       extractorPacket?.candidates,
       [],
-      {
-        parseError
-      }
+      { parseError }
     )
   }
 
   const durationMs = Date.now() - startedAt
-  const result = buildBaseResult(extractorPacket, durationMs, response, warnings)
+  const result = buildBaseResult(extractorPacket, resolvedConfig, durationMs, response, warnings)
   result.candidates = finalCandidates
   result.batch_summary = buildBatchSummary(finalCandidates)
 
@@ -194,10 +182,10 @@ async function evaluateLlmCandidateBatchV1({ extractorPacket }) {
     prompt: {
       systemPrompt,
       userPrompt,
-      usedModel: response?.model || env.memoryModel || null
+      usedModel: response?.model || resolvedConfig.model || null
     },
     response: {
-      meta: buildResponseMeta(response, env.memoryModel),
+      meta: buildResponseMeta(response, resolvedConfig.model),
       rawModelContent
     },
     parsedResponse: parsed,
