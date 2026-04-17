@@ -274,6 +274,19 @@ function detectOne({ clause, context }) {
   if (!text || isFalseAffect(unitText)) return results
   if (!normalizedUnit) return results
 
+    if (
+    normalizedUnit.length > 120 &&
+    (
+      normalizedUnit.includes('спасибо') ||
+      normalizedUnit.includes('тепл') ||
+      normalizedUnit.includes('щека') ||
+      normalizedUnit.includes('рук') ||
+      normalizedUnit.includes('поцелов')
+    )
+  ) {
+    return results
+  }
+
   const emotion = detectEmotion(unitText)
   if (!emotion) return results
 

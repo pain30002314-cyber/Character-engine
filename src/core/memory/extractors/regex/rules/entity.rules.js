@@ -237,6 +237,27 @@ function escapeRegex(text) {
   return String(text || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
+function isInsideQuotes(text, value) {
+  const source = String(text || '')
+  const needle = normalize(value)
+
+  if (!source || !needle) return false
+
+  const quotedPattern = needle
+    .split(/\s+/)
+    .map(escapeRegex)
+    .join('\\s+')
+
+  return new RegExp(
+    `[«"][^«»"]*${quotedPattern}[^«»"]*[»"]`,
+    'i'
+  ).test(source)
+}
+
+function escapeRegex(text) {
+  return String(text || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
 function hasBoundedPhrase(text, phrase) {
   const normalizedPhrase = normalize(phrase)
   if (!normalizedPhrase) return false
@@ -250,6 +271,19 @@ function hasBoundedPhrase(text, phrase) {
     `(^|[^а-яёa-z0-9_])${pattern}([^а-яёa-z0-9_]|$)`,
     'i'
   ).test(text)
+}
+
+function isQuotedMetaEntityContext(text) {
+  const source = normalize(text)
+
+  if (!source) return false
+
+  return (
+    /не\s+как\s+[«"].+[»"]/.test(source) ||
+    /как\s+роль\s+внутри\s+пример[а-я]*/.test(source) ||
+    /внутри\s+пример[а-я]*/.test(source) ||
+    /это\s+было\s+сказано\s+не\s+как/.test(source)
+  )
 }
 
 function buildEntityCandidate({
@@ -286,6 +320,7 @@ function isSafeEntityClause(text, context, event) {
   if (event.role !== 'user') return false
   if (context.isReported) return false
   if (context.isQuoted) return false
+  if (isQuotedMetaEntityContext(text)) return false
   if (source.length > 140) return false
 
   return true
@@ -367,6 +402,7 @@ function detectOne({ clause, context, event }) {
   for (const def of ENTITY_DEFS) {
     if (!matchesAny(def.patterns, lowered)) continue
     if (typeof def.extraGuard === 'function' && !def.extraGuard(text)) continue
+    if (isInsideQuotes(text, def.value)) continue
 
     results.push(
       buildEntityCandidate({

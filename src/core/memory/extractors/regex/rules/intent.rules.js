@@ -17,19 +17,19 @@ const PLAN_RE = /^(?:я\s+)?планирую\s+(.+)/i
 const GOING_TO_RE = /^(?:я\s+)?собираюсь\s+(.+)/i
 const TRY_RE = /^(?:я\s+)?попробую\s+(.+)/i
 
-const INLINE_WONT_RE = /(?:^|[^а-яёa-z0-9_])не\s+буду\s+(.+)/i
+const INLINE_WONT_RE =
+  /(?:^|[^а-яёa-z0-9_])(?:(.+?)\s+не\s+буду|не\s+буду\s+(.+))(?:[^а-яёa-z0-9_]|$)/i
 const INLINE_NEED_RE = /(?:^|[^а-яёa-z0-9_])мне\s+(?:сегодня|завтра|потом|позже)?\s*нужно(?:\s+будет)?\s+(.+)/i
 const INLINE_NEED_GENERIC_RE = /(?:^|[^а-яёa-z0-9_])(?:сегодня|завтра|потом|позже)?\s*(?:надо|нужно)(?:\s+будет)?\s+(.+)/i
 const INLINE_RETURN_RE = /(?:^|[^а-яёa-z0-9_])вернусь(?:\s+(.+))?$/i
 
 const PROMISE_RE = /(?:^|[^а-яёa-z0-9_])я\s+обещаю,\s*что\s+(.+)/i
-const KEEP_PROMISE_RE = /(?:^|[^а-яёa-z0-9_])не\s+отказываюсь\s+от\s+(?:этого\s+)?обещани(?:я|й)\b/i
+const KEEP_PROMISE_RE =
+  /(?:^|[^а-яёa-z0-9_])не\s+отказываюсь\s+от\s+(?:этого\s+)?обещани(?:я|й)(?:[^а-яёa-z0-9_]|$)/i
 const WE_WILL_RE = /(?:^|[^а-яёa-z0-9_])(?:мы\s+)?(.+?)\s+будем\s+(.+)/i
 const SHOULD_SEND_RE = /(?:^|[^а-яёa-z0-9_])(сегодня|завтра|сегодня-завтра|потом|позже)?\s*должны\s+(?:мне\s+)?(скинуть|прислать|отправить|дать)\s+(.+)/i
 
-const PROMISE_RE = /(?:^|[^а-яёa-z0-9_])я\s+обещаю(?:,\s*что)?\s+(.+)/i
-const KEEP_PROMISE_RE = /(?:^|[^а-яёa-z0-9_])не\s+отказываюсь\s+от\s+(?:этого\s+)?обещани(?:я|й)(?:\s|$)/i
-const INLINE_WONT_RE = /(?:^|[^а-яёa-z0-9_])(.+?)?\bне\s+буду\s+(.+)/i
+
 
 const FUTURE_TASK_RE =
   /^(завтра|потом|позже|сегодня)\s+(.{0,120}?(сделаю|проверю|посмотрю|вернусь|добью|разберу|разберусь|доделаю|починю).*)$/i
@@ -347,6 +347,65 @@ function detectOne({ clause, context }) {
       })
     )
   }
+
+    const promiseMatch = source.match(PROMISE_RE)
+  if (promiseMatch && normalize(promiseMatch[1])) {
+    results.push(
+      buildIntentCandidate({
+        subtype: 'commitment',
+        text: source,
+        clause,
+        context,
+        rule: 'promise_v1',
+        confidence: 0.9,
+        certainty: 'high',
+        action: promiseMatch[1]
+      })
+    )
+
+    return results
+  }
+
+  if (KEEP_PROMISE_RE.test(source)) {
+    results.push(
+      buildIntentCandidate({
+        subtype: 'commitment',
+        text: source,
+        clause,
+        context,
+        rule: 'promise_keep_v1',
+        confidence: 0.88,
+        certainty: 'high',
+        action: 'не отказываюсь от обещания'
+      })
+    )
+
+    return results
+  }
+
+const wontInlineMatch = source.match(INLINE_WONT_RE)
+if (wontInlineMatch) {
+  const before = normalize(wontInlineMatch[1] || '')
+  const after = normalize(wontInlineMatch[2] || '')
+  const action = before || after
+
+  if (action) {
+    results.push(
+      buildIntentCandidate({
+        subtype: 'refused',
+        text: source,
+        clause,
+        context,
+        rule: 'inline_wont_v3',
+        confidence: 0.86,
+        certainty: 'high',
+        action
+      })
+    )
+
+    return results
+  }
+}
 
   return results
 }

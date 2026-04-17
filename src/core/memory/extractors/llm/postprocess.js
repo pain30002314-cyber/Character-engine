@@ -430,6 +430,9 @@ function refsChanged(before, after) {
 function flagCandidate(candidate) {
   let next = cloneCandidate(candidate)
 
+  const flags = safeFlags(next).filter((flag) => flag !== 'invalid_semantic_tags')
+  next.flags = flags
+
   if (hasInvalidSemanticTags(candidate)) {
     next = withFlag(next, 'invalid_semantic_tags')
   }
