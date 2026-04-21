@@ -25,6 +25,10 @@ function sanitizeTagList(tags) {
   ).slice(0, 3)
 }
 
+function needsSemanticTagsPatch(packet) {
+  return safeArray(packet?.candidates).length > 0
+}
+
 function buildSemanticTagsPatchPrompt({ event, candidates }) {
   return JSON.stringify({
     task: 'semantic_tags_patch_v1',
@@ -42,7 +46,7 @@ function buildSemanticTagsPatchPrompt({ event, candidates }) {
         'Use lower_case only.',
         'Use noun-like schema tags, not full phrases.',
         'Do not output Russian words.',
-        'Good examples: relationship_signal, memory_work, pet, clinic, recovery, irony_test, agreement, supplies.'
+        'Good examples: relationship_signal, apology, absence, break, return, greeting, interaction, care, agreement, workflow.'
       ]
     },
     schema: {
@@ -67,7 +71,7 @@ function buildSemanticTagsPatchPrompt({ event, candidates }) {
           subclass: candidate?.semantic?.subclass || null,
           key: candidate?.semantic?.key || null,
           category: candidate?.semantic?.category || null,
-          tags: safeArray(candidate?.semantic?.tags)
+          tags: []
         }
       }))
     }
@@ -136,7 +140,7 @@ function applySemanticTagsPatch(packet, patchResult) {
   const candidates = safeArray(source?.candidates)
   const updates = safeArray(patchResult?.patch?.tagUpdates)
 
-  if (!candidates.length || !updates.length) {
+  if (!candidates.length) {
     return source
   }
 
@@ -149,15 +153,11 @@ function applySemanticTagsPatch(packet, patchResult) {
     candidates: candidates.map((candidate) => {
       const patchedTags = byId.get(candidate?.id)
 
-      if (!patchedTags) {
-        return candidate
-      }
-
       return {
         ...candidate,
         semantic: {
           ...(candidate?.semantic || {}),
-          tags: patchedTags
+          tags: patchedTags || []
         }
       }
     }),
@@ -173,6 +173,7 @@ function applySemanticTagsPatch(packet, patchResult) {
 
 module.exports = {
   buildSemanticTagsPatchPrompt,
+  needsSemanticTagsPatch,
   runSemanticTagsPatch,
   applySemanticTagsPatch
 }

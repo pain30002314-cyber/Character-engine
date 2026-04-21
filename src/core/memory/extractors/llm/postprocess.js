@@ -152,27 +152,12 @@ function sanitizeSchema(candidate, packet) {
   const fallbackModel = sanitizeModelName(packet?.meta?.usedModel, null)
 
   next.kind = VALID_KINDS.has(next.kind) ? next.kind : null
-
-  const rawModel = String(next?.source?.model || '').trim()
-  next.source.model = sanitizeModelName(rawModel, fallbackModel)
-
+  next.source.model = sanitizeModelName(next?.source?.model, fallbackModel)
   next.source.promptVersion =
     next?.source?.promptVersion && String(next.source.promptVersion).trim()
       ? String(next.source.promptVersion).trim()
       : String(packet?.meta?.promptVersion || 'llm_memory_candidates_v1')
-
   next.source.extractor = 'llm'
-
-  if (!next.source.model && fallbackModel) {
-    next.source.model = fallbackModel
-  }
-
-  if (rawModel && next.source.model == null) {
-    next.flags = Array.from(new Set([
-      ...safeFlags(next),
-      'broken_source_model'
-    ]))
-  }
 
   return next.kind ? next : null
 }
@@ -222,22 +207,9 @@ function sanitizeSemantic(candidate) {
   next.semantic.key = sanitizeSemanticKey(next.semantic.key)
   next.semantic.category = sanitizeSchemaId(next.semantic.category)
 
-  const rawTags = safeArray(next.semantic.tags)
-  const hadInvalidTags = rawTags.some((item) => sanitizeSchemaId(item) == null)
-
-  next.semantic.tags = Array.from(new Set(
-    rawTags
-      .map((item) => sanitizeSchemaId(item))
-      .filter(Boolean)
-      .filter((item) => !isSuspiciousSemanticTag(item))
-  )).slice(0, 5)
-
-  if (hadInvalidTags || next.semantic.tags.length !== rawTags.length) {
-    next.flags = Array.from(new Set([
-      ...safeFlags(next),
-      'invalid_semantic_tags'
-    ]))
-  }
+  // Первый extractor не является источником tags.
+  // Tags всегда приходят только из отдельного semantic tag patch pass.
+  next.semantic.tags = []
 
   return next.semantic.class ? next : null
 }
@@ -255,11 +227,12 @@ function collectSemanticIds(candidate) {
 
 function hasInvalidSemanticTags(candidate) {
   const rawTags = safeArray(candidate?.semantic?.tags)
-  if (!rawTags.length) return false
+
+  if (!rawTags.length) return true
 
   return rawTags.some((item) => {
     const value = String(item || '').trim()
-    return !value || sanitizeSchemaId(value) == null || isSuspiciousSemanticTag(value)
+    return !value || sanitizeSchemaId(value) == null
   })
 }
 
@@ -441,8 +414,14 @@ function refsChanged(before, after) {
   )
 }
 
-function flagCandidate(candidate) {
+function flagCandidate(candidate, options = {}) {
+  const { finalizeTags = true } = options
+
   let next = cloneCandidate(candidate)
+
+  if (finalizeTags && hasInvalidSemanticTags(candidate)) {
+    next = withFlag(next, 'invalid_semantic_tags')
+  }
 
   if (hasWeakReferenceGrounding(candidate)) {
     next = withFlag(next, 'weak_reference_grounding')
@@ -455,7 +434,9 @@ function flagCandidate(candidate) {
   return next
 }
 
-function postprocessLlmCandidates(packet) {
+function postprocessLlmCandidates(packet, options = {}) {
+  const { finalizeTags = true } = options
+
   const source = packet && typeof packet === 'object' ? packet : {}
   const candidates = safeArray(source.candidates)
 
@@ -485,7 +466,25 @@ function postprocessLlmCandidates(packet) {
       continue
     }
 
-    next = flagCandidate(next)
+    // Во втором финальном проходе tags уже должны прийти из patch.
+    if (finalizeTags) {
+      next = {
+        ...next,
+        semantic: {
+          ...(next.semantic || {}),
+          tags: Array.from(
+            new Set(
+              safeArray(candidate?.semantic?.tags)
+                .map((item) => sanitizeSchemaId(item))
+                .filter(Boolean)
+            )
+          ).slice(0, 5)
+        }
+      }
+    }
+
+    next = flagCandidate(next, { finalizeTags })
+
     if (safeFlags(next).length > 0) {
       stats.flaggedCandidates += 1
     }

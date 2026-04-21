@@ -4,9 +4,13 @@ const env = require('../../../../config/env')
 const { buildPrompt } = require('./prompt')
 const { normalizeMemoryCandidatesPacket } = require('./normalize')
 const { postprocessLlmCandidates } = require('./postprocess')
+const {
+  needsSemanticTagsPatch,
+  runSemanticTagsPatch,
+  applySemanticTagsPatch
+} = require('./tags.runtime')
 const { appendLlmDebugLog } = require('./debug/llm.debug')
 const { generateRawCompletion } = require('../../../../services/llm.service')
-const { runSemanticTagsPatch, applySemanticTagsPatch } = require('./tags.runtime')
 
 const EXTRACTOR_VERSION = '2.0.0'
 const PROMPT_VERSION = 'llm_memory_candidates_v1'
@@ -14,26 +18,6 @@ const STRATEGY = 'llm_memory_candidates_v1'
 
 function safeArray(value) {
   return Array.isArray(value) ? value : []
-}
-
-function forceSourceModel(packet, forcedModel = env.memoryModel) {
-  if (!packet || typeof packet !== 'object') return packet
-
-  return {
-    ...packet,
-    candidates: safeArray(packet.candidates).map((candidate) => ({
-      ...candidate,
-      source: {
-        ...(candidate?.source || {}),
-        extractor: 'llm',
-        model: forcedModel,
-        promptVersion:
-          candidate?.source?.promptVersion ||
-          packet?.meta?.promptVersion ||
-          PROMPT_VERSION
-      }
-    }))
-  }
 }
 
 function buildWindowPreview(eventWindow) {
@@ -154,7 +138,6 @@ function finalizeResult({
 
   result.version = 1
   result.strategy = STRATEGY
-
   result.meta = {
     ...result.meta,
     source: 'llm',
@@ -196,10 +179,6 @@ function finalizeResult({
   return result
 }
 
-function safeArray(value) {
-  return Array.isArray(value) ? value : []
-}
-
 async function runLlmExtractor({ event, eventWindow = [] }) {
   const startedAt = Date.now()
 
@@ -227,6 +206,7 @@ async function runLlmExtractor({ event, eventWindow = [] }) {
         'Верни только JSON-пакет формата llm_memory_candidates_v1.',
         'Все human-readable текстовые поля памяти пиши на русском.',
         'Системные идентификаторы, enum-поля и schema keys оставляй на английском.',
+        'semantic.tags не заполняй: оставляй пустым массивом.',
         'Если memory-relevant сигналов нет, верни пустой массив candidates.'
       ].join(' '),
       userPrompt,
@@ -248,46 +228,38 @@ async function runLlmExtractor({ event, eventWindow = [] }) {
       }
     })
 
-    normalizedPacket = postprocessLlmCandidates(normalizedPacket)
-    normalizedPacket = forceSourceModel(normalizedPacket)
-
-    if (needsSemanticTagsPatch(normalizedPacket)) {
-      try {
-        const tagPatchResult = await runSemanticTagsPatch({
-          event,
-          candidates: normalizedPacket.candidates
-        })
-
-        normalizedPacket = applySemanticTagsPatch(normalizedPacket, tagPatchResult)
-        normalizedPacket = postprocessLlmCandidates(normalizedPacket)
-        normalizedPacket = forceSourceModel(normalizedPacket)
-      } catch (err) {
-        normalizedPacket = {
-          ...(normalizedPacket || {}),
-          debug: {
-            ...(normalizedPacket?.debug || {}),
-            semanticTagsPatch: {
-              error: err?.message || 'unknown_error'
-            }
-          }
-        }
-      }
-    }
-
     const resolvedModel = response?.model || env.memoryModel || null
 
     normalizedPacket.candidates = Array.isArray(normalizedPacket.candidates)
-      ? normalizedPacket.candidates.map((c) => ({
-          ...c,
+      ? normalizedPacket.candidates.map((candidate) => ({
+          ...candidate,
+          semantic: {
+            ...(candidate?.semantic || {}),
+            tags: []
+          },
           source: {
-            ...(c.source || {}),
+            ...(candidate?.source || {}),
             model: resolvedModel
           }
         }))
       : []
 
-    normalizedPacket = postprocessLlmCandidates(normalizedPacket)
-    
+    normalizedPacket = postprocessLlmCandidates(normalizedPacket, {
+      finalizeTags: false
+    })
+
+    if (needsSemanticTagsPatch(normalizedPacket)) {
+      const tagPatchResult = await runSemanticTagsPatch({
+        event,
+        candidates: normalizedPacket.candidates
+      })
+
+      normalizedPacket = applySemanticTagsPatch(normalizedPacket, tagPatchResult)
+    }
+
+    normalizedPacket = postprocessLlmCandidates(normalizedPacket, {
+      finalizeTags: true
+    })
   } catch (err) {
     error = err?.message || 'unknown_error'
   }
@@ -330,6 +302,51 @@ async function runLlmExtractor({ event, eventWindow = [] }) {
     stats: result.service?.stats || {},
     warnings: result.debug?.warnings || []
   })
+
+            console.log('PATCH_CHECK', {
+            candidates: normalizedPacket.candidates.length,
+            shouldPatch: needsSemanticTagsPatch(normalizedPacket)
+          })
+
+          if (needsSemanticTagsPatch(normalizedPacket)) {
+            console.log(
+              'PATCH_BEFORE_TAGS',
+              normalizedPacket.candidates.map((c) => ({
+                id: c.id,
+                tags: c?.semantic?.tags || []
+              }))
+            )
+
+            const tagPatchResult = await runSemanticTagsPatch({
+              event,
+              candidates: normalizedPacket.candidates
+            })
+
+            console.log('PATCH_RESULT', JSON.stringify(tagPatchResult, null, 2))
+
+            normalizedPacket = applySemanticTagsPatch(normalizedPacket, tagPatchResult)
+
+            console.log(
+              'PATCH_AFTER_APPLY',
+              normalizedPacket.candidates.map((c) => ({
+                id: c.id,
+                tags: c?.semantic?.tags || []
+              }))
+            )
+          }
+
+          normalizedPacket = postprocessLlmCandidates(normalizedPacket, {
+            finalizeTags: true
+          })
+
+          console.log(
+            'PATCH_AFTER_FINAL_POSTPROCESS',
+            normalizedPacket.candidates.map((c) => ({
+              id: c.id,
+              tags: c?.semantic?.tags || [],
+              flags: c?.flags || []
+            }))
+          )
 
   return result
 }
