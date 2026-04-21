@@ -3,11 +3,7 @@
 const env = require('../../../../config/env')
 const { generateRawCompletion } = require('../../../../services/llm.service')
 
-const TAG_MODEL =
-  env.MEMORY_MODEL ||
-  env.MODEL ||
-  'openai/gpt-5.4-nano'
-
+const TAG_MODEL = env.memoryModel || env.model || 'openai/gpt-5.4-nano'
 const VALID_TAG_RE = /^[a-z][a-z0-9_]{0,63}$/
 
 function safeArray(value) {
@@ -20,11 +16,13 @@ function sanitizeTag(value) {
 }
 
 function sanitizeTagList(tags) {
-  return Array.from(new Set(
-    safeArray(tags)
-      .map((item) => sanitizeTag(item))
-      .filter(Boolean)
-  )).slice(0, 3)
+  return Array.from(
+    new Set(
+      safeArray(tags)
+        .map((item) => sanitizeTag(item))
+        .filter(Boolean)
+    )
+  ).slice(0, 3)
 }
 
 function buildSemanticTagsPatchPrompt({ event, candidates }) {
@@ -40,33 +38,11 @@ function buildSemanticTagsPatchPrompt({ event, candidates }) {
         'Do not change kind, text, refs, evidence, temporal, memory, class, subclass, key, or category.',
         'Return only tagUpdates.',
         'Use candidateId exactly as provided.',
-        'semanticTags must contain 0 to 3 short English schema tags.',
-        'Use lower_case or snake_case only.',
+        'semanticTags must contain 1 to 3 short English schema tags when good tags are obvious.',
+        'Use lower_case only.',
+        'Use noun-like schema tags, not full phrases.',
         'Do not output Russian words.',
-        'Do not output full phrases or explanations.',
-        'If no good tags are available, return an empty array for that candidate.'
-      ],
-      examples: [
-        {
-          bad: {
-            candidateId: 'c1',
-            semanticTags: ['готово', 'оценка', 'работа']
-          },
-          good: {
-            candidateId: 'c1',
-            semanticTags: ['patch', 'evaluation', 'request']
-          }
-        },
-        {
-          bad: {
-            candidateId: 'c2',
-            semanticTags: ['после_патча']
-          },
-          good: {
-            candidateId: 'c2',
-            semanticTags: ['post_patch']
-          }
-        }
+        'Good examples: relationship_signal, memory_work, pet, clinic, recovery, irony_test, agreement, supplies.'
       ]
     },
     schema: {
@@ -122,6 +98,7 @@ function parseTagsPatch(rawText) {
 
 async function runSemanticTagsPatch({ event, candidates }) {
   const safeCandidates = safeArray(candidates)
+
   if (!safeCandidates.length) {
     return {
       model: TAG_MODEL,
@@ -130,21 +107,22 @@ async function runSemanticTagsPatch({ event, candidates }) {
     }
   }
 
-  const prompt = buildSemanticTagsPatchPrompt({
+  const userPrompt = buildSemanticTagsPatchPrompt({
     event,
     candidates: safeCandidates
   })
 
   const response = await generateRawCompletion({
-    prompt,
-    model: TAG_MODEL
+    systemPrompt:
+      'You are a strict JSON-only semantic tag patcher. Return only valid JSON.',
+    userPrompt,
+    model: TAG_MODEL,
+    temperature: 0,
+    max_tokens: 1200,
+    title: 'Hu Tao Semantic Tags Patch'
   })
 
-  const raw =
-    response?.text ||
-    response?.content ||
-    response?.output_text ||
-    ''
+  const raw = response?.choices?.[0]?.message?.content || ''
 
   return {
     model: response?.model || TAG_MODEL,
@@ -170,6 +148,7 @@ function applySemanticTagsPatch(packet, patchResult) {
     ...source,
     candidates: candidates.map((candidate) => {
       const patchedTags = byId.get(candidate?.id)
+
       if (!patchedTags) {
         return candidate
       }

@@ -6,6 +6,7 @@ const { normalizeMemoryCandidatesPacket } = require('./normalize')
 const { postprocessLlmCandidates } = require('./postprocess')
 const { appendLlmDebugLog } = require('./debug/llm.debug')
 const { generateRawCompletion } = require('../../../../services/llm.service')
+const { runSemanticTagsPatch, applySemanticTagsPatch } = require('./tags.runtime')
 
 const EXTRACTOR_VERSION = '2.0.0'
 const PROMPT_VERSION = 'llm_memory_candidates_v1'
@@ -13,6 +14,26 @@ const STRATEGY = 'llm_memory_candidates_v1'
 
 function safeArray(value) {
   return Array.isArray(value) ? value : []
+}
+
+function forceSourceModel(packet, forcedModel = env.memoryModel) {
+  if (!packet || typeof packet !== 'object') return packet
+
+  return {
+    ...packet,
+    candidates: safeArray(packet.candidates).map((candidate) => ({
+      ...candidate,
+      source: {
+        ...(candidate?.source || {}),
+        extractor: 'llm',
+        model: forcedModel,
+        promptVersion:
+          candidate?.source?.promptVersion ||
+          packet?.meta?.promptVersion ||
+          PROMPT_VERSION
+      }
+    }))
+  }
 }
 
 function buildWindowPreview(eventWindow) {
@@ -226,6 +247,32 @@ async function runLlmExtractor({ event, eventWindow = [] }) {
         extractorVersion: EXTRACTOR_VERSION
       }
     })
+
+    normalizedPacket = postprocessLlmCandidates(normalizedPacket)
+    normalizedPacket = forceSourceModel(normalizedPacket)
+
+    if (needsSemanticTagsPatch(normalizedPacket)) {
+      try {
+        const tagPatchResult = await runSemanticTagsPatch({
+          event,
+          candidates: normalizedPacket.candidates
+        })
+
+        normalizedPacket = applySemanticTagsPatch(normalizedPacket, tagPatchResult)
+        normalizedPacket = postprocessLlmCandidates(normalizedPacket)
+        normalizedPacket = forceSourceModel(normalizedPacket)
+      } catch (err) {
+        normalizedPacket = {
+          ...(normalizedPacket || {}),
+          debug: {
+            ...(normalizedPacket?.debug || {}),
+            semanticTagsPatch: {
+              error: err?.message || 'unknown_error'
+            }
+          }
+        }
+      }
+    }
 
     const resolvedModel = response?.model || env.memoryModel || null
 
