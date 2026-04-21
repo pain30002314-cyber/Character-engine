@@ -129,7 +129,15 @@ async function recordUserMessage({
   appendEvent(threadId, event)
   refreshRecentDialogSnapshot(threadId)
   await runRegexDebugPass(event)
-  await runLlmObserveDebugPass(event)
+
+  void runLlmObserveDebugPass(event).catch((error) => {
+    logger.warn('LLM observe debug pass failed', {
+      eventId: event?.id || null,
+      threadId: event?.threadId || null,
+      message: error.message
+    })
+  })
+
   enqueueMemoryJob({ type: 'ingest_user_message', payload: { threadId, eventId: event.id } })
 
   return event
