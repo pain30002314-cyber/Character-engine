@@ -228,38 +228,93 @@ async function runLlmExtractor({ event, eventWindow = [] }) {
       }
     })
 
-    const resolvedModel = response?.model || env.memoryModel || null
-
-    normalizedPacket.candidates = Array.isArray(normalizedPacket.candidates)
-      ? normalizedPacket.candidates.map((candidate) => ({
-          ...candidate,
-          semantic: {
-            ...(candidate?.semantic || {}),
-            tags: []
-          },
-          source: {
-            ...(candidate?.source || {}),
-            model: resolvedModel
-          }
-        }))
-      : []
-
     normalizedPacket = postprocessLlmCandidates(normalizedPacket, {
       finalizeTags: false
     })
 
-    if (needsSemanticTagsPatch(normalizedPacket)) {
-      const tagPatchResult = await runSemanticTagsPatch({
-        event,
-        candidates: normalizedPacket.candidates
-      })
-
-      normalizedPacket = applySemanticTagsPatch(normalizedPacket, tagPatchResult)
+    // 2) Жёстко вычищаем tags первого extractor.
+    // Первый LLM не является источником semantic.tags вообще.
+    normalizedPacket = {
+      ...normalizedPacket,
+      candidates: Array.isArray(normalizedPacket?.candidates)
+        ? normalizedPacket.candidates.map((candidate) => ({
+            ...candidate,
+            semantic: {
+              ...(candidate?.semantic || {}),
+              tags: []
+            }
+          }))
+        : []
     }
 
+    // 3) Форсим source.model ДО передачи дальше.
+    normalizedPacket = forceSourceModel(
+      normalizedPacket,
+      response?.model || env.memoryModel
+    )
+
+    // 4) Отдельный tag pass.
+    if (needsSemanticTagsPatch(normalizedPacket)) {
+      try {
+        const tagPatchResult = await runSemanticTagsPatch({
+          event,
+          candidates: normalizedPacket.candidates
+        })
+
+        normalizedPacket = applySemanticTagsPatch(normalizedPacket, tagPatchResult)
+
+      } catch (err) {
+        normalizedPacket = {
+          ...(normalizedPacket || {}),
+          debug: {
+            ...(normalizedPacket?.debug || {}),
+            warnings: [
+              ...(Array.isArray(normalizedPacket?.debug?.warnings)
+                ? normalizedPacket.debug.warnings
+                : []),
+              `semantic_tags_patch_failed:${err?.message || 'unknown_error'}`
+            ],
+            semanticTagsPatch: {
+              error: err?.message || 'unknown_error'
+            }
+          }
+        }
+      }
+    }
+
+    // 5) Теперь финальный postprocess УЖЕ с финальной проверкой tags.
     normalizedPacket = postprocessLlmCandidates(normalizedPacket, {
       finalizeTags: true
     })
+
+    // 6) И ещё раз форсим source.model на финальном объекте.
+    normalizedPacket = forceSourceModel(
+      normalizedPacket,
+      response?.model || env.memoryModel
+    )
+
+    const resolvedModel = response?.model || env.memoryModel || null
+
+    normalizedPacket = {
+      ...normalizedPacket,
+      candidates: Array.isArray(normalizedPacket?.candidates)
+        ? normalizedPacket.candidates.map((candidate) => ({
+            ...candidate,
+            source: {
+              ...(candidate?.source || {}),
+              extractor: 'llm',
+              model: resolvedModel,
+              promptVersion:
+                candidate?.source?.promptVersion || PROMPT_VERSION,
+              sourceEventId:
+                candidate?.source?.sourceEventId || event?.id || null,
+              timestamp:
+                candidate?.source?.timestamp || event?.timestamp || null
+            }
+          }))
+        : []
+    }
+
   } catch (err) {
     error = err?.message || 'unknown_error'
   }
@@ -302,51 +357,6 @@ async function runLlmExtractor({ event, eventWindow = [] }) {
     stats: result.service?.stats || {},
     warnings: result.debug?.warnings || []
   })
-
-            console.log('PATCH_CHECK', {
-            candidates: normalizedPacket.candidates.length,
-            shouldPatch: needsSemanticTagsPatch(normalizedPacket)
-          })
-
-          if (needsSemanticTagsPatch(normalizedPacket)) {
-            console.log(
-              'PATCH_BEFORE_TAGS',
-              normalizedPacket.candidates.map((c) => ({
-                id: c.id,
-                tags: c?.semantic?.tags || []
-              }))
-            )
-
-            const tagPatchResult = await runSemanticTagsPatch({
-              event,
-              candidates: normalizedPacket.candidates
-            })
-
-            console.log('PATCH_RESULT', JSON.stringify(tagPatchResult, null, 2))
-
-            normalizedPacket = applySemanticTagsPatch(normalizedPacket, tagPatchResult)
-
-            console.log(
-              'PATCH_AFTER_APPLY',
-              normalizedPacket.candidates.map((c) => ({
-                id: c.id,
-                tags: c?.semantic?.tags || []
-              }))
-            )
-          }
-
-          normalizedPacket = postprocessLlmCandidates(normalizedPacket, {
-            finalizeTags: true
-          })
-
-          console.log(
-            'PATCH_AFTER_FINAL_POSTPROCESS',
-            normalizedPacket.candidates.map((c) => ({
-              id: c.id,
-              tags: c?.semantic?.tags || [],
-              flags: c?.flags || []
-            }))
-          )
 
   return result
 }

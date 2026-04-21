@@ -34,243 +34,9 @@
           ],
           "identityConfidence": 1
         },
-        "updatedAt": "2026-04-21T10:24:09.715Z"
+        "updatedAt": "2026-04-21T17:52:07.661Z"
       },
       "rawExtractions": [
-        {
-          "version": 2,
-          "strategy": "llm_raw_v2",
-          "eventId": "a47854f2-aa65-4d7b-9931-851d401cafe2",
-          "threadId": "telegram:929147515",
-          "createdAt": "2026-04-19T16:35:43.379Z",
-          "claims": [
-            {
-              "claimType": "episode",
-              "text": "Буду просыпаться от вскипевшего в 3 часа ночи чайника",
-              "payload": {
-                "importance": 63,
-                "source": "heuristic",
-                "normalizedText": "Буду просыпаться от вскипевшего в 3 часа ночи чайника",
-                "semanticKey": "буду_просыпаться_от_вскипевшего_в_3_часа_ночи_чайника",
-                "semanticClass": "episode"
-              },
-              "confidence": 0.7,
-              "sourceEventId": "a47854f2-aa65-4d7b-9931-851d401cafe2",
-              "timestamp": "2026-04-19T23:35:27.197+07:00"
-            },
-            {
-              "claimType": "episode",
-              "text": "Во время важного разговора по телефону свет будет переливаться всеми цветами радуги",
-              "payload": {
-                "importance": 61,
-                "source": "heuristic",
-                "normalizedText": "Во время важного разговора по телефону свет будет переливаться всеми цветами радуги",
-                "semanticKey": "во_время_важного_разговора_по_телефону_свет_будет_переливаться_в",
-                "semanticClass": "episode"
-              },
-              "confidence": 0.7,
-              "sourceEventId": "a47854f2-aa65-4d7b-9931-851d401cafe2",
-              "timestamp": "2026-04-19T23:35:27.197+07:00"
-            }
-          ],
-          "temporal": {
-            "firstSeenAt": "2026-04-05T04:28:43.669Z",
-            "lastSeenAt": "2026-04-07T07:09:44.109Z",
-            "lastUserMessageAt": "2026-04-07T07:09:20.727Z",
-            "lastAssistantMessageAt": "2026-04-07T07:09:44.109Z",
-            "messageCount": 667,
-            "semanticSignals": []
-          },
-          "meta": {
-            "mode": "llm_only",
-            "llmCandidates": 2,
-            "llmWarnings": [],
-            "regexExcludedFromLlmStrategy": true,
-            "requestedMode": "llm_only",
-            "effectiveMode": "llm_only",
-            "regexExcludedFromMemoryPipeline": true
-          }
-        },
-        {
-          "version": 2,
-          "strategy": "llm_raw_v2",
-          "eventId": "2d5b1f3e-bf01-4e56-a2c5-0b879e748b72",
-          "threadId": "telegram:929147515",
-          "createdAt": "2026-04-19T16:37:10.817Z",
-          "claims": [
-            {
-              "claimType": "relationship",
-              "text": "нам пока и до этих планов далековато, честно говоря",
-              "payload": {
-                "sentiment": "interaction_timeline",
-                "importance": 64,
-                "source": "heuristic",
-                "normalizedText": "нам пока и до этих планов далековато, честно говоря",
-                "semanticKey": "нам_пока_и_до_этих_планов_далековато_честно_говоря",
-                "semanticClass": "relationship"
-              },
-              "confidence": 0.78,
-              "sourceEventId": "2d5b1f3e-bf01-4e56-a2c5-0b879e748b72",
-              "timestamp": "2026-04-19T23:36:52.540+07:00"
-            },
-            {
-              "claimType": "episode",
-              "text": "Я тихонько посмелся",
-              "payload": {
-                "importance": 52,
-                "source": "heuristic",
-                "normalizedText": "Я тихонько посмелся",
-                "semanticKey": "я_тихонько_посмелся",
-                "semanticClass": "episode"
-              },
-              "confidence": 0.7,
-              "sourceEventId": "2d5b1f3e-bf01-4e56-a2c5-0b879e748b72",
-              "timestamp": "2026-04-19T23:36:52.540+07:00"
-            }
-          ],
-          "temporal": {
-            "firstSeenAt": "2026-04-05T04:28:43.669Z",
-            "lastSeenAt": "2026-04-07T07:09:44.109Z",
-            "lastUserMessageAt": "2026-04-07T07:09:20.727Z",
-            "lastAssistantMessageAt": "2026-04-07T07:09:44.109Z",
-            "messageCount": 667,
-            "semanticSignals": []
-          },
-          "meta": {
-            "mode": "llm_only",
-            "llmCandidates": 3,
-            "llmWarnings": [],
-            "regexExcludedFromLlmStrategy": true,
-            "requestedMode": "llm_only",
-            "effectiveMode": "llm_only",
-            "regexExcludedFromMemoryPipeline": true
-          }
-        },
-        {
-          "version": 2,
-          "strategy": "llm_raw_v2",
-          "eventId": "00cb629a-c3d1-43c9-9082-9f2dd1baa1f0",
-          "threadId": "telegram:929147515",
-          "createdAt": "2026-04-19T16:39:24.499Z",
-          "claims": [
-            {
-              "claimType": "fact",
-              "text": "мы обсуждали твою память раз так 10 минимум",
-              "payload": {
-                "category": "communication_history",
-                "importance": 68,
-                "source": "heuristic",
-                "normalizedText": "мы обсуждали твою память раз так 10 минимум",
-                "semanticKey": "мы_обсуждали_твою_память_раз_так_10_минимум",
-                "semanticClass": "structural"
-              },
-              "confidence": 0.86,
-              "sourceEventId": "00cb629a-c3d1-43c9-9082-9f2dd1baa1f0",
-              "timestamp": "2026-04-19T23:39:03.911+07:00"
-            },
-            {
-              "claimType": "fact",
-              "text": "мы об этом уже договорились и все обсудили",
-              "payload": {
-                "category": "agreement_state",
-                "importance": 62,
-                "source": "heuristic",
-                "normalizedText": "мы об этом уже договорились и все обсудили",
-                "semanticKey": "мы_об_этом_уже_договорились_и_все_обсудили",
-                "semanticClass": "structural"
-              },
-              "confidence": 0.83,
-              "sourceEventId": "00cb629a-c3d1-43c9-9082-9f2dd1baa1f0",
-              "timestamp": "2026-04-19T23:39:03.911+07:00"
-            }
-          ],
-          "temporal": {
-            "firstSeenAt": "2026-04-05T04:28:43.669Z",
-            "lastSeenAt": "2026-04-07T07:09:44.109Z",
-            "lastUserMessageAt": "2026-04-07T07:09:20.727Z",
-            "lastAssistantMessageAt": "2026-04-07T07:09:44.109Z",
-            "messageCount": 667,
-            "semanticSignals": []
-          },
-          "meta": {
-            "mode": "llm_only",
-            "llmCandidates": 4,
-            "llmWarnings": [],
-            "regexExcludedFromLlmStrategy": true,
-            "requestedMode": "llm_only",
-            "effectiveMode": "llm_only",
-            "regexExcludedFromMemoryPipeline": true
-          }
-        },
-        {
-          "version": 2,
-          "strategy": "llm_raw_v2",
-          "eventId": "42c2ac84-b045-4f10-a546-91b719949c49",
-          "threadId": "telegram:929147515",
-          "createdAt": "2026-04-19T16:42:05.519Z",
-          "claims": [
-            {
-              "claimType": "fact",
-              "text": "Лакрицу мы выбрали, потому что горьких мармеладок в виде призраков пока не придумали продавать в магазинах моего города",
-              "payload": {
-                "category": "fact",
-                "importance": 54,
-                "source": "heuristic",
-                "normalizedText": "Лакрицу мы выбрали, потому что горьких мармеладок в виде призраков пока не придумали продавать в магазинах моего города",
-                "semanticKey": "лакрицу_мы_выбрали_потому_что_горьких_мармеладок_в_виде_призрако",
-                "semanticClass": "structural"
-              },
-              "confidence": 0.74,
-              "sourceEventId": "42c2ac84-b045-4f10-a546-91b719949c49",
-              "timestamp": "2026-04-19T23:41:41.282+07:00"
-            },
-            {
-              "claimType": "episode",
-              "text": "Мы готовили Карри вместе",
-              "payload": {
-                "importance": 64,
-                "source": "heuristic",
-                "normalizedText": "Мы готовили Карри вместе",
-                "semanticKey": "мы_готовили_карри_вместе",
-                "semanticClass": "episode"
-              },
-              "confidence": 0.7,
-              "sourceEventId": "42c2ac84-b045-4f10-a546-91b719949c49",
-              "timestamp": "2026-04-19T23:41:41.282+07:00"
-            },
-            {
-              "claimType": "episode",
-              "text": "Ты меня просила купить кислые мармеладки с лакрицей",
-              "payload": {
-                "importance": 66,
-                "source": "heuristic",
-                "normalizedText": "Ты меня просила купить кислые мармеладки с лакрицей",
-                "semanticKey": "ты_меня_просила_купить_кислые_мармеладки_с_лакрицей",
-                "semanticClass": "episode"
-              },
-              "confidence": 0.7,
-              "sourceEventId": "42c2ac84-b045-4f10-a546-91b719949c49",
-              "timestamp": "2026-04-19T23:41:41.282+07:00"
-            }
-          ],
-          "temporal": {
-            "firstSeenAt": "2026-04-05T04:28:43.669Z",
-            "lastSeenAt": "2026-04-07T07:09:44.109Z",
-            "lastUserMessageAt": "2026-04-07T07:09:20.727Z",
-            "lastAssistantMessageAt": "2026-04-07T07:09:44.109Z",
-            "messageCount": 667,
-            "semanticSignals": []
-          },
-          "meta": {
-            "mode": "llm_only",
-            "llmCandidates": 4,
-            "llmWarnings": [],
-            "regexExcludedFromLlmStrategy": true,
-            "requestedMode": "llm_only",
-            "effectiveMode": "llm_only",
-            "regexExcludedFromMemoryPipeline": true
-          }
-        },
         {
           "version": 2,
           "strategy": "llm_raw_v2",
@@ -1673,6 +1439,282 @@
             "mode": "llm_only",
             "llmCandidates": 3,
             "llmWarnings": [],
+            "regexExcludedFromLlmStrategy": true,
+            "requestedMode": "llm_only",
+            "effectiveMode": "llm_only",
+            "regexExcludedFromMemoryPipeline": true
+          }
+        },
+        {
+          "version": 2,
+          "strategy": "llm_raw_v2",
+          "eventId": "36ac3d3b-7c0b-4d54-a637-66c007f6fe90",
+          "threadId": "telegram:929147515",
+          "createdAt": "2026-04-21T17:35:20.750Z",
+          "claims": [
+            {
+              "claimType": "fact",
+              "text": "«Соскучился» означало: «Я уже успел забыть как с тобой интересно»",
+              "payload": {
+                "category": "relationship_emotion_meaning",
+                "importance": 68,
+                "source": "heuristic",
+                "normalizedText": "«Соскучился» означало: «Я уже успел забыть как с тобой интересно»",
+                "semanticKey": "соскучился_означало_я_уже_успел_забыть_как_с_тобой_интересно",
+                "semanticClass": "structural"
+              },
+              "confidence": 0.9,
+              "sourceEventId": "36ac3d3b-7c0b-4d54-a637-66c007f6fe90",
+              "timestamp": "2026-04-22T00:35:04.411+07:00"
+            },
+            {
+              "claimType": "open_loop",
+              "text": "Понять бы ещё что ты имела в виду",
+              "payload": {
+                "loopType": "unresolved_communication",
+                "status": "open",
+                "source": "heuristic",
+                "normalizedText": "Понять бы ещё что ты имела в виду",
+                "semanticKey": "понять_бы_еще_что_ты_имела_в_виду",
+                "semanticClass": "topic"
+              },
+              "confidence": 0.88,
+              "sourceEventId": "36ac3d3b-7c0b-4d54-a637-66c007f6fe90",
+              "timestamp": "2026-04-22T00:35:04.411+07:00"
+            }
+          ],
+          "temporal": {
+            "firstSeenAt": "2026-04-05T04:28:43.669Z",
+            "lastSeenAt": "2026-04-07T07:09:44.109Z",
+            "lastUserMessageAt": "2026-04-07T07:09:20.727Z",
+            "lastAssistantMessageAt": "2026-04-07T07:09:44.109Z",
+            "messageCount": 667,
+            "semanticSignals": []
+          },
+          "meta": {
+            "mode": "llm_only",
+            "llmCandidates": 2,
+            "llmWarnings": [
+              "forceSourceModel is not defined"
+            ],
+            "regexExcludedFromLlmStrategy": true,
+            "requestedMode": "llm_only",
+            "effectiveMode": "llm_only",
+            "regexExcludedFromMemoryPipeline": true
+          }
+        },
+        {
+          "version": 2,
+          "strategy": "llm_raw_v2",
+          "eventId": "99641d33-8712-45b8-9b3b-f49ab32f3485",
+          "threadId": "telegram:929147515",
+          "createdAt": "2026-04-21T17:38:03.006Z",
+          "claims": [
+            {
+              "claimType": "fact",
+              "text": "Я и не пытался усложнить, просто факт озвучил",
+              "payload": {
+                "category": "communication",
+                "importance": 54,
+                "source": "heuristic",
+                "normalizedText": "Я и не пытался усложнить, просто факт озвучил",
+                "semanticKey": "я_и_не_пытался_усложнить_просто_факт_озвучил",
+                "semanticClass": "structural"
+              },
+              "confidence": 0.66,
+              "sourceEventId": "99641d33-8712-45b8-9b3b-f49ab32f3485",
+              "timestamp": "2026-04-22T00:37:28.344+07:00"
+            },
+            {
+              "claimType": "fact",
+              "text": "Сегодня без салата, так как забыл маслины купить снова",
+              "payload": {
+                "category": "everyday_life",
+                "importance": 48,
+                "source": "heuristic",
+                "normalizedText": "Сегодня без салата, так как забыл маслины купить снова",
+                "semanticKey": "сегодня_без_салата_так_как_забыл_маслины_купить_снова",
+                "semanticClass": "structural"
+              },
+              "confidence": 0.74,
+              "sourceEventId": "99641d33-8712-45b8-9b3b-f49ab32f3485",
+              "timestamp": "2026-04-22T00:37:28.344+07:00"
+            }
+          ],
+          "temporal": {
+            "firstSeenAt": "2026-04-05T04:28:43.669Z",
+            "lastSeenAt": "2026-04-07T07:09:44.109Z",
+            "lastUserMessageAt": "2026-04-07T07:09:20.727Z",
+            "lastAssistantMessageAt": "2026-04-07T07:09:44.109Z",
+            "messageCount": 667,
+            "semanticSignals": []
+          },
+          "meta": {
+            "mode": "llm_only",
+            "llmCandidates": 3,
+            "llmWarnings": [
+              "forceSourceModel is not defined"
+            ],
+            "regexExcludedFromLlmStrategy": true,
+            "requestedMode": "llm_only",
+            "effectiveMode": "llm_only",
+            "regexExcludedFromMemoryPipeline": true
+          }
+        },
+        {
+          "version": 2,
+          "strategy": "llm_raw_v2",
+          "eventId": "6e82b01c-bf58-4207-a33f-a51257d066be",
+          "threadId": "telegram:929147515",
+          "createdAt": "2026-04-21T17:47:00.137Z",
+          "claims": [
+            {
+              "claimType": "fact",
+              "text": "в этом чате обсуждают веса локальных моделей, квантизацию, дообучение",
+              "payload": {
+                "category": "machine_learning_context",
+                "importance": 50,
+                "source": "heuristic",
+                "normalizedText": "в этом чате обсуждают веса локальных моделей, квантизацию, дообучение",
+                "semanticKey": "в_этом_чате_обсуждают_веса_локальных_моделей_квантизацию_дообуче",
+                "semanticClass": "structural"
+              },
+              "confidence": 0.6,
+              "sourceEventId": "6e82b01c-bf58-4207-a33f-a51257d066be",
+              "timestamp": "2026-04-22T00:45:40.500+07:00"
+            },
+            {
+              "claimType": "fact",
+              "text": "даже память по уже готовой mem0 архитектуре построить не может",
+              "payload": {
+                "category": "system_building_issue",
+                "importance": 58,
+                "source": "heuristic",
+                "normalizedText": "даже память по уже готовой mem0 архитектуре построить не может",
+                "semanticKey": "даже_память_по_уже_готовой_mem0_архитектуре_построить_не_может",
+                "semanticClass": "structural"
+              },
+              "confidence": 0.75,
+              "sourceEventId": "6e82b01c-bf58-4207-a33f-a51257d066be",
+              "timestamp": "2026-04-22T00:45:40.500+07:00"
+            },
+            {
+              "claimType": "relationship",
+              "text": "Просто потопал к тебе, просто общаюсь как пойдет",
+              "payload": {
+                "sentiment": "communication_style",
+                "importance": 59,
+                "source": "heuristic",
+                "normalizedText": "Просто потопал к тебе, просто общаюсь как пойдет",
+                "semanticKey": "просто_потопал_к_тебе_просто_общаюсь_как_пойдет",
+                "semanticClass": "relationship"
+              },
+              "confidence": 0.78,
+              "sourceEventId": "6e82b01c-bf58-4207-a33f-a51257d066be",
+              "timestamp": "2026-04-22T00:45:40.500+07:00"
+            },
+            {
+              "claimType": "episode",
+              "text": "попал в какой-то чат умников за эти дни",
+              "payload": {
+                "importance": 57,
+                "source": "heuristic",
+                "normalizedText": "попал в какой-то чат умников за эти дни",
+                "semanticKey": "попал_в_какой_то_чат_умников_за_эти_дни",
+                "semanticClass": "episode"
+              },
+              "confidence": 0.7,
+              "sourceEventId": "6e82b01c-bf58-4207-a33f-a51257d066be",
+              "timestamp": "2026-04-22T00:45:40.500+07:00"
+            }
+          ],
+          "temporal": {
+            "firstSeenAt": "2026-04-05T04:28:43.669Z",
+            "lastSeenAt": "2026-04-07T07:09:44.109Z",
+            "lastUserMessageAt": "2026-04-07T07:09:20.727Z",
+            "lastAssistantMessageAt": "2026-04-07T07:09:44.109Z",
+            "messageCount": 667,
+            "semanticSignals": []
+          },
+          "meta": {
+            "mode": "llm_only",
+            "llmCandidates": 7,
+            "llmWarnings": [
+              "forceSourceModel is not defined"
+            ],
+            "regexExcludedFromLlmStrategy": true,
+            "requestedMode": "llm_only",
+            "effectiveMode": "llm_only",
+            "regexExcludedFromMemoryPipeline": true
+          }
+        },
+        {
+          "version": 2,
+          "strategy": "llm_raw_v2",
+          "eventId": "e4d0d884-e77d-483b-a061-dd0cf6c33ece",
+          "threadId": "telegram:929147515",
+          "createdAt": "2026-04-21T17:52:07.656Z",
+          "claims": [
+            {
+              "claimType": "fact",
+              "text": "Мне их жалко, честно говоря",
+              "payload": {
+                "category": "emotion_toward_third_party",
+                "importance": 61,
+                "source": "heuristic",
+                "normalizedText": "Мне их жалко, честно говоря",
+                "semanticKey": "мне_их_жалко_честно_говоря",
+                "semanticClass": "structural"
+              },
+              "confidence": 0.88,
+              "sourceEventId": "e4d0d884-e77d-483b-a061-dd0cf6c33ece",
+              "timestamp": "2026-04-22T00:51:04.533+07:00"
+            },
+            {
+              "claimType": "fact",
+              "text": "Они все какие-то... боязливые",
+              "payload": {
+                "category": "third_party_characteristics",
+                "importance": 54,
+                "source": "heuristic",
+                "normalizedText": "Они все какие-то... боязливые",
+                "semanticKey": "они_все_какие_то_боязливые",
+                "semanticClass": "structural"
+              },
+              "confidence": 0.8,
+              "sourceEventId": "e4d0d884-e77d-483b-a061-dd0cf6c33ece",
+              "timestamp": "2026-04-22T00:51:04.533+07:00"
+            },
+            {
+              "claimType": "fact",
+              "text": "Обсуждают они хрень какую-то зачастую, гоняя одни и те же мысли по 100 раз, но в целом что-то полезное можно выцепить для себя",
+              "payload": {
+                "category": "third_party_discussion_assessment",
+                "importance": 56,
+                "source": "heuristic",
+                "normalizedText": "Обсуждают они хрень какую-то зачастую, гоняя одни и те же мысли по 100 раз, но в целом что-то полезное можно выцепить для себя",
+                "semanticKey": "обсуждают_они_хрень_какую_то_зачастую_гоняя_одни_и_те_же_мысли_п",
+                "semanticClass": "structural"
+              },
+              "confidence": 0.74,
+              "sourceEventId": "e4d0d884-e77d-483b-a061-dd0cf6c33ece",
+              "timestamp": "2026-04-22T00:51:04.533+07:00"
+            }
+          ],
+          "temporal": {
+            "firstSeenAt": "2026-04-05T04:28:43.669Z",
+            "lastSeenAt": "2026-04-07T07:09:44.109Z",
+            "lastUserMessageAt": "2026-04-07T07:09:20.727Z",
+            "lastAssistantMessageAt": "2026-04-07T07:09:44.109Z",
+            "messageCount": 667,
+            "semanticSignals": []
+          },
+          "meta": {
+            "mode": "llm_only",
+            "llmCandidates": 5,
+            "llmWarnings": [
+              "forceSourceModel is not defined"
+            ],
             "regexExcludedFromLlmStrategy": true,
             "requestedMode": "llm_only",
             "effectiveMode": "llm_only",
@@ -6439,7 +6481,7 @@
         "messageCount": 667,
         "semanticSignals": []
       },
-      "updatedAt": "2026-04-21T10:24:09.725Z"
+      "updatedAt": "2026-04-21T17:52:07.672Z"
     },
     "telegram:test-thread": {
       "version": 2,
