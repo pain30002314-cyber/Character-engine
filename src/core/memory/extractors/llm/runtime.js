@@ -55,6 +55,30 @@ function buildFallbackEvent(event) {
   }
 }
 
+function forceSourceModel(packet, resolvedModel) {
+  const model = String(resolvedModel || '').trim() || null
+
+  return {
+    ...(packet || {}),
+    candidates: Array.isArray(packet?.candidates)
+      ? packet.candidates.map((candidate) => ({
+          ...candidate,
+          source: {
+            ...(candidate?.source || {}),
+            extractor: 'llm',
+            model,
+            promptVersion:
+              candidate?.source?.promptVersion || PROMPT_VERSION,
+            sourceEventId:
+              candidate?.source?.sourceEventId || packet?.event?.id || null,
+            timestamp:
+              candidate?.source?.timestamp || packet?.event?.timestamp || null
+          }
+        }))
+      : []
+  }
+}
+
 function buildBaseResult({ event, eventWindow }) {
   return {
     version: 1,

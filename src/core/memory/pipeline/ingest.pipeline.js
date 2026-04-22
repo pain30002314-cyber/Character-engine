@@ -1,11 +1,11 @@
+'use strict'
+
 const { getThreadEvents } = require('../store/events.store')
 const { runExtractPipeline } = require('./extract.pipeline')
 const { runInterpretPipeline } = require('./interpret.pipeline')
 const { runUpdatePipeline } = require('./update.pipeline')
 const { runSnapshotPipeline } = require('./snapshot.pipeline')
-const {
-  looksLikeContaminatedAssistantEvent
-} = require('../hygiene/admission.service')
+const { looksLikeContaminatedAssistantEvent } = require('../hygiene/admission.service')
 
 async function runIngestPipeline({ threadId, eventId }) {
   const events = getThreadEvents(threadId)
@@ -23,25 +23,21 @@ async function runIngestPipeline({ threadId, eventId }) {
     return runSnapshotPipeline({ threadId })
   }
 
-  const extracted = await runExtractPipeline({
-    threadId,
-    event
+  const extracted = await runExtractPipeline({ threadId, event })
+  const interpreted = await runInterpretPipeline({ threadId, event, extracted })
+  await runUpdatePipeline({ threadId, interpreted })
+
+  const { enqueueMemoryJob } = require('../queue/memory.queue')
+  enqueueMemoryJob({
+    type: 'apply_status_filter',
+    payload: {
+      threadId,
+      sourceEventId: event.id,
+      triggeredBy: 'ingest_pipeline'
+    }
   })
 
-  const interpreted = await runInterpretPipeline({
-    threadId,
-    event,
-    extracted
-  })
-
-  await runUpdatePipeline({
-    threadId,
-    interpreted
-  })
-
-  return runSnapshotPipeline({ threadId })
+  return null
 }
 
-module.exports = {
-  runIngestPipeline
-}
+module.exports = { runIngestPipeline }

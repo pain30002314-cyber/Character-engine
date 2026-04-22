@@ -1,6 +1,7 @@
 const logger = require('../../../services/logger.service')
 const { runIngestPipeline } = require('../pipeline/ingest.pipeline')
 const { runSnapshotPipeline } = require('../pipeline/snapshot.pipeline')
+const { runStatusPipeline } = require('../pipeline/status.pipeline')
 
 async function processMemoryJob(job) {
   if (!job || !job.type) {
@@ -17,16 +18,15 @@ async function processMemoryJob(job) {
     case 'ingest_assistant_message':
       return runIngestPipeline(job.payload)
 
+    case 'apply_status_filter':
+      return runStatusPipeline(job.payload)
+
     case 'rebuild_snapshot':
       return runSnapshotPipeline(job.payload)
 
     default:
-      logger.warn('Unknown memory job type', {
-        type: job.type
-      })
+      logger.warn('Unknown memory job type', { type: job.type })
   }
 }
 
-module.exports = {
-  processMemoryJob
-}
+module.exports = { processMemoryJob }
