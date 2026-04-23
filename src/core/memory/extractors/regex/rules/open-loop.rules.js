@@ -3,7 +3,7 @@
 const { runRuleList } = require('./shared/base.detector')
 const { makeCandidate } = require('./shared/detector.utils')
 
-const STRICT_QUESTION_RE = /^(зачем|почему|что|кто|где|когда)(?:\s|[?!…]|$)/i
+const STRICT_QUESTION_RE = /^(зачем|почему|что|чего|кто|где|когда)(?:\s|[?!…]|$)/i
 const SOFT_QUESTION_RE = /^(как)(?:\s|[?!…]|$)/i
 
 const RETURN_LATER_RE =

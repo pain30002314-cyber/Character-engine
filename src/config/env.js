@@ -26,11 +26,24 @@ function numberEnv(name, fallback) {
   return parsed
 }
 
+function booleanEnv(name, fallback = false) {
+  const raw = process.env[name]
+
+  if (raw === undefined || raw === null || raw === '') {
+    return fallback
+  }
+
+  return ['1', 'true', 'yes', 'on'].includes(String(raw).toLowerCase())
+}
+
+const telegramEnabled = booleanEnv('ENABLE_TELEGRAM', false)
+
 const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: numberEnv('PORT', 3000),
 
-  telegramToken: requireEnv('TELEGRAM_TOKEN'),
+  telegramEnabled,
+  telegramToken: telegramEnabled ? requireEnv('TELEGRAM_TOKEN') : null,
 
   llmApiKey: requireEnv('LLM_API_KEY'),
   llmApiUrl: requireEnv('LLM_API_URL'),

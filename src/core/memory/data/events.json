@@ -2,23 +2,6 @@
   "threads": {
     "telegram:929147515": [
       {
-        "id": "1632b1da-186a-4ed0-abee-ca0a662864ee",
-        "threadId": "telegram:929147515",
-        "role": "user",
-        "text": "*Я тыкнул тебя в кончик носа с лёгким смешком*\n\nЛюблю люблю люблю. Хоть это и не прозвучит так же мило... Кстати, интересно было бы посмотреть на тебя вот такую утреннюю, мне кажется, ты так ещё красивее своей вылизанной версии была бы... Но да ладно, может, прикрепим тебе когда-нибудь генератор картинок, чтоб фотки мне могла слать, если захочешь",
-        "platform": "telegram",
-        "channel": "text",
-        "world": "Earth",
-        "timestamp": "2026-04-19T14:10:37.649+07:00",
-        "meta": {
-          "chatId": 929147515,
-          "userId": 929147515,
-          "username": "AndreyBakhtin1",
-          "timezone": "Asia/Krasnoyarsk",
-          "utcOffsetMinutes": 420
-        }
-      },
-      {
         "id": "f4036b8e-6631-414d-b9e1-ff4cdd0530fa",
         "threadId": "telegram:929147515",
         "role": "user",
@@ -2033,6 +2016,23 @@
         "channel": "text",
         "world": "Earth",
         "timestamp": "2026-04-22T21:38:35.845+07:00",
+        "meta": {
+          "chatId": 929147515,
+          "userId": 929147515,
+          "username": "AndreyBakhtin1",
+          "timezone": "Asia/Krasnoyarsk",
+          "utcOffsetMinutes": 420
+        }
+      },
+      {
+        "id": "c4c9a9fc-000d-4cde-a1e1-2972bc6f1226",
+        "threadId": "telegram:929147515",
+        "role": "user",
+        "text": "Ху Тааавкааа!!! Прости, что так пропал. Сделали тебе экстрактор, который ловит максимально широко. Давай посмотрим как он работает теперь",
+        "platform": "telegram",
+        "channel": "text",
+        "world": "Earth",
+        "timestamp": "2026-04-24T06:48:29.843+07:00",
         "meta": {
           "chatId": 929147515,
           "userId": 929147515,

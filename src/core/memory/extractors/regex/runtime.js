@@ -6,8 +6,7 @@ const { buildClauseContext } = require('./core/context')
 const { filterWeakCandidates } = require('./core/garbage-control')
 const { dedupeByBestScore } = require('./core/dedupe')
 const { dropShadowedAtoms } = require('./core/postprocess')
-
-const { appendRegexDebugLog } = require('./debug/regex.debug')
+const { writeMemoryDebug } = require('../../debug/memory-debug.service')
 
 const { buildAtom } = require('./builders/atom.builder')
 const { buildIdentityHints } = require('./builders/identity-hints.builder')
@@ -95,48 +94,58 @@ async function extractRegexAtoms({ event }) {
     }
   })
 
-  appendRegexDebugLog({
+  writeMemoryDebug({
+    layer: 'regex-extractor',
     timestamp: new Date().toISOString(),
-    eventId: event?.id || null,
     threadId: event?.threadId || null,
-    role: event?.role || null,
-
-    sourceText: event?.text || '',
-    preprocessed,
-    units,
-
-    clauses: clauses.map(({ clause, context }) => ({
-      clauseId: context?.clauseId || null,
-      text: clause?.text || '',
-      normalizedText: clause?.normalizedText || '',
-      flags: {
-        isQuestion: context?.isQuestion || false,
-        isImperative: context?.isImperative || false,
-        isConditional: context?.isConditional || false,
-        isHypothetical: context?.isHypothetical || false,
-        isReported: context?.isReported || false,
-        isHedged: context?.isHedged || false,
-        hasQuote: context?.hasQuote || false
+    messageId: event?.id || null,
+    eventId: event?.id || null,
+    sourceEventId: event?.id || null,
+    input: {
+      event: {
+        id: event?.id || null,
+        role: event?.role || null,
+        timestamp: event?.timestamp || null,
+        text: event?.text || ''
+      },
+      preprocessed,
+      units,
+      clauses: clauses.map(({ clause, context }) => ({
+        clauseId: context?.clauseId || null,
+        text: clause?.text || '',
+        normalizedText: clause?.normalizedText || '',
+        flags: {
+          isQuestion: context?.isQuestion || false,
+          isImperative: context?.isImperative || false,
+          isConditional: context?.isConditional || false,
+          isHypothetical: context?.isHypothetical || false,
+          isReported: context?.isReported || false,
+          isHedged: context?.isHedged || false,
+          hasQuote: context?.hasQuote || false
+        }
+      })),
+      detectorLogs
+    },
+    output: {
+      candidatesBeforeFilter,
+      filteredCandidates,
+      builtAtoms,
+      finalAtoms: atoms,
+      identityHints
+    },
+    meta: {
+      role: event?.role || null,
+      stats: {
+        detectors: detectorLogs.length,
+        candidatesBeforeFilter: candidatesBeforeFilter.length,
+        filteredCandidates: filteredCandidates.length,
+        builtAtoms: builtAtoms.length,
+        finalAtoms: atoms.length,
+        identityHints: identityHints.length,
+        durationMs: Date.now() - startedAt
       }
-    })),
-
-    detectorLogs,
-
-    candidatesBeforeFilter,
-    filteredCandidates,
-    builtAtoms,
-    finalAtoms: atoms,
-    identityHints,
-
-    stats: {
-      detectors: detectorLogs.length,
-      candidatesBeforeFilter: candidatesBeforeFilter.length,
-      filteredCandidates: filteredCandidates.length,
-      builtAtoms: builtAtoms.length,
-      finalAtoms: atoms.length,
-      identityHints: identityHints.length,
-      durationMs: Date.now() - startedAt
-    }
+    },
+    errors: []
   })
 
   return response

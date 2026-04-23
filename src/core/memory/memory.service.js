@@ -7,6 +7,7 @@ const { enqueueMemoryJob } = require('./queue/memory.queue')
 const {
   looksLikeContaminatedAssistantEvent
 } = require('./hygiene/admission.service')
+const extractionSettings = require('./raw/extraction.settings')
 const { extractRegexAtomsV1 } = require('./extractors/regex')
 const {
   getNowTimestamp,
@@ -88,6 +89,10 @@ async function runLlmObserveDebugPass(event) {
     return
   }
 
+  if (extractionSettings.wideLlmExtractorEnabled || !extractionSettings.debugLog) {
+    return
+  }
+
   try {
     await runExtractFilterObservePipeline({
       threadId: event.threadId,
@@ -130,13 +135,15 @@ async function recordUserMessage({
   refreshRecentDialogSnapshot(threadId)
   await runRegexDebugPass(event)
 
-  void runLlmObserveDebugPass(event).catch((error) => {
-    logger.warn('LLM observe debug pass failed', {
-      eventId: event?.id || null,
-      threadId: event?.threadId || null,
-      message: error.message
+  if (!extractionSettings.wideLlmExtractorEnabled && extractionSettings.debugLog) {
+    void runLlmObserveDebugPass(event).catch((error) => {
+      logger.warn('LLM observe debug pass failed', {
+        eventId: event?.id || null,
+        threadId: event?.threadId || null,
+        message: error.message
+      })
     })
-  })
+  }
 
   enqueueMemoryJob({ type: 'ingest_user_message', payload: { threadId, eventId: event.id } })
 

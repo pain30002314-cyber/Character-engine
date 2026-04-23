@@ -1,11 +1,14 @@
 'use strict'
 
 const { getThreadEvents } = require('../store/events.store')
+const extractionSettings = require('../raw/extraction.settings')
 const { runExtractPipeline } = require('./extract.pipeline')
+const { runExtractFilterObservePipeline } = require('./extract-filter-observe.pipeline')
 const { runInterpretPipeline } = require('./interpret.pipeline')
 const { runUpdatePipeline } = require('./update.pipeline')
 const { runSnapshotPipeline } = require('./snapshot.pipeline')
 const { looksLikeContaminatedAssistantEvent } = require('../hygiene/admission.service')
+const logger = require('../../../services/logger.service')
 
 async function runIngestPipeline({ threadId, eventId }) {
   const events = getThreadEvents(threadId)
@@ -23,6 +26,34 @@ async function runIngestPipeline({ threadId, eventId }) {
     return runSnapshotPipeline({ threadId })
   }
 
+  let observeResult = null
+
+  if (extractionSettings.wideLlmExtractorEnabled) {
+    observeResult = await runExtractFilterObservePipeline({
+      threadId,
+      event,
+      history: events
+    })
+  }
+
+  if (extractionSettings.disablePersistenceWrite) {
+    logger.info('Memory persistence write skipped by config', {
+      threadId,
+      eventId: event?.id || null,
+      wideLlmExtractorEnabled: extractionSettings.wideLlmExtractorEnabled,
+      extractionMode: extractionSettings.mode,
+      observeStatus: observeResult?.status || null
+    })
+
+    return {
+      threadId,
+      eventId: event?.id || null,
+      status: observeResult?.status || 'success',
+      persistenceSkipped: true,
+      observeResult
+    }
+  }
+
   const extracted = await runExtractPipeline({ threadId, event })
   const interpreted = await runInterpretPipeline({ threadId, event, extracted })
   await runUpdatePipeline({ threadId, interpreted })
@@ -37,7 +68,13 @@ async function runIngestPipeline({ threadId, eventId }) {
     }
   })
 
-  return null
+  return {
+    threadId,
+    eventId: event?.id || null,
+    status: 'success',
+    persistenceSkipped: false,
+    observeResult
+  }
 }
 
 module.exports = { runIngestPipeline }
