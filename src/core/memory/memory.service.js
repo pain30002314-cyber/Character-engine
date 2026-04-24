@@ -15,6 +15,7 @@ const {
 } = require('../../services/time-context.service')
 const logger = require('../../services/logger.service')
 const { runExtractFilterObservePipeline } = require('./pipeline/extract-filter-observe.pipeline')
+const { writeMemoryLiveTrace } = require('./debug/memory-debug.service')
 
 function createEventId() {
   if (crypto.randomUUID) {
@@ -117,6 +118,17 @@ async function recordUserMessage({
   userId,
   username
 }) {
+  writeMemoryLiveTrace({
+    marker: 'memory_service_called',
+    eventId: null,
+    threadId,
+    messageId: null,
+    memoryExtractionMode: extractionSettings.mode,
+    wideLlmExtractorEnabled: extractionSettings.wideLlmExtractorEnabled,
+    disablePersistenceWrite: extractionSettings.disablePersistenceWrite,
+    note: 'recordUserMessage'
+  })
+
   const event = createEvent({
     threadId,
     role: 'user',

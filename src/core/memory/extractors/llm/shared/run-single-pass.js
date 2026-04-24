@@ -53,16 +53,14 @@ function mergeWarnings(...parts) {
   )
 }
 
-function resolvePassStatus({ callWarnings, repairedJson, validation }) {
+function resolvePassStatus({ validation }) {
   if (!validation?.ok) {
     return 'failed'
   }
 
   if (
-    safeArray(callWarnings).length > 0 ||
-    repairedJson ||
-    safeArray(validation?.droppedCandidates).length > 0 ||
-    safeArray(validation?.warnings).length > 0
+    (validation?.stats?.validCandidateCount || 0) > 0 &&
+    (validation?.stats?.droppedCandidateCount || 0) > 0
   ) {
     return 'partial'
   }

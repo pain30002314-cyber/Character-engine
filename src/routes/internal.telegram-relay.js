@@ -1,6 +1,8 @@
 const express = require('express')
 const { handleInput } = require('../core')
 const logger = require('../services/logger.service')
+const extractionSettings = require('../core/memory/raw/extraction.settings')
+const { writeMemoryLiveTrace } = require('../core/memory/debug/memory-debug.service')
 
 const router = express.Router()
 
@@ -31,6 +33,17 @@ router.post('/internal/telegram-relay', async (req, res) => {
       username,
       threadId,
       textPreview: String(text).slice(0, 120)
+    })
+
+    writeMemoryLiveTrace({
+      marker: 'live_message_received',
+      eventId: null,
+      threadId,
+      messageId: null,
+      memoryExtractionMode: extractionSettings.mode,
+      wideLlmExtractorEnabled: extractionSettings.wideLlmExtractorEnabled,
+      disablePersistenceWrite: extractionSettings.disablePersistenceWrite,
+      note: 'internal.telegram-relay'
     })
 
     const result = await handleInput({

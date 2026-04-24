@@ -1,6 +1,8 @@
 const logger = require('../../../services/logger.service')
 const memoryConfig = require('../memory.config')
 const { processMemoryJob } = require('./memory.worker')
+const extractionSettings = require('../raw/extraction.settings')
+const { writeMemoryLiveTrace } = require('../debug/memory-debug.service')
 
 const jobs = []
 let isProcessing = false
@@ -23,6 +25,18 @@ function enqueueMemoryJob(job) {
   }
 
   jobs.push(queuedJob)
+
+  writeMemoryLiveTrace({
+    marker: 'memory_job_enqueued',
+    eventId: queuedJob?.payload?.eventId || queuedJob?.payload?.sourceEventId || null,
+    threadId: queuedJob?.payload?.threadId || null,
+    messageId: queuedJob?.id || null,
+    memoryExtractionMode: extractionSettings.mode,
+    wideLlmExtractorEnabled: extractionSettings.wideLlmExtractorEnabled,
+    disablePersistenceWrite: extractionSettings.disablePersistenceWrite,
+    note: queuedJob.type || 'unknown_job'
+  })
+
   scheduleQueueRun()
 
   return queuedJob.id

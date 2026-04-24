@@ -61,6 +61,7 @@ async function logPassRun({
   return writeStageLog({
     stage,
     entry: {
+      stage: 'extractor',
       traceId,
       eventId,
       threadId,

@@ -9,6 +9,12 @@ const DEFAULT_DEBUG_ROOT = path.join(
   'debug',
   'memory-pipeline'
 )
+const DEFAULT_LIVE_TRACE_FILE = path.join(
+  process.cwd(),
+  'logs',
+  'memory',
+  'live-trace.jsonl'
+)
 const STAGE_ENV_FLAGS = {
   'raw-extraction': 'MEMORY_EXTRACTION_DEBUG'
 }
@@ -141,6 +147,34 @@ function buildDebugFilePath(packet, options = {}) {
   return path.join(rootDir, stageFileName)
 }
 
+function resolveLiveTraceFilePath(options = {}) {
+  return options.filePath || process.env.MEMORY_LIVE_TRACE_FILE || DEFAULT_LIVE_TRACE_FILE
+}
+
+function buildLiveTracePacket({
+  timestamp,
+  marker,
+  eventId,
+  threadId,
+  messageId,
+  memoryExtractionMode,
+  wideLlmExtractorEnabled,
+  disablePersistenceWrite,
+  note
+}) {
+  return {
+    timestamp: toStringOrNull(timestamp) || new Date().toISOString(),
+    marker: toStringOrNull(marker) || 'unknown_marker',
+    eventId: toStringOrNull(eventId),
+    threadId: toStringOrNull(threadId),
+    messageId: toStringOrNull(messageId),
+    memoryExtractionMode: toStringOrNull(memoryExtractionMode),
+    wideLlmExtractorEnabled: Boolean(wideLlmExtractorEnabled),
+    disablePersistenceWrite: Boolean(disablePersistenceWrite),
+    note: toStringOrNull(note)
+  }
+}
+
 function writeMemoryDebug(payload, options = {}) {
   const packet = buildMemoryDebugPacket(payload)
 
@@ -163,10 +197,26 @@ function writeMemoryDebug(payload, options = {}) {
   }
 }
 
+function writeMemoryLiveTrace(payload, options = {}) {
+  const packet = buildLiveTracePacket(payload)
+  const filePath = resolveLiveTraceFilePath(options)
+  ensureDirectory(path.dirname(filePath))
+  fs.appendFileSync(filePath, `${safeJson(packet)}\n`, 'utf-8')
+
+  return {
+    enabled: true,
+    packet,
+    filePath
+  }
+}
+
 module.exports = {
   DEFAULT_DEBUG_ROOT,
+  DEFAULT_LIVE_TRACE_FILE,
   buildMemoryDebugPacket,
+  buildLiveTracePacket,
   buildDebugFilePath,
   isMemoryDebugEnabled,
-  writeMemoryDebug
+  writeMemoryDebug,
+  writeMemoryLiveTrace
 }

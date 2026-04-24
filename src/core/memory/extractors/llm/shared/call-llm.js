@@ -9,6 +9,44 @@ const DEFAULT_SYSTEM_PROMPT = [
   'Не добавляй пояснения вне JSON.'
 ].join(' ')
 
+const DEFAULT_OPENROUTER_TITLE = 'Character-engine-memory-wide-extractor'
+const HEADER_VALUE_MAX_LENGTH = 120
+
+function sanitizeHeaderValue(value, fallback = DEFAULT_OPENROUTER_TITLE) {
+  const source = String(value || '')
+    .replace(/[\r\n]+/g, ' ')
+    .replace(/[^\x20-\x7E]+/g, '-')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .trim()
+
+  if (!source) {
+    return fallback
+  }
+
+  return source.slice(0, HEADER_VALUE_MAX_LENGTH).replace(/-+$/g, '') || fallback
+}
+
+function buildOpenRouterTitle(pass, requestConfig = {}) {
+  if (requestConfig.title) {
+    return sanitizeHeaderValue(requestConfig.title)
+  }
+
+  const extractorKey = String(pass?.extractorKey || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+
+  if (!extractorKey) {
+    return DEFAULT_OPENROUTER_TITLE
+  }
+
+  return sanitizeHeaderValue(`${DEFAULT_OPENROUTER_TITLE}-${extractorKey}`)
+}
+
 async function callLlm({
   pass,
   promptPacket,
@@ -33,7 +71,7 @@ async function callLlm({
     model: requestConfig.model || env.memoryModel,
     apiUrl: requestConfig.apiUrl || env.memoryLlmApiUrl,
     apiKey: requestConfig.apiKey || env.memoryLlmKey,
-    title: requestConfig.title || `Character Engine Memory Extractor: ${pass?.extractorName || 'LLM Pass'}`
+    title: buildOpenRouterTitle(pass, requestConfig)
   })
 
   const rawResponseText = String(response?.choices?.[0]?.message?.content || '').trim()
@@ -52,5 +90,7 @@ async function callLlm({
 }
 
 module.exports = {
-  callLlm
+  callLlm,
+  sanitizeHeaderValue,
+  buildOpenRouterTitle
 }

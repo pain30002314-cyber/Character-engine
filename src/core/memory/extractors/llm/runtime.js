@@ -1,94 +1,21 @@
 'use strict'
 
-const { writeMemoryDebug } = require('../../debug/memory-debug.service')
+const {
+  writeMemoryDebug,
+  writeMemoryLiveTrace
+} = require('../../debug/memory-debug.service')
 const {
   LLM_EXTRACTOR_FLOW_CONFIG
 } = require('./config/extractor-passes.config')
 const { orchestrateWideLlmExtraction } = require('./orchestrator')
-const { createTraceId } = require('./utils/ids')
 const { buildBaseEventPacket } = require('./shared/build-base-event-packet')
 const { getRegisteredExtractorPasses } = require('./passes/registry')
 const { logBasePacket } = require('./logging/log-base-packet')
 const { writeFailureLog } = require('./logging/write-failure-log')
+const { createTraceId } = require('./utils/ids')
 
 function safeArray(value) {
   return Array.isArray(value) ? value : []
-}
-
-function buildFallbackEvent(event) {
-  return {
-    id: event?.id || null,
-    threadId: event?.threadId || null,
-    role: event?.role || 'user',
-    platform: event?.platform || null,
-    channel: event?.channel || null,
-    world: event?.world || null,
-    timestamp: event?.timestamp || null,
-    text: event?.text || '',
-    meta: event?.meta || {}
-  }
-}
-
-function buildWindowPreview(eventWindow) {
-  return safeArray(eventWindow).map((item, index) => ({
-    index,
-    id: item?.id || null,
-    role: item?.role || null,
-    timestamp: item?.timestamp || null,
-    text: item?.text || ''
-  }))
-}
-
-function buildIdentityContext(context = {}) {
-  return {
-    coreUserRef: context?.identity?.coreUserRef || 'core_user:main',
-    coreCharacterRef: context?.identity?.coreCharacterRef || 'core_character:active',
-    userDisplayName: context?.identity?.userDisplayName || null,
-    characterDisplayName: context?.identity?.characterDisplayName || null
-  }
-}
-
-function buildBasePacket({ event, eventWindow, context, flowConfig, durationMs = 0, warnings = [] }) {
-  return {
-    version: 1,
-    strategy: flowConfig.strategy,
-    event: buildFallbackEvent(event),
-    context: {
-      eventWindow: buildWindowPreview(eventWindow),
-      identity: buildIdentityContext(context)
-    },
-    candidates: [],
-    temporal: {
-      messageTime: event?.timestamp || null,
-      anchors: []
-    },
-    meta: {
-      source: 'llm',
-      strategy: flowConfig.strategy,
-      promptTransport: flowConfig.promptTransport,
-      responseContract: flowConfig.responseContract,
-      extractorVersion: flowConfig.extractorVersion,
-      durationMs
-    },
-    service: {
-      extractorVersion: flowConfig.extractorVersion,
-      processedAt: new Date().toISOString(),
-      durationMs,
-      stats: {
-        eventWindowSize: safeArray(eventWindow).length,
-        candidates: 0,
-        passesTotal: 0,
-        passesSucceeded: 0,
-        passesFailed: 0
-      },
-      warnings,
-      debug: {}
-    },
-    debug: {
-      warnings
-    },
-    orchestration: null
-  }
 }
 
 function resolvePassPlan(requestedPasses) {
@@ -113,6 +40,36 @@ function resolvePassPlan(requestedPasses) {
   return configuredPasses.filter((pass) => requestedKeys.has(pass.extractorKey))
 }
 
+function buildServicePacket({
+  extractorVersion,
+  durationMs,
+  eventWindow,
+  orchestration,
+  warnings,
+  status
+}) {
+  const passes = orchestration?.passes || {}
+  const candidates = safeArray(orchestration?.candidates)
+
+  return {
+    extractorVersion,
+    processedAt: new Date().toISOString(),
+    durationMs,
+    stats: {
+      eventWindowSize: safeArray(eventWindow).length,
+      candidates: candidates.length,
+      passesTotal: Number(passes.configured || 0),
+      passesSucceeded: safeArray(passes.successful).length,
+      passesFailed: safeArray(passes.failed).length
+    },
+    warnings,
+    debug: {
+      status,
+      partialFailure: Boolean(passes.partialFailure)
+    }
+  }
+}
+
 async function runLlmExtractionRuntime({
   event,
   eventWindow = [],
@@ -122,38 +79,36 @@ async function runLlmExtractionRuntime({
   runtime = {}
 }) {
   const startedAt = Date.now()
-  const flowConfig = {
-    ...LLM_EXTRACTOR_FLOW_CONFIG,
-    ...(runtime?.flowConfig || {})
-  }
-  const traceId = runtime?.traceId || createTraceId('llm_trace')
-  const passPlan = resolvePassPlan(passes)
-  const runtimeBaseEventPacket = buildBaseEventPacket({
+  const baseEventPacket = buildBaseEventPacket({
     pass: null,
     event,
     eventWindow,
     context
   })
-  const effectiveRuntime = {
-    ...runtime,
-    traceId,
-    flowConfig
+  const passPlan = resolvePassPlan(passes)
+  const traceId = runtime?.traceId || baseEventPacket?.traceId || createTraceId('llm_trace')
+  const extractorVersion =
+    runtime?.flowConfig?.extractorVersion ||
+    LLM_EXTRACTOR_FLOW_CONFIG.extractorVersion
+
+  if (!baseEventPacket.traceId) {
+    baseEventPacket.traceId = traceId
   }
 
   await logBasePacket({
     traceId,
     eventId: event?.id || null,
     threadId: event?.threadId || null,
-    platform: runtimeBaseEventPacket?.event?.platform || null,
-    channel: runtimeBaseEventPacket?.event?.channel || null,
-    speakerRole: runtimeBaseEventPacket?.event?.speakerRole || null,
-    speakerName: runtimeBaseEventPacket?.event?.speakerName || null,
-    timestampIso: runtimeBaseEventPacket?.event?.timestampIso || null,
-    localizedTime: runtimeBaseEventPacket?.event?.localizedTime || null,
-    promptLanguage: runtimeBaseEventPacket?.promptLanguageCode || null,
-    messageText: runtimeBaseEventPacket?.event?.messageText || '',
-    recentContextCount: safeArray(runtimeBaseEventPacket?.recentContext).length,
-    fastSignals: safeArray(runtimeBaseEventPacket?.fastSignals),
+    platform: baseEventPacket?.event?.platform || null,
+    channel: baseEventPacket?.event?.channel || null,
+    speakerRole: baseEventPacket?.event?.speakerRole || null,
+    speakerName: baseEventPacket?.event?.speakerName || null,
+    timestampIso: baseEventPacket?.event?.timestampIso || null,
+    localizedTime: baseEventPacket?.event?.localizedTime || null,
+    promptLanguage: baseEventPacket?.promptLanguageCode || null,
+    messageText: baseEventPacket?.event?.messageText || '',
+    recentContextCount: safeArray(baseEventPacket?.recentContext).length,
+    fastSignals: safeArray(baseEventPacket?.fastSignals),
     extractorPlan: passPlan.map((pass) => ({
       extractorKey: pass.extractorKey,
       extractorName: pass.extractorName,
@@ -163,6 +118,17 @@ async function runLlmExtractionRuntime({
     errors: []
   })
 
+  writeMemoryLiveTrace({
+    marker: 'wide_llm_runtime_started',
+    eventId: event?.id || null,
+    threadId: event?.threadId || null,
+    messageId: event?.id || null,
+    memoryExtractionMode: runtime?.flowConfig?.mode || process.env.MEMORY_EXTRACTION_MODE || null,
+    wideLlmExtractorEnabled: process.env.MEMORY_WIDE_LLM_EXTRACTOR_ENABLED === 'true',
+    disablePersistenceWrite: process.env.MEMORY_DISABLE_PERSISTENCE_WRITE !== 'false',
+    note: 'runLlmExtractionRuntime'
+  })
+
   try {
     const orchestration = await orchestrateWideLlmExtraction({
       event,
@@ -170,109 +136,118 @@ async function runLlmExtractionRuntime({
       context,
       passes,
       llm,
-      runtime: effectiveRuntime
-    })
-
-    const durationMs = Date.now() - startedAt
-    const packet = buildBasePacket({
-      event,
-      eventWindow,
-      context,
-      flowConfig,
-      durationMs,
-      warnings: orchestration.warnings
-    })
-
-    packet.candidates = orchestration.candidates
-    packet.service = {
-      ...packet.service,
-      durationMs,
-      stats: {
-        eventWindowSize: safeArray(eventWindow).length,
-        candidates: orchestration.candidates.length,
-        passesTotal: orchestration.passes.configured,
-        passesSucceeded: orchestration.passes.successful.length,
-        passesFailed: orchestration.passes.failed.length
-      },
-      warnings: orchestration.warnings,
-      debug: {
-        status: orchestration.status,
-        partialFailure: orchestration.passes.partialFailure
+      runtime: {
+        ...runtime,
+        traceId
       }
+    })
+    const durationMs = Date.now() - startedAt
+    const warnings = safeArray(orchestration?.warnings)
+    const result = {
+      traceId,
+      eventId: event?.id || null,
+      threadId: event?.threadId || null,
+      service: buildServicePacket({
+        extractorVersion,
+        durationMs,
+        eventWindow,
+        orchestration,
+        warnings,
+        status: orchestration?.status || 'ok'
+      }),
+      orchestration,
+      candidatePool: orchestration?.candidatePool || null,
+      persistencePacket: orchestration?.persistencePacket || null,
+      candidates: safeArray(orchestration?.candidates),
+      warnings
     }
-    packet.debug = {
-      warnings: orchestration.warnings
-    }
-    packet.orchestration = orchestration
-    packet.persistencePacket = orchestration.persistencePacket || null
-    packet.traceId = traceId
 
     writeMemoryDebug({
       layer: 'llm-extractor-runtime',
       timestamp: new Date().toISOString(),
-      threadId: event?.threadId || null,
-      messageId: event?.id || null,
-      eventId: event?.id || null,
-      sourceEventId: event?.id || null,
+      threadId: result.threadId,
+      messageId: result.eventId,
+      eventId: result.eventId,
+      sourceEventId: result.eventId,
       input: {
-        event: buildFallbackEvent(event),
+        traceId,
+        eventId: result.eventId,
         eventWindowSize: safeArray(eventWindow).length
       },
       output: {
-        strategy: packet.strategy,
-        candidateCount: packet.candidates.length,
-        passesSucceeded: packet.service.stats.passesSucceeded,
-        passesFailed: packet.service.stats.passesFailed
+        candidateCount: result.candidates.length,
+        status: orchestration?.status || 'ok'
       },
       meta: {
         durationMs,
-        extractorVersion: flowConfig.extractorVersion
+        extractorVersion
       },
-      errors: orchestration.passes.failed.map((item) => item.error.message)
+      errors: safeArray(orchestration?.passes?.failed).map(
+        (item) => item?.error?.message || 'extractor_pass_failed'
+      )
     })
 
-    return packet
+    writeMemoryLiveTrace({
+      marker: 'wide_llm_runtime_finished',
+      eventId: result.eventId,
+      threadId: result.threadId,
+      messageId: result.eventId,
+      memoryExtractionMode: runtime?.flowConfig?.mode || process.env.MEMORY_EXTRACTION_MODE || null,
+      wideLlmExtractorEnabled: process.env.MEMORY_WIDE_LLM_EXTRACTOR_ENABLED === 'true',
+      disablePersistenceWrite: process.env.MEMORY_DISABLE_PERSISTENCE_WRITE !== 'false',
+      note: orchestration?.status || 'ok'
+    })
+
+    return result
   } catch (error) {
     const durationMs = Date.now() - startedAt
     const warnings = [error?.message || 'llm_extraction_runtime_failed']
-    const packet = buildBasePacket({
-      event,
-      eventWindow,
-      context,
-      flowConfig,
-      durationMs,
+    const result = {
+      traceId,
+      eventId: event?.id || null,
+      threadId: event?.threadId || null,
+      service: buildServicePacket({
+        extractorVersion,
+        durationMs,
+        eventWindow,
+        orchestration: null,
+        warnings,
+        status: 'failed'
+      }),
+      orchestration: null,
+      candidatePool: null,
+      persistencePacket: null,
+      candidates: [],
       warnings
-    })
-    packet.traceId = traceId
+    }
 
     writeMemoryDebug({
       layer: 'llm-extractor-runtime',
       timestamp: new Date().toISOString(),
-      threadId: event?.threadId || null,
-      messageId: event?.id || null,
-      eventId: event?.id || null,
-      sourceEventId: event?.id || null,
+      threadId: result.threadId,
+      messageId: result.eventId,
+      eventId: result.eventId,
+      sourceEventId: result.eventId,
       input: {
-        event: buildFallbackEvent(event),
+        traceId,
+        eventId: result.eventId,
         eventWindowSize: safeArray(eventWindow).length
       },
       output: {
-        strategy: packet.strategy,
         candidateCount: 0,
-        passesSucceeded: 0,
-        passesFailed: 0
+        status: 'failed'
       },
       meta: {
         durationMs,
-        extractorVersion: flowConfig.extractorVersion
+        extractorVersion
       },
       errors: warnings
     })
 
     await writeFailureLog({
       traceId,
-      eventId: event?.id || null,
-      threadId: event?.threadId || null,
+      eventId: result.eventId,
+      threadId: result.threadId,
       failedStage: 'runtime',
       status: 'failed',
       durationMs,
@@ -282,20 +257,28 @@ async function runLlmExtractionRuntime({
       error
     })
 
-    return packet
+    writeMemoryLiveTrace({
+      marker: 'wide_llm_runtime_finished',
+      eventId: result.eventId,
+      threadId: result.threadId,
+      messageId: result.eventId,
+      memoryExtractionMode: runtime?.flowConfig?.mode || process.env.MEMORY_EXTRACTION_MODE || null,
+      wideLlmExtractorEnabled: process.env.MEMORY_WIDE_LLM_EXTRACTOR_ENABLED === 'true',
+      disablePersistenceWrite: process.env.MEMORY_DISABLE_PERSISTENCE_WRITE !== 'false',
+      note: 'failed'
+    })
+
+    return result
   }
 }
 
-async function extractLlmAtomsV1(input) {
-  return runLlmExtractionRuntime(input)
-}
-
-async function extractLlmClaims(input) {
-  return runLlmExtractionRuntime(input)
-}
+const runLlmExtractor = runLlmExtractionRuntime
+const extractLlmAtomsV1 = runLlmExtractionRuntime
+const extractLlmClaims = runLlmExtractionRuntime
 
 module.exports = {
   runLlmExtractionRuntime,
+  runLlmExtractor,
   extractLlmAtomsV1,
   extractLlmClaims
 }

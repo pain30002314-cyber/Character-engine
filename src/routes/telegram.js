@@ -9,6 +9,8 @@ const {
 } = require('../services/telegram.service')
 const { handleInput } = require('../core')
 const { getThreadId } = require('../core/memory/memory.service')
+const extractionSettings = require('../core/memory/raw/extraction.settings')
+const { writeMemoryLiveTrace } = require('../core/memory/debug/memory-debug.service')
 
 const TELEGRAM_API = `https://api.telegram.org/bot${env.telegramToken}`
 
@@ -75,6 +77,17 @@ async function handleTelegramMessage(message) {
     username,
     threadId,
     textPreview: userText.slice(0, 120)
+  })
+
+  writeMemoryLiveTrace({
+    marker: 'live_message_received',
+    eventId: null,
+    threadId,
+    messageId: message?.message_id || null,
+    memoryExtractionMode: extractionSettings.mode,
+    wideLlmExtractorEnabled: extractionSettings.wideLlmExtractorEnabled,
+    disablePersistenceWrite: extractionSettings.disablePersistenceWrite,
+    note: 'telegram.polling'
   })
 
   const result = await handleInput({

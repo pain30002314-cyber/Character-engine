@@ -5,6 +5,7 @@ const { extractRegexAtoms } = require('../extractors/regex/runtime')
 const { runLlmExtractionRuntime } = require('../extractors/llm')
 const { logPersistence } = require('../extractors/llm/logging/log-persistence')
 const { buildEventWindow } = require('./event-window')
+const { writeMemoryLiveTrace } = require('../debug/memory-debug.service')
 
 const DEFAULT_PIPELINE_LIMITS = {
   rawContextEvents: 8,
@@ -44,6 +45,38 @@ function collectRuntimeErrors(extractorPacket) {
   }
 
   return []
+}
+
+function getRuntimeImplName(runtimeImpl) {
+  if (runtimeImpl === runLlmExtractionRuntime) {
+    return 'runLlmExtractionRuntime'
+  }
+
+  return runtimeImpl?.name || 'anonymous_runtime_impl'
+}
+
+function resolveWideRuntimeDecision({ settings, event, extractionConfig = {} }) {
+  if (extractionConfig?.memoryDisabled === true) {
+    return 'skipped_because_memory_disabled'
+  }
+
+  if (extractionConfig?.queueDisabled === true) {
+    return 'skipped_because_queue_disabled'
+  }
+
+  if (!event) {
+    return 'skipped_because_no_event'
+  }
+
+  if (!settings.wideLlmExtractorEnabled) {
+    return 'skipped_because_disabled'
+  }
+
+  if (!(settings.mode === 'llm_only' || settings.mode === 'hybrid')) {
+    return 'skipped_because_mode_not_llm'
+  }
+
+  return 'started'
 }
 
 async function logPersistenceSkip({
@@ -106,6 +139,34 @@ async function runExtractFilterObservePipeline({
   }
 
   const resolvedThreadId = threadId || event?.threadId || null
+  const runtimeImplName = getRuntimeImplName(runtimeImpl)
+  const wideRuntimeDecision = resolveWideRuntimeDecision({
+    settings,
+    event,
+    extractionConfig
+  })
+
+  writeMemoryLiveTrace({
+    marker: 'extract_filter_observe_started',
+    eventId: event?.id || null,
+    threadId: resolvedThreadId,
+    messageId: event?.id || null,
+    memoryExtractionMode: settings.mode,
+    wideLlmExtractorEnabled: settings.wideLlmExtractorEnabled,
+    disablePersistenceWrite: settings.disablePersistenceWrite,
+    note: `runtimeImpl=${runtimeImplName}`
+  })
+
+  writeMemoryLiveTrace({
+    marker: 'wide_llm_runtime_decision',
+    eventId: event?.id || null,
+    threadId: resolvedThreadId,
+    messageId: event?.id || null,
+    memoryExtractionMode: settings.mode,
+    wideLlmExtractorEnabled: settings.wideLlmExtractorEnabled,
+    disablePersistenceWrite: settings.disablePersistenceWrite,
+    note: `${wideRuntimeDecision};runtimeImpl=${runtimeImplName};called=${wideRuntimeDecision === 'started'}`
+  })
 
   const filteredHistory = Array.isArray(history)
     ? history.filter((item) => item?.id !== event?.id)
@@ -135,10 +196,32 @@ async function runExtractFilterObservePipeline({
     }
   }
 
-  if (settings.wideLlmExtractorEnabled && (settings.mode === 'llm_only' || settings.mode === 'hybrid')) {
+  if (wideRuntimeDecision === 'started') {
+    writeMemoryLiveTrace({
+      marker: 'wide_llm_runtime_started',
+      eventId: event?.id || null,
+      threadId: resolvedThreadId,
+      messageId: event?.id || null,
+      memoryExtractionMode: settings.mode,
+      wideLlmExtractorEnabled: settings.wideLlmExtractorEnabled,
+      disablePersistenceWrite: settings.disablePersistenceWrite,
+      note: runtimeImplName
+    })
+
     extractorPacket = await runtimeImpl({
       event,
       eventWindow: resolvedEventWindow
+    })
+
+    writeMemoryLiveTrace({
+      marker: 'wide_llm_runtime_finished',
+      eventId: event?.id || null,
+      threadId: resolvedThreadId,
+      messageId: event?.id || null,
+      memoryExtractionMode: settings.mode,
+      wideLlmExtractorEnabled: settings.wideLlmExtractorEnabled,
+      disablePersistenceWrite: settings.disablePersistenceWrite,
+      note: extractorPacket?.service?.debug?.status || extractorPacket?.orchestration?.status || 'finished'
     })
 
     warnings.push(...safeArray(extractorPacket?.service?.warnings))

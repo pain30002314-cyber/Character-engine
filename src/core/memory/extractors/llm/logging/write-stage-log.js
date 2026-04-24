@@ -36,13 +36,20 @@ function serializeLogEntry(entry) {
 }
 
 function normalizeLogEntry(stage, payload = {}) {
+  const normalizedStage = String(payload.stage || stage || '').trim() || null
+  const normalizedWarnings = safeArray(payload.warnings)
+  const normalizedErrors = safeArray(payload.errors)
+  const normalizedCounts =
+    payload.counts && typeof payload.counts === 'object' ? payload.counts : {}
+
   return {
+    ...payload,
     logVersion: payload.logVersion || LLM_LOGGING_CONFIG.logVersion,
     timestamp: payload.timestamp || new Date().toISOString(),
     traceId: payload.traceId || null,
     eventId: payload.eventId || null,
     threadId: payload.threadId || null,
-    stage,
+    stage: normalizedStage,
     status: payload.status || 'unknown',
     extractorName:
       payload.extractorName === undefined ? null : payload.extractorName,
@@ -51,12 +58,10 @@ function normalizeLogEntry(stage, payload = {}) {
       payload.durationMs === undefined || payload.durationMs === null
         ? null
         : Number(payload.durationMs),
-    warnings: safeArray(payload.warnings),
-    errors: safeArray(payload.errors),
-    counts:
-      payload.counts && typeof payload.counts === 'object' ? payload.counts : {},
-    note: payload.note == null ? null : String(payload.note),
-    ...payload
+    warnings: normalizedWarnings,
+    errors: normalizedErrors,
+    counts: normalizedCounts,
+    note: payload.note == null ? null : String(payload.note)
   }
 }
 

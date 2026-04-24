@@ -9,10 +9,22 @@ const { runUpdatePipeline } = require('./update.pipeline')
 const { runSnapshotPipeline } = require('./snapshot.pipeline')
 const { looksLikeContaminatedAssistantEvent } = require('../hygiene/admission.service')
 const logger = require('../../../services/logger.service')
+const { writeMemoryLiveTrace } = require('../debug/memory-debug.service')
 
 async function runIngestPipeline({ threadId, eventId }) {
   const events = getThreadEvents(threadId)
   const event = events.find((item) => item.id === eventId) || events[events.length - 1] || null
+
+  writeMemoryLiveTrace({
+    marker: 'ingest_pipeline_started',
+    eventId: event?.id || eventId || null,
+    threadId,
+    messageId: event?.id || eventId || null,
+    memoryExtractionMode: extractionSettings.mode,
+    wideLlmExtractorEnabled: extractionSettings.wideLlmExtractorEnabled,
+    disablePersistenceWrite: extractionSettings.disablePersistenceWrite,
+    note: event ? 'event_loaded' : 'event_missing'
+  })
 
   if (!event) {
     return runSnapshotPipeline({ threadId })

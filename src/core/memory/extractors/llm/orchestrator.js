@@ -161,6 +161,8 @@ async function orchestrateWideLlmExtraction({
             normalizationStats.unstableImportanceCount,
           cleanedTagsCount: normalizationStats.cleanedTagsCount,
           payloadUnstableCount: normalizationStats.payloadUnstableCount,
+          inputCandidates: safeArray(item?.candidates),
+          outputCandidates: safeArray(normalized?.candidates),
           warnings: uniq([
             ...safeArray(item?.warnings),
             ...safeArray(normalizationMeta.warnings)
@@ -185,6 +187,8 @@ async function orchestrateWideLlmExtraction({
           unstableImportanceCount: 0,
           cleanedTagsCount: 0,
           payloadUnstableCount: 0,
+          inputCandidates: safeArray(item?.candidates),
+          outputCandidates: [],
           warnings: safeArray(item?.warnings),
           errors: [error?.message || 'normalization_failed'],
           note: error?.code || 'normalization_failed'

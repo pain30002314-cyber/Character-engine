@@ -2,6 +2,7 @@
 
 const {
   runLlmExtractionRuntime,
+  runLlmExtractor,
   extractLlmAtomsV1,
   extractLlmClaims
 } = require('./runtime')
@@ -57,6 +58,7 @@ const { writeFailureLog } = require('./logging/write-failure-log')
 
 module.exports = {
   runLlmExtractionRuntime,
+  runLlmExtractor,
   extractLlmAtomsV1,
   extractLlmClaims,
   orchestrateWideLlmExtraction,
