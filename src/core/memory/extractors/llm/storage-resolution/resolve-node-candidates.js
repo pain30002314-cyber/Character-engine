@@ -16,8 +16,8 @@ const {
 function resolveNodeType(candidate) {
   switch (candidate?.kind) {
     case 'entity_candidate':
-    case 'alias_candidate':
-    case 'role_candidate':
+    case 'alias_signal':
+    case 'role_signal':
       return 'entity'
     case 'object_candidate':
       return 'object'
@@ -53,12 +53,12 @@ function resolveNodeCandidates(candidatePool = {}) {
       const aliasSeeds = pickStringList(
         payload.alias,
         payload.aliases,
-        candidate?.kind === 'alias_candidate' ? displayNameSeed : null
+        candidate?.kind === 'alias_signal' ? displayNameSeed : null
       )
       const roleSeeds = pickStringList(
         payload.role,
         payload.roles,
-        candidate?.kind === 'role_candidate' ? displayNameSeed : null
+        candidate?.kind === 'role_signal' ? displayNameSeed : null
       )
 
       return {

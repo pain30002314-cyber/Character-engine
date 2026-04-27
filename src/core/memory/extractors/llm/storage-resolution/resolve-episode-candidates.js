@@ -16,14 +16,17 @@ const {
 
 function resolveEpisodeType(candidate) {
   switch (candidate?.kind) {
-    case 'scene_candidate':
-      return 'scene'
-    case 'micro_scene_candidate':
     case 'micro_episode_candidate':
-      return 'micro_scene'
-    case 'interaction_candidate':
+      return 'micro_episode'
+    case 'situational_context_signal':
+      return 'situational_context'
+    case 'local_interaction_signal':
       return 'interaction'
-    case 'progression_signal':
+    case 'participant_signal':
+      return 'participant'
+    case 'scene_location_signal':
+      return 'scene_location'
+    case 'scene_progression_signal':
       return 'progression'
     default:
       return 'episode'

@@ -7,6 +7,7 @@ const { renderEventMetaBlock } = require('../prompts/blocks/event-meta.block')
 const { renderCurrentMessageBlock } = require('../prompts/blocks/current-message.block')
 const { renderRecentContextBlock } = require('../prompts/blocks/recent-context.block')
 const { renderFastSignalsBlock } = require('../prompts/blocks/fast-signals.block')
+const { renderAllowedKindsBlock } = require('../prompts/blocks/allowed-kinds.block')
 const { renderResponseFormatBlock } = require('../prompts/blocks/response-format.block')
 
 const entityObjectLocationRole = require('../prompts/roles/entity-object-location.role')
@@ -48,6 +49,7 @@ function buildPrompt(baseEventPacket, extractorKey) {
     current_message: renderCurrentMessageBlock(baseEventPacket),
     recent_context: renderRecentContextBlock(baseEventPacket),
     fast_signals: renderFastSignalsBlock(baseEventPacket),
+    allowed_kinds: renderAllowedKindsBlock(extractorKey),
     response_format: renderResponseFormatBlock(baseEventPacket)
   }
 

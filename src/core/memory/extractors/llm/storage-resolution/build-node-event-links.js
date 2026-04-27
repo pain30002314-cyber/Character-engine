@@ -20,7 +20,7 @@ function buildNodeEventLinks({
     threadId: item?.provenance?.threadId || candidatePool?.threadId || null,
     eventId: item?.provenance?.eventId || candidatePool?.eventId || null,
     linkRole:
-      item?.candidateKind === 'alias_candidate' || item?.candidateKind === 'role_candidate'
+      item?.candidateKind === 'alias_signal' || item?.candidateKind === 'role_signal'
         ? 'support'
         : 'mention',
     positionIndex: index,

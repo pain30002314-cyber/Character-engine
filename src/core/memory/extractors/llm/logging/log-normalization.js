@@ -96,6 +96,8 @@ async function logNormalization({
   outputCandidateCount = 0,
   changedFieldsSummary = {},
   unknownKinds = [],
+  fallbackKindCount = 0,
+  kindFallbackPreview = [],
   unstableImportanceCount = 0,
   cleanedTagsCount = 0,
   payloadUnstableCount = 0,
@@ -126,6 +128,7 @@ async function logNormalization({
         inputCandidateCount,
         outputCandidateCount,
         unknownKindCount: safeArray(unknownKinds).length,
+        fallbackKindCount,
         unstableImportanceCount,
         cleanedTagsCount,
         payloadUnstableCount
@@ -138,6 +141,8 @@ async function logNormalization({
           ? changedFieldsSummary
           : {},
       unknownKinds: safeArray(unknownKinds),
+      fallbackKindCount,
+      kindFallbackPreview: safeArray(kindFallbackPreview),
       unstableImportanceCount,
       cleanedTagsCount,
       payloadUnstableCount,

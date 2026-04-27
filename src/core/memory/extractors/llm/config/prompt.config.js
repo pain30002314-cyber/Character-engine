@@ -19,6 +19,7 @@ const PROMPT_CONFIG = Object.freeze({
     'current_message',
     'recent_context',
     'fast_signals',
+    'allowed_kinds',
     'response_format'
   ])
 })

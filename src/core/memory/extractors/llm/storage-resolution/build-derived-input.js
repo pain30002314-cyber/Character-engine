@@ -15,46 +15,48 @@ const {
 function resolveDerivedType(candidate) {
   switch (candidate?.kind) {
     case 'episode_candidate':
-    case 'scene_candidate':
-    case 'micro_scene_candidate':
-    case 'interaction_candidate':
-    case 'progression_signal':
+    case 'micro_episode_candidate':
+    case 'situational_context_signal':
+    case 'local_interaction_signal':
+    case 'participant_signal':
+    case 'scene_location_signal':
+    case 'scene_progression_signal':
       return 'episode_shift_summary'
-    case 'relationship_signal':
+    case 'relationship_candidate':
     case 'collaboration_signal':
     case 'vulnerability_signal':
     case 'openness_signal':
     case 'boundary_signal':
     case 'addressing_signal':
       return 'relationship_brief'
-    case 'emotional_state':
-    case 'emotional_shift':
+    case 'emotional_state_candidate':
+    case 'emotional_shift_candidate':
       return 'episode_emotional_trace'
-    case 'atmosphere_signal':
+    case 'atmosphere_candidate':
     case 'tone_signal':
       return 'episode_atmosphere'
-    case 'significance_signal':
+    case 'significance_candidate':
     case 'emphasis_signal':
-    case 'progression_signal':
-    case 'phase_transition':
-    case 'phase_marker':
-    case 'plan_marker':
+    case 'scene_progression_signal':
+    case 'phase_transition_candidate':
+    case 'phase_marker_signal':
+    case 'plan_marker_signal':
     case 'milestone_signal':
     case 'open_loop_candidate':
-    case 'deferred_topic':
-    case 'pending_step':
+    case 'deferred_topic_signal':
+    case 'pending_step_signal':
     case 'dependency_signal':
-    case 'realization_signal':
-    case 'cognitive_update':
+    case 'realization_candidate':
+    case 'cognitive_update_candidate':
     case 'reframing_signal':
-    case 'interpretation_shift':
-    case 'certainty_shift':
+    case 'interpretation_shift_signal':
+    case 'certainty_shift_signal':
       return 'episode_shift_summary'
     case 'location_candidate':
       return 'location_feel'
     case 'entity_candidate':
-    case 'alias_candidate':
-    case 'role_candidate':
+    case 'alias_signal':
+    case 'role_signal':
       return 'entity_impression'
     default:
       return 'brief_opinion'

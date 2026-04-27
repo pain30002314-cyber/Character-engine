@@ -36,6 +36,15 @@ test('log modules write expected structured fields without using console as sour
       inputCandidateCount: 1,
       outputCandidateCount: 1,
       unknownKinds: ['unknown_kind'],
+      fallbackKindCount: 1,
+      kindFallbackPreview: [
+        {
+          candidateId: 'cand-1',
+          sourcePass: 'fact',
+          rawKind: 'episode_candidate',
+          fallbackKind: 'fact_candidate'
+        }
+      ],
       unstableImportanceCount: 1,
       cleanedTagsCount: 1,
       payloadUnstableCount: 1,
@@ -67,7 +76,14 @@ test('log modules write expected structured fields without using console as sour
       threadId: 'thread-1',
       status: 'completed',
       totalInputCandidates: 3,
-      totalOutputCandidates: 2
+      totalOutputCandidates: 2,
+      duplicateGroups: 1,
+      overlapGroups: 1,
+      conflictGroups: 1,
+      duplicateGroupPreview: [{ candidateIds: ['cand-1', 'cand-2'] }],
+      overlapGroupPreview: [{ reason: 'mixed_overlap', candidateIds: ['cand-1', 'cand-3'] }],
+      conflictGroupPreview: [{ relation: 'conflicts_with', candidateIds: ['cand-2', 'cand-4'] }],
+      mergeActionsPreview: [{ action: 'link_overlap', candidateIds: ['cand-1', 'cand-3'] }]
     })
     await writeFailureLog({
       traceId: 'trace-1',
@@ -93,6 +109,8 @@ test('log modules write expected structured fields without using console as sour
     assert.equal(normalizationLog[0].inputCandidateCount, 1)
     assert.equal(normalizationLog[0].outputCandidateCount, 1)
     assert.deepEqual(normalizationLog[0].unknownKinds, ['unknown_kind'])
+    assert.equal(normalizationLog[0].counts.fallbackKindCount, 1)
+    assert.equal(normalizationLog[0].kindFallbackPreview[0].fallbackKind, 'fact_candidate')
     assert.equal(normalizationLog[0].candidateDiffPreview[0].candidateId, 'cand-1')
     assert.equal(
       normalizationLog[0].rawImportanceNormalizedImportancePreview[0].rawImportance,
@@ -103,6 +121,9 @@ test('log modules write expected structured fields without using console as sour
       'средняя'
     )
     assert.equal(mergeLog[0].counts.totalInputCandidates, 3)
+    assert.equal(mergeLog[0].counts.overlapGroups, 1)
+    assert.equal(mergeLog[0].overlapGroupPreview[0].reason, 'mixed_overlap')
+    assert.equal(mergeLog[0].mergeActionsPreview.length, 1)
     assert.equal(failureLog[0].failedStage, 'fact')
   } finally {
     process.chdir(previousCwd)

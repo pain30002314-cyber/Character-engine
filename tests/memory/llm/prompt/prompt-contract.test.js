@@ -20,6 +20,7 @@ test('prompt contract keeps minimal json response shape and russian-only human i
   )
 
   assert.match(prompt, /Верни строго один JSON-объект/)
+  assert.match(prompt, /kind должен быть только из блока "Допустимые kind"/)
   assert.match(prompt, /"candidates": \[/)
   assert.match(prompt, /Если сигналов нет, верни \{"candidates":\[\]\}\./)
   assert.equal(/You are|Return JSON only|English/i.test(prompt), false)

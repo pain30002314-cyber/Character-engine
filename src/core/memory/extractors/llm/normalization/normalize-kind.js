@@ -3,7 +3,8 @@
 const { LLM_NORMALIZATION_CONFIG } = require('../config/normalization.config')
 const {
   KIND_ALIAS_TO_NORMALIZED_BY_PASS,
-  canonicalizeKindAlias
+  canonicalizeKindAlias,
+  getFallbackKindForPass
 } = require('../registries/kind.registry')
 
 function normalizeKind(candidate, passKey) {
@@ -13,18 +14,46 @@ function normalizeKind(candidate, passKey) {
       : candidate?.kind
 
   const canonical = canonicalizeKindAlias(sourceValue)
-  const aliasMap = KIND_ALIAS_TO_NORMALIZED_BY_PASS[passKey] || {}
-  const normalizedKind = aliasMap[canonical] || LLM_NORMALIZATION_CONFIG.unknownKindFallback
+  const normalizedPassKey = String(passKey || '').trim()
+  const aliasMap = KIND_ALIAS_TO_NORMALIZED_BY_PASS[normalizedPassKey] || null
+  const fallbackKind = getFallbackKindForPass(normalizedPassKey)
+  const hasKnownSourcePass = Boolean(aliasMap)
+  const hasAllowedKind =
+    canonical && hasKnownSourcePass && Object.prototype.hasOwnProperty.call(aliasMap, canonical)
   const flags = []
   const warnings = []
+  let normalizedKind = LLM_NORMALIZATION_CONFIG.unknownKindFallback
+  let forceKeepRaw = false
 
   if (!canonical) {
-    flags.push('missing_candidate_kind')
-    warnings.push('candidate_kind_missing')
-  } else if (!aliasMap[canonical]) {
-    flags.push('unknown_candidate_kind')
-    flags.push('unknown_kind_raw')
+    if (!hasKnownSourcePass) {
+      flags.push('missing_candidate_kind')
+      flags.push('unknown_source_pass_for_kind_fallback')
+      warnings.push('candidate_kind_missing')
+      normalizedKind = LLM_NORMALIZATION_CONFIG.unknownKindFallback
+      forceKeepRaw = true
+    } else {
+      flags.push('missing_candidate_kind')
+      flags.push('kind_fallback_from_source_pass')
+      flags.push('kind_not_allowed_for_pass')
+      warnings.push('candidate_kind_missing')
+      warnings.push(`kind_fallback_from_source_pass:missing:${fallbackKind}`)
+      normalizedKind = fallbackKind
+      forceKeepRaw = true
+    }
+  } else if (!hasKnownSourcePass) {
+    flags.push('unknown_source_pass_for_kind_fallback')
     warnings.push(`candidate_kind_unknown:${canonical}`)
+    normalizedKind = LLM_NORMALIZATION_CONFIG.unknownKindFallback
+    forceKeepRaw = true
+  } else if (!hasAllowedKind) {
+    flags.push('kind_fallback_from_source_pass')
+    flags.push('kind_not_allowed_for_pass')
+    warnings.push(`kind_fallback_from_source_pass:${sourceValue}:${fallbackKind}`)
+    normalizedKind = fallbackKind
+    forceKeepRaw = true
+  } else {
+    normalizedKind = aliasMap[canonical]
   }
 
   return {
@@ -32,7 +61,7 @@ function normalizeKind(candidate, passKey) {
     normalizedValue: normalizedKind,
     flags,
     warnings,
-    forceKeepRaw: normalizedKind === LLM_NORMALIZATION_CONFIG.unknownKindFallback
+    forceKeepRaw
   }
 }
 

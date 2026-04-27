@@ -11,7 +11,7 @@ test('buildDerivedInput maps emotional and relationship signals into derived inp
     buildCandidatePool({
       candidates: [
         buildCandidate({
-          kind: 'emotional_state',
+          kind: 'emotional_state_candidate',
           routingTargets: ['derived_input'],
           payload: {
             mood: 'тревога'
@@ -19,7 +19,7 @@ test('buildDerivedInput maps emotional and relationship signals into derived inp
         }),
         buildCandidate({
           candidateId: 'rel-1',
-          kind: 'relationship_signal',
+          kind: 'relationship_candidate',
           routingTargets: ['derived_input'],
           payload: {
             entity: 'Ху Тао'

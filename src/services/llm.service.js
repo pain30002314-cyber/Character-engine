@@ -1,4 +1,3 @@
-const axios = require('axios')
 const fs = require('fs')
 const path = require('path')
 const env = require('../config/env')
@@ -86,6 +85,68 @@ function appendUsageLog(payload) {
   }
 }
 
+function buildTextPreview(value, maxLength = 800) {
+  const text = String(value == null ? '' : value)
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  if (!text) {
+    return ''
+  }
+
+  return text.length > maxLength
+    ? `${text.slice(0, maxLength - 1)}…`
+    : text
+}
+
+function buildMessagePreview(messages = [], maxItems = 4) {
+  return (Array.isArray(messages) ? messages : [])
+    .slice(0, maxItems)
+    .map((message) => ({
+      role: message?.role || null,
+      contentPreview: buildTextPreview(message?.content, 220)
+    }))
+}
+
+function buildRequestPayloadPreview({
+  apiUrl,
+  model,
+  messages,
+  temperature,
+  maxTokens,
+  title,
+  forceJson
+}) {
+  return {
+    url: apiUrl || null,
+    model: model || null,
+    temperature:
+      typeof temperature === 'number' ? temperature : null,
+    max_tokens:
+      Number.isFinite(maxTokens) ? Number(maxTokens) : null,
+    stream: false,
+    response_format: forceJson ? { type: 'json_object' } : null,
+    title: title || null,
+    messageCount: Array.isArray(messages) ? messages.length : 0,
+    messages: buildMessagePreview(messages)
+  }
+}
+
+function createRequestError(message, diagnostics = {}) {
+  const error = new Error(message || 'openrouter_request_failed')
+  error.code = diagnostics.code || 'OPENROUTER_REQUEST_FAILED'
+  error.statusCode =
+    Number.isFinite(diagnostics.statusCode) ? diagnostics.statusCode : null
+  error.details = {
+    url: diagnostics.url || null,
+    model: diagnostics.model || null,
+    status: Number.isFinite(diagnostics.statusCode) ? diagnostics.statusCode : null,
+    requestPayloadPreview: diagnostics.requestPayloadPreview || null,
+    responseBodyPreview: diagnostics.responseBodyPreview || null
+  }
+  return error
+}
+
 function logUsageAndCost(model, usage, channel = 'unknown') {
   const cost = calculateCost(model, usage)
 
@@ -133,18 +194,89 @@ async function requestOpenRouter({
   if (forceJson) {
     body.response_format = { type: 'json_object' }
   }
-
-  const response = await axios.post(apiUrl, body, {
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://localhost',
-      'X-OpenRouter-Title': title
-    },
-    timeout: 60000
+  const requestPayloadPreview = buildRequestPayloadPreview({
+    apiUrl,
+    model,
+    messages,
+    temperature,
+    maxTokens,
+    title,
+    forceJson
   })
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 60000)
 
-  return response.data
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://localhost',
+        'X-OpenRouter-Title': title
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal
+    })
+    const responseText = await response.text()
+    const responseBodyPreview = buildTextPreview(responseText)
+
+    let data = null
+
+    try {
+      data = responseText ? JSON.parse(responseText) : {}
+    } catch (error) {
+      throw createRequestError('openrouter_response_json_parse_failed', {
+        code: 'OPENROUTER_RESPONSE_PARSE_FAILED',
+        statusCode: response.status,
+        url: apiUrl,
+        model,
+        requestPayloadPreview,
+        responseBodyPreview
+      })
+    }
+
+    if (!response.ok) {
+      throw createRequestError(`openrouter_request_failed:${response.status}`, {
+        code: 'OPENROUTER_REQUEST_FAILED',
+        statusCode: response.status,
+        url: apiUrl,
+        model,
+        requestPayloadPreview,
+        responseBodyPreview
+      })
+    }
+
+    return data
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      throw createRequestError('openrouter_request_timeout', {
+        code: 'ETIMEDOUT',
+        statusCode: null,
+        url: apiUrl,
+        model,
+        requestPayloadPreview,
+        responseBodyPreview: null
+      })
+    }
+
+    if (error?.details?.requestPayloadPreview) {
+      throw error
+    }
+
+    throw createRequestError(error?.message || 'openrouter_request_failed', {
+      code: error?.code || 'OPENROUTER_REQUEST_FAILED',
+      statusCode: error?.statusCode ?? null,
+      url: apiUrl,
+      model,
+      requestPayloadPreview,
+      responseBodyPreview: buildTextPreview(
+        error?.response?.data ? JSON.stringify(error.response.data) : ''
+      )
+    })
+  } finally {
+    clearTimeout(timeout)
+  }
 }
 
 async function generateReply(input) {
@@ -193,8 +325,7 @@ async function generateReply(input) {
 
       return content
     } catch (error) {
-      const status = error.response?.status
-      const data = error.response?.data
+      const status = error?.statusCode ?? error.response?.status ?? null
 
       appendUsageLog({
         timestamp: new Date().toISOString(),
@@ -202,7 +333,10 @@ async function generateReply(input) {
         model: env.model,
         status: status || null,
         errorMessage: error.message,
-        errorData: data || null,
+        errorData: error?.details?.responseBodyPreview || error.response?.data || null,
+        apiUrl: error?.details?.url || env.llmApiUrl,
+        requestPayloadPreview: error?.details?.requestPayloadPreview || null,
+        responseBodyPreview: error?.details?.responseBodyPreview || null,
         attempt
       })
 
@@ -261,8 +395,7 @@ async function generateRawCompletion({
       logUsageAndCost(data?.model || usedModel, data?.usage, 'memory_raw')
       return data
     } catch (error) {
-      const status = error.response?.status
-      const data = error.response?.data
+      const status = error?.statusCode ?? error.response?.status ?? null
 
       appendUsageLog({
         timestamp: new Date().toISOString(),
@@ -270,7 +403,10 @@ async function generateRawCompletion({
         model: model || env.memoryModel,
         status: status || null,
         errorMessage: error.message,
-        errorData: data || null,
+        errorData: error?.details?.responseBodyPreview || error.response?.data || null,
+        apiUrl: error?.details?.url || apiUrl || env.memoryLlmApiUrl,
+        requestPayloadPreview: error?.details?.requestPayloadPreview || null,
+        responseBodyPreview: error?.details?.responseBodyPreview || null,
         attempt
       })
 

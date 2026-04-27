@@ -47,6 +47,45 @@ function buildOpenRouterTitle(pass, requestConfig = {}) {
   return sanitizeHeaderValue(`${DEFAULT_OPENROUTER_TITLE}-${extractorKey}`)
 }
 
+function extractChatMessageContent(response) {
+  const messageContent = response?.choices?.[0]?.message?.content
+
+  if (typeof messageContent === 'string') {
+    return messageContent.trim()
+  }
+
+  if (Array.isArray(messageContent)) {
+    return messageContent
+      .map((item) => {
+        if (typeof item === 'string') {
+          return item
+        }
+
+        if (typeof item?.text === 'string') {
+          return item.text
+        }
+
+        if (typeof item?.content === 'string') {
+          return item.content
+        }
+
+        return ''
+      })
+      .join('')
+      .trim()
+  }
+
+  if (typeof response?.choices?.[0]?.text === 'string') {
+    return response.choices[0].text.trim()
+  }
+
+  if (typeof response?.output_text === 'string') {
+    return response.output_text.trim()
+  }
+
+  return ''
+}
+
 async function callLlm({
   pass,
   promptPacket,
@@ -74,7 +113,7 @@ async function callLlm({
     title: buildOpenRouterTitle(pass, requestConfig)
   })
 
-  const rawResponseText = String(response?.choices?.[0]?.message?.content || '').trim()
+  const rawResponseText = extractChatMessageContent(response)
 
   return {
     ok: true,
@@ -92,5 +131,6 @@ async function callLlm({
 module.exports = {
   callLlm,
   sanitizeHeaderValue,
-  buildOpenRouterTitle
+  buildOpenRouterTitle,
+  extractChatMessageContent
 }

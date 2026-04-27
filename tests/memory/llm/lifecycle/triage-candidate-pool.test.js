@@ -11,7 +11,7 @@ test('triageCandidatePool assigns multiple routing targets when candidate suppor
     buildCandidatePool({
       candidates: [
         buildCandidate({
-          kind: 'relationship_signal',
+          kind: 'relationship_candidate',
           sourcePass: 'relationship-social'
         })
       ]

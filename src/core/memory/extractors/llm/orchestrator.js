@@ -32,27 +32,29 @@ function uniq(list = []) {
 
 function buildNormalizationStats(candidates = []) {
   const unknownKinds = new Set()
+  const kindFallbackPreview = []
   let unstableImportanceCount = 0
   let cleanedTagsCount = 0
   let payloadUnstableCount = 0
+  let fallbackKindCount = 0
 
   for (const candidate of safeArray(candidates)) {
     const flags = safeArray(candidate?.flags)
     const warnings = safeArray(candidate?.normalization?.warnings)
     const changedFields = safeArray(candidate?.normalization?.changedFields)
-    const unknownKindWarnings = warnings
-      .filter((warning) => String(warning).startsWith('candidate_kind_unknown:'))
-      .map((warning) => String(warning).split(':').slice(1).join(':'))
-      .filter(Boolean)
 
     if (flags.includes('unknown_candidate_kind')) {
-      for (const warning of unknownKindWarnings) {
-        unknownKinds.add(warning)
-      }
+      unknownKinds.add(candidate?.rawKind || candidate?.kind || 'unknown')
+    }
 
-      if (unknownKindWarnings.length === 0) {
-        unknownKinds.add(candidate?.kind || 'unknown')
-      }
+    if (flags.includes('kind_fallback_from_source_pass')) {
+      fallbackKindCount += 1
+      kindFallbackPreview.push({
+        candidateId: candidate?.candidateId || candidate?.id || null,
+        sourcePass: candidate?.sourcePass || null,
+        rawKind: candidate?.rawKind || null,
+        fallbackKind: candidate?.kind || null
+      })
     }
 
     if (flags.includes('unknown_candidate_importance')) {
@@ -77,6 +79,8 @@ function buildNormalizationStats(candidates = []) {
 
   return {
     unknownKinds: Array.from(unknownKinds),
+    fallbackKindCount,
+    kindFallbackPreview,
     unstableImportanceCount,
     cleanedTagsCount,
     payloadUnstableCount
@@ -157,6 +161,10 @@ async function orchestrateWideLlmExtraction({
           outputCandidateCount: normalizationMeta.candidateCountAfter || 0,
           changedFieldsSummary: normalizationMeta.changedFieldsSummary || {},
           unknownKinds: normalizationStats.unknownKinds,
+          fallbackKindCount:
+            normalizationMeta.fallbackKindCount || normalizationStats.fallbackKindCount || 0,
+          kindFallbackPreview:
+            normalizationMeta.kindFallbackPreview || normalizationStats.kindFallbackPreview || [],
           unstableImportanceCount:
             normalizationStats.unstableImportanceCount,
           cleanedTagsCount: normalizationStats.cleanedTagsCount,
@@ -184,6 +192,8 @@ async function orchestrateWideLlmExtraction({
           outputCandidateCount: 0,
           changedFieldsSummary: {},
           unknownKinds: [],
+          fallbackKindCount: 0,
+          kindFallbackPreview: [],
           unstableImportanceCount: 0,
           cleanedTagsCount: 0,
           payloadUnstableCount: 0,
@@ -341,11 +351,15 @@ async function orchestrateWideLlmExtraction({
     duplicateGroups: mergeMeta?.duplicateGroups || 0,
     overlapGroups: mergeMeta?.overlapGroups || 0,
     conflictGroups: mergeMeta?.conflictGroups || 0,
+    duplicateGroupPreview: safeArray(mergeMeta?.duplicateGroupPreview),
+    overlapGroupPreview: safeArray(mergeMeta?.overlapGroupPreview),
+    conflictGroupPreview: safeArray(mergeMeta?.conflictGroupPreview),
     mergeActionsPreview: [
       `output_candidates:${mergeMeta?.totalOutputCandidates || 0}`,
       `duplicate_groups:${mergeMeta?.duplicateGroups || 0}`,
       `overlap_groups:${mergeMeta?.overlapGroups || 0}`,
-      `conflict_groups:${mergeMeta?.conflictGroups || 0}`
+      `conflict_groups:${mergeMeta?.conflictGroups || 0}`,
+      ...safeArray(mergeMeta?.mergeActionsPreview)
     ],
     warnings: safeArray(mergeMeta?.warnings),
     errors: []

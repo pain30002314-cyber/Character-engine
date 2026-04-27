@@ -33,6 +33,9 @@ async function logMerge({
   duplicateGroups = 0,
   overlapGroups = 0,
   conflictGroups = 0,
+  duplicateGroupPreview = [],
+  overlapGroupPreview = [],
+  conflictGroupPreview = [],
   mergeActionsPreview = [],
   warnings = [],
   errors = [],
@@ -69,6 +72,9 @@ async function logMerge({
       duplicateGroups,
       overlapGroups,
       conflictGroups,
+      duplicateGroupPreview: safeArray(duplicateGroupPreview),
+      overlapGroupPreview: safeArray(overlapGroupPreview),
+      conflictGroupPreview: safeArray(conflictGroupPreview),
       mergeActionsPreview: buildMergeActionsPreview(mergeActionsPreview)
     }
   })

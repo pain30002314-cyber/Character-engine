@@ -135,7 +135,9 @@ function normalizePassResult(passResult) {
   const existingWarnings = safeArray(passResult?.warnings)
   const normalizationWarnings = []
   const changedFieldsSummary = {}
+  const kindFallbackPreview = []
   let normalizedCandidateCount = 0
+  let fallbackKindCount = 0
 
   for (const candidate of candidates) {
     const normalized = normalizeCandidate(candidate, sourcePass)
@@ -144,6 +146,17 @@ function normalizePassResult(passResult) {
 
     for (const field of normalized.changedFields) {
       changedFieldsSummary[field] = (changedFieldsSummary[field] || 0) + 1
+    }
+
+    if (safeArray(normalized.candidate?.flags).includes('kind_fallback_from_source_pass')) {
+      fallbackKindCount += 1
+      kindFallbackPreview.push({
+        candidateId:
+          normalized.candidate?.candidateId || normalized.candidate?.id || null,
+        sourcePass,
+        rawKind: normalized.candidate?.rawKind || candidate?.rawKind || candidate?.kind || null,
+        fallbackKind: normalized.candidate?.kind || null
+      })
     }
 
     normalizationWarnings.push(...normalized.warnings)
@@ -159,6 +172,8 @@ function normalizePassResult(passResult) {
       candidateCountBefore: candidates.length,
       candidateCountAfter: normalizedCandidates.length,
       normalizedCandidateCount,
+      fallbackKindCount,
+      kindFallbackPreview,
       changedFieldsSummary,
       warnings: uniq(normalizationWarnings)
     }

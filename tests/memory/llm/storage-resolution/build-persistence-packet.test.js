@@ -35,7 +35,7 @@ test('buildPersistencePacket returns final persistence packet contract without w
         }),
         buildCandidate({
           candidateId: 'edge-1',
-          kind: 'relationship_signal',
+          kind: 'relationship_candidate',
           sourcePass: 'relationship-social',
           routingTargets: ['edge_resolution', 'derived_input'],
           payload: { from: 'Ху Тао', to: 'Пользователь' }

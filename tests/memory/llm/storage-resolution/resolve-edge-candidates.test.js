@@ -6,12 +6,12 @@ const assert = require('node:assert/strict')
 const { resolveEdgeCandidates } = require('../../../../src/core/memory/extractors/llm/storage-resolution/resolve-edge-candidates')
 const { buildCandidatePool, buildCandidate } = require('../helpers')
 
-test('resolveEdgeCandidates maps relationship signal into edge resolution', () => {
+test('resolveEdgeCandidates maps relationship candidate into edge resolution', () => {
   const result = resolveEdgeCandidates(
     buildCandidatePool({
       candidates: [
         buildCandidate({
-          kind: 'relationship_signal',
+          kind: 'relationship_candidate',
           sourcePass: 'relationship-social',
           routingTargets: ['edge_resolution'],
           payload: {

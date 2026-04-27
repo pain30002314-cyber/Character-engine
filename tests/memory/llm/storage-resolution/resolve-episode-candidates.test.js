@@ -20,5 +20,5 @@ test('resolveEpisodeCandidates maps micro episode aliases into episode resolutio
   )
 
   assert.equal(result.length, 1)
-  assert.equal(result[0].episodeType, 'micro_scene')
+  assert.equal(result[0].episodeType, 'micro_episode')
 })

@@ -15,7 +15,7 @@ const {
 
 function resolveEdgeType(candidate) {
   switch (candidate?.kind) {
-    case 'relationship_signal':
+    case 'relationship_candidate':
       return 'relationship'
     case 'collaboration_signal':
       return 'collaboration'
@@ -27,11 +27,13 @@ function resolveEdgeType(candidate) {
       return 'boundary'
     case 'addressing_signal':
       return 'addressing'
-    case 'support_signal':
+    case 'fact_support_signal':
       return 'support'
-    case 'contradiction_signal':
+    case 'fact_contradiction_signal':
       return 'contradiction'
-    case 'interaction_candidate':
+    case 'local_interaction_signal':
+      return 'interaction'
+    case 'participant_signal':
       return 'participation'
     default:
       return 'association'
@@ -71,9 +73,9 @@ function resolveEdgeCandidates(candidatePool = {}) {
         ),
         supportNodeHints: pickStringList(candidate?.relatedCandidateIds),
         polaritySeed:
-          candidate?.kind === 'contradiction_signal'
+          candidate?.kind === 'fact_contradiction_signal'
             ? 'negative'
-            : candidate?.kind === 'support_signal'
+            : candidate?.kind === 'fact_support_signal'
               ? 'positive'
               : 'neutral',
         summarySeed: summarySeeds.summaryShort,

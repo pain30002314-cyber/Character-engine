@@ -1,5 +1,29 @@
 'use strict'
 
+const { safeArray, uniq } = require('./helpers')
+
+function buildDuplicateGroupPreview(duplicateGroups = []) {
+  return safeArray(duplicateGroups)
+    .slice(0, 10)
+    .map((group, index) => ({
+      groupId: `duplicate:${index + 1}`,
+      candidateIds: safeArray(group).map((candidate) => candidate?.candidateId).filter(Boolean),
+      kinds: uniq(safeArray(group).map((candidate) => candidate?.kind).filter(Boolean)),
+      sourcePasses: uniq(safeArray(group).map((candidate) => candidate?.sourcePass).filter(Boolean)),
+      summaries: safeArray(group).map((candidate) => candidate?.summary).filter(Boolean).slice(0, 3)
+    }))
+}
+
+function buildConflictGroupPreview(conflicts = []) {
+  return safeArray(conflicts)
+    .slice(0, 10)
+    .map((conflict, index) => ({
+      groupId: conflict?.pairKey || `conflict:${index + 1}`,
+      relation: conflict?.relation || 'conflicts_with',
+      candidateIds: [conflict?.leftCandidateId, conflict?.rightCandidateId].filter(Boolean)
+    }))
+}
+
 function buildMergeMeta({
   totalInputCandidates = 0,
   totalOutputCandidates = 0,
@@ -8,7 +32,8 @@ function buildMergeMeta({
   conflicts = [],
   configuredPasses = [],
   passResults = [],
-  failedPasses = []
+  failedPasses = [],
+  mergeActions = []
 }) {
   const successfulPassKeys = new Set(
     (Array.isArray(passResults) ? passResults : [])
@@ -36,8 +61,12 @@ function buildMergeMeta({
     totalInputCandidates,
     totalOutputCandidates,
     duplicateGroups: duplicateGroups.length,
+    duplicateGroupPreview: buildDuplicateGroupPreview(duplicateGroups),
     overlapGroups: overlaps.length,
+    overlapGroupPreview: safeArray(overlaps).slice(0, 10),
     conflictGroups: conflicts.length,
+    conflictGroupPreview: buildConflictGroupPreview(conflicts),
+    mergeActionsPreview: safeArray(mergeActions).slice(0, 10),
     missingPasses,
     warnings
   }

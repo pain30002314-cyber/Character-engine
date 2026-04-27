@@ -43,6 +43,48 @@ function sanitizeTagList(value, limit = 8) {
   return result
 }
 
+const OVERLAP_STOP_WORDS = new Set([
+  'и',
+  'в',
+  'на',
+  'по',
+  'что',
+  'это',
+  'как',
+  'мы',
+  'ты',
+  'он',
+  'она',
+  'они',
+  'для',
+  'без',
+  'уже',
+  'еще',
+  'тут',
+  'там',
+  'вот',
+  'давай',
+  'надо'
+])
+
+function normalizeForOverlap(value) {
+  const tokens = normalizeInlineText(value)
+    .toLowerCase()
+    .replace(/ё/g, 'е')
+    .replace(/[^a-zа-я0-9\s]+/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(' ')
+    .map((item) => item.trim())
+    .filter((item) => item.length > 2)
+    .filter((item) => !OVERLAP_STOP_WORDS.has(item))
+
+  return {
+    text: tokens.join(' '),
+    words: tokens
+  }
+}
+
 function toSafeKey(value, fallback = 'candidate') {
   const normalized = normalizeInlineText(value)
     .toLowerCase()
@@ -60,5 +102,6 @@ module.exports = {
   trimText,
   sanitizeTag,
   sanitizeTagList,
+  normalizeForOverlap,
   toSafeKey
 }

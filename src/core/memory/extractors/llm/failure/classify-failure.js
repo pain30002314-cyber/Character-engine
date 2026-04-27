@@ -32,6 +32,8 @@ function hasTransportSignal(error) {
       'ETIMEDOUT',
       'ESOCKETTIMEDOUT'
     ].includes(code) ||
+    message.includes('protocol mismatch') ||
+    message.includes('fetch failed') ||
     message.includes('timeout') ||
     message.includes('timed out') ||
     message.includes('network') ||

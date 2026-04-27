@@ -15,11 +15,11 @@ const {
 
 function resolvePredicateSeed(candidate) {
   switch (candidate?.kind) {
-    case 'support_signal':
+    case 'fact_support_signal':
       return 'supports'
-    case 'contradiction_signal':
+    case 'fact_contradiction_signal':
       return 'contradicts'
-    case 'refinement_signal':
+    case 'fact_refinement_signal':
       return 'refines'
     case 'temporal_fact_candidate':
       return 'describes_temporal_fact'

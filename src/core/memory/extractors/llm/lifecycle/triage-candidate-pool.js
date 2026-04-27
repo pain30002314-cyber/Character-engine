@@ -18,57 +18,58 @@ const NODE_KINDS = new Set([
   'entity_candidate',
   'object_candidate',
   'location_candidate',
-  'alias_candidate',
-  'role_candidate'
+  'alias_signal',
+  'role_signal'
 ])
 
 const FACT_KINDS = new Set([
   'fact_candidate',
   'temporal_fact_candidate',
-  'support_signal',
-  'contradiction_signal',
-  'refinement_signal'
+  'fact_support_signal',
+  'fact_contradiction_signal',
+  'fact_refinement_signal'
 ])
 
 const EPISODE_KINDS = new Set([
   'episode_candidate',
-  'scene_candidate',
-  'micro_scene_candidate',
   'micro_episode_candidate',
-  'interaction_candidate',
-  'progression_signal'
+  'situational_context_signal',
+  'local_interaction_signal',
+  'participant_signal',
+  'scene_location_signal',
+  'scene_progression_signal'
 ])
 
 const PHASE_KINDS = new Set([
-  'phase_transition',
-  'phase_marker',
-  'plan_marker',
+  'phase_transition_candidate',
+  'phase_marker_signal',
+  'plan_marker_signal',
   'milestone_signal',
   'open_loop_candidate',
-  'deferred_topic',
-  'pending_step',
+  'deferred_topic_signal',
+  'pending_step_signal',
   'dependency_signal'
 ])
 
 const COGNITION_KINDS = new Set([
-  'realization_signal',
-  'cognitive_update',
+  'realization_candidate',
+  'cognitive_update_candidate',
   'reframing_signal',
-  'interpretation_shift',
-  'certainty_shift'
+  'interpretation_shift_signal',
+  'certainty_shift_signal'
 ])
 
 const EMOTION_KINDS = new Set([
-  'emotional_state',
-  'emotional_shift',
-  'atmosphere_signal',
+  'emotional_state_candidate',
+  'emotional_shift_candidate',
+  'atmosphere_candidate',
   'tone_signal',
-  'significance_signal',
+  'significance_candidate',
   'emphasis_signal'
 ])
 
 const RELATIONSHIP_KINDS = new Set([
-  'relationship_signal',
+  'relationship_candidate',
   'collaboration_signal',
   'vulnerability_signal',
   'openness_signal',
@@ -125,8 +126,8 @@ function resolveCandidateTargets(candidate) {
     targets.push(ROUTING_TARGETS.DERIVED_INPUT)
     if (
       kind === 'open_loop_candidate' ||
-      kind === 'deferred_topic' ||
-      kind === 'pending_step' ||
+      kind === 'deferred_topic_signal' ||
+      kind === 'pending_step_signal' ||
       kind === 'dependency_signal' ||
       sourcePass === 'phase-open-loop'
     ) {
@@ -143,10 +144,10 @@ function resolveCandidateTargets(candidate) {
   if (EMOTION_KINDS.has(kind) || sourcePass === 'emotion-atmosphere-significance') {
     targets.push(ROUTING_TARGETS.DERIVED_INPUT)
     if (
-      kind === 'emotional_shift' ||
-      kind === 'atmosphere_signal' ||
+      kind === 'emotional_shift_candidate' ||
+      kind === 'atmosphere_candidate' ||
       kind === 'tone_signal' ||
-      kind === 'significance_signal'
+      kind === 'significance_candidate'
     ) {
       targets.push(ROUTING_TARGETS.EPISODE_RESOLUTION)
     }
